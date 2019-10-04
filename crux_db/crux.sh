@@ -160,8 +160,14 @@ else
   exit
 fi
 
+
 source $DB/scripts/crux_vars.sh
 source $DB/scripts/crux_config.sh
+
+if [ ! -d "${OBI_DB}" ]; then
+    >&2 echo "ERROR: directory ${OBI_DB} not valid. Please check your configuration file."
+    exit 1
+fi
 
 ${MODULE_SOURCE}
 ${QIIME}
@@ -183,23 +189,39 @@ echo " "
 echo " "
 echo "Part 1.1:"
 echo "Run ecoPCR with ${NAME} primers F- ${FP} R- ${RP} and these parameters:"
-echo "     missmatch = ${ERROR:=$ECOPCR_e}"
+echo "     mismatch = ${ERROR:=$ECOPCR_e}"
 echo "     expected amplicon length between ${SHRT} and ${LNG}"
 echo ""
 ###
 mkdir -p ${ODIR}/${NAME}_ecoPCR
 mkdir -p ${ODIR}/${NAME}_ecoPCR/raw_out/
 #run ecoPCR on each folder in the obitools database folder
-for db in ${OBI_DB}/OB_dat_*/
-do
- db1=${db%/}
- j=${db1#${OBI_DB}/}
- echo "..."${j}" ecoPCR is running"
- ${ecoPCR} -d ${db}${j} -e ${ERROR:=$ECOPCR_e} -l ${SHRT} -L ${LNG} ${FP} ${RP} -D 1 > ${ODIR}/${NAME}_ecoPCR/raw_out/${NAME}_${j}_ecoPCR_out
- echo "..."${j}" ecoPCR is finished"
- echo ""
-date
+
+for dn in $(find "${OBI_DB}" -mindepth 1 -maxdepth 1 -type d -name "OB_dat_*"); do
+    dn="${dn##*/}"
+    echo "Processing directory ${dn}..."
+    for fn in $(find "${OBI_DB}/${dn}" -mindepth 1 -maxdepth 1 -type f -name "OB_dat_*.tdx"); do
+        # Trim off file extension
+        fn="${fn%.tdx}"
+        fn="${fn##*/}"
+        echo "Running ecoPCR on file ${fn}..."
+        ${ecoPCR} -d "${OBI_DB}/${dn}/${fn}" -e ${ERROR:=$ECOPCR_e} -l ${SHRT} -L ${LNG} ${FP} ${RP} -D 1 > ${ODIR}/${NAME}_ecoPCR/raw_out/${NAME}_${fn}_ecoPCR_out
+        echo "...${fn} ecoPCR is finished"
+        echo ""
+        date
+    done 
 done
+
+#for db in ${OBI_DB}/OB_dat_*/
+#do
+# db1=${db%/}
+# j=${db1#${OBI_DB}/}
+# echo "..."${j}" ecoPCR is running"
+# ${ecoPCR} -d ${db}${j} -e ${ERROR:=$ECOPCR_e} -l ${SHRT} -L ${LNG} ${FP} ${RP} -D 1 > ${ODIR}/${NAME}_ecoPCR/raw_out/${NAME}_${j}_ecoPCR_out
+# echo "..."${j}" ecoPCR is finished"
+# echo ""
+#date
+#done
 ###
 
 ##########################
