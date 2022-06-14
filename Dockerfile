@@ -26,16 +26,6 @@ RUN cd /usr/local && \
 RUN . /usr/local/.bashrc && \
     conda init bash --verbose
 
-# download TAXO and Obitools database from Cyverse
-RUN cd crux_db/ && \
-	wget https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/crux/TAXO.zip && \
-	unzip TAXO.zip && \
-	rm TAXO.zip && \
-	wget https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/crux/Obitools_databases.zip && \
-	unzip Obitools_databases.zip && \
-	rm Obitools_databases.zip && \
-	chmod +x crux.sh
-
 
 RUN cd test/ && \
 	tar xvzf crux_db.tar.gz && \
@@ -50,5 +40,3 @@ RUN . /root/.bashrc && \
 	./crux.sh -n 16S -f CGAGAAGACCCTATGGAGCT -r CCGAGGTCRCCCCAACC -s 30 -m 200 -e 3 -o 16S -d ./ -l && \
 	cd 16S/16S_db_unfiltered/16S_fasta_and_taxonomy && \
 	if [ -s 16S_taxonomy.txt ]; then echo "unfiltered taxonomy not empty"; else echo "unfiltered taxonomy empty" && exit 1; fi
-#	cat 16S_taxonomy.txt && \
-#	if grep "MX4443346.1	Eukaryota;Chordata;Mammalia;Artiodactyla;Bovidae;Bos;Bos grunniens" "16S_taxonomy.txt"; then echo "the string exists"; else exit 1; fi
