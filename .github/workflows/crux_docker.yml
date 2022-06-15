@@ -2,12 +2,6 @@ name: Crux Docker Image CI
 
 on: [push]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# env:
-#   DOCKER_USER:
-
 jobs:
 
   build:
