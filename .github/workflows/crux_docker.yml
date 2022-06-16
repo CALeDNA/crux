@@ -19,7 +19,7 @@ jobs:
           tar xvzf crux_db.tar.gz
           cd crux_db/
           chmod +x crux.sh
-          cd ..
+          cd ../../
           docker build -t crux .
       # - name: Login to Docker Hub
       #   uses: docker/login-action@v1
