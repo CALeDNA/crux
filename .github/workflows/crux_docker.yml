@@ -26,5 +26,4 @@ jobs:
           docker build -t crux .
       - name: run crux.sh inside container
         run: |
-          docker run -t -d -v $(pwd)/test/crux_db:/mnt --name crux crux bash /mnt/docker-crux.sh
-          docker logs crux
+          docker run -t -v $(pwd)/test/crux_db:/mnt --name crux crux bash /mnt/docker-crux.sh
