@@ -25,6 +25,7 @@ jobs:
           docker build -t crux .
       - name: run docker container
         run:
+          pwd
           docker run -d -it --mount "src=$(pwd)/test/crux_db,target=/app/crux_db,type=bind" --name crux crux
           docker inspect crux
       # - name: Login to Docker Hub
