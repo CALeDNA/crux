@@ -10,7 +10,6 @@ dependencies:
   - backports.functools_lru_cache=1.6.1=py_0
   - backports.shutil_get_terminal_size=1.0.0=py_3
   - backports_abc=0.5=py_1
-  - blast=2.9.0=pl526he19e7b1_7
   - boost=1.66.0=py27_1
   - boost-cpp=1.66.0=1
   - bowtie2=2.3.4.1=py27h2d50403_1
