@@ -16,7 +16,5 @@ COPY crux.yml /app/crux.yml
 # create conda env and install dependecies
 RUN cd /usr/local && \
 	. /usr/local/.bashrc && \
-	conda env create -f /app/crux.yml
-
-# Make RUN commands use the crux environment:
-SHELL ["conda", "run", "-n", "crux", "/bin/bash", "-c"]
+	conda env create -f /app/crux.yml && \
+	conda init bash
