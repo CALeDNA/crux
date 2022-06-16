@@ -16,5 +16,4 @@ COPY crux.yml /app/crux.yml
 # create conda env and install dependecies
 RUN cd /usr/local && \
 	. /usr/local/.bashrc && \
-	conda env create -f /app/crux.yml && \
-	conda init bash
+	conda env create -f /app/crux.yml
