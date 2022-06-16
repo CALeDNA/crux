@@ -1,0 +1,29 @@
+name: Crux Docker Image CI
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: untar crux_db folder
+        run: |
+          cd test/
+          tar xvzf crux_db.tar.gz
+          cd crux_db/
+          chmod +x crux.sh
+          chmod +x docker-crux.sh
+      - name: build docker crux image
+        run:
+          docker build -t crux .
+      - name: run crux.sh inside container
+        run: |
+          docker run -t -v $(pwd)/test/crux_db:/mnt --name crux crux bash /mnt/docker-crux.sh
