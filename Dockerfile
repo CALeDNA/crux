@@ -12,13 +12,13 @@ RUN apt-get update && apt-get upgrade -yy && \
 	echo "export PATH=/usr/local/miniconda/bin:\$PATH" >> /usr/local/.bashrc
 
 
-COPY crux.yml WORKDIR
+COPY crux.yml /crux_db/crux.yml
 
 
 # create conda env and install dependecies
 RUN cd /usr/local && \
 	. /usr/local/.bashrc && \
-	conda env create -f WORKDIR/crux.yml
+	conda env create -f /crux_db/crux.yml
 
 RUN . /usr/local/.bashrc && \
     conda init bash --verbose
