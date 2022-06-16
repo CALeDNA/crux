@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 
 WORKDIR /app
 
-# install apt + npm dependencies
+# install apt dependencies
 RUN apt-get update && apt-get upgrade -yy && \
 	apt-get install -yy build-essential software-properties-common apt-transport-https curl wget git libssl-dev libcurl4-openssl-dev libxml2-dev && \
 	wget -P /tmp/ "https://repo.continuum.io/miniconda/Miniconda2-4.7.12-Linux-x86_64.sh" && \
@@ -17,3 +17,6 @@ COPY crux.yml /app/crux.yml
 RUN cd /usr/local && \
 	. /usr/local/.bashrc && \
 	conda env create -f /app/crux.yml
+
+# Make RUN commands use the crux environment:
+SHELL ["conda", "run", "-n", "crux", "/bin/bash", "-c"]
