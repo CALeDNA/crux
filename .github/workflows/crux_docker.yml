@@ -15,16 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: untar crux_db folder
-      - run: |
+        run: |
           cd test/
           tar xvzf crux_db.tar.gz
           cd crux_db/
           chmod +x crux.sh
       - name: build docker crux image
-      - run:
+        run:
           docker build -t crux .
       - name: run docker container
-      - run:
+        run:
           docker run -d \
           -it \
           --name crux \
