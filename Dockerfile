@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 
 ENV NSPAWN_BOOTSTRAP_IMAGE_SIZE=10GB
 
-WORKDIR /crux_db
+WORKDIR /app
 
 # install apt + npm dependencies
 RUN apt-get update && apt-get upgrade -yy && \
@@ -12,13 +12,13 @@ RUN apt-get update && apt-get upgrade -yy && \
 	echo "export PATH=/usr/local/miniconda/bin:\$PATH" >> /usr/local/.bashrc
 
 
-COPY crux.yml /crux_db/crux.yml
+COPY crux.yml /app/crux.yml
 
 
 # create conda env and install dependecies
 RUN cd /usr/local && \
 	. /usr/local/.bashrc && \
-	conda env create -f /crux_db/crux.yml
+	conda env create -f /app/crux.yml
 
 RUN . /usr/local/.bashrc && \
     conda init bash --verbose
