@@ -31,8 +31,9 @@ ID2=""
 COV2=""
 HEADER=""
 HELP=""
+ECOPCRDIR=""
 
-while getopts "n:f:r:s:m:o:d:q?:u:l?:k:e:g:t:v:i:c:a:z:y:j:w:p:x:b:h?:" opt; do
+while getopts "n:f:r:s:m:o:d:q?:u:l?:k:e:g:t:v:i:c:a:z:y:j:w:p:x:b:h?:1:" opt; do
     case $opt in
         n) NAME="$OPTARG"
         ;;
@@ -85,6 +86,8 @@ while getopts "n:f:r:s:m:o:d:q?:u:l?:k:e:g:t:v:i:c:a:z:y:j:w:p:x:b:h?:" opt; do
         b) HEADER="$OPTARG"
         ;;
         h) HELP="TRUE"
+        ;;
+        1) ECOPCRDIR="$OPTARG"
         ;;
     esac
 done
@@ -189,17 +192,26 @@ echo ""
 ###
 mkdir -p ${ODIR}/${NAME}_ecoPCR
 mkdir -p ${ODIR}/${NAME}_ecoPCR/raw_out/
-#run ecoPCR on each folder in the obitools database folder
-for db in ${OBI_DB}/OB_dat_*/
-do
- db1=${db%/}
- j=${db1#${OBI_DB}/}
- echo "..."${j}" ecoPCR is running"
- ${ecoPCR} -d ${db}${j} -e ${ERROR:=$ECOPCR_e} -l ${SHRT} -L ${LNG} ${FP} ${RP} -D 1 > ${ODIR}/${NAME}_ecoPCR/raw_out/${NAME}_${j}_ecoPCR_out
- echo "..."${j}" ecoPCR is finished"
- echo ""
-date
-done
+
+if [ "${ECOPCRDIR}" = "" ]
+then
+  #run ecoPCR on each folder in the obitools database folder
+  for db in ${OBI_DB}/OB_dat_*/
+  do
+  db1=${db%/}
+  j=${db1#${OBI_DB}/}
+  echo "..."${j}" ecoPCR is running"
+  echo ${ecoPCR} -d ${db}${j} -e ${ERROR:=$ECOPCR_e} -l ${SHRT} -L ${LNG} ${FP} ${RP} -D 1 > ${ODIR}/${NAME}_ecoPCR/raw_out/${NAME}_${j}_ecoPCR_out
+  ${ecoPCR} -d ${db}${j} -e ${ERROR:=$ECOPCR_e} -l ${SHRT} -L ${LNG} ${FP} ${RP} -D 1 > ${ODIR}/${NAME}_ecoPCR/raw_out/${NAME}_${j}_ecoPCR_out
+  echo "..."${j}" ecoPCR is finished"
+  echo ""
+  date
+  done
+else
+  echo "Skipping ecoPCR Part 1.1... copying ${ECOPCRDIR} to ${ODIR}/${NAME}_ecoPCR"
+  cp -r ${ECOPCRDIR} ${ODIR}/${NAME}_ecoPCR
+fi
+
 ###
 
 ##########################
@@ -220,137 +232,18 @@ python ${DB}/scripts/crux_format_primers_cutadapt.py ${ODIR}/cutadapt_files/${NA
 #run ecoPCR through cutadapt to verify that the primer seqeunce exists, and to trim it off
 for str in ${ODIR}/${NAME}_ecoPCR/raw_out/*_ecoPCR_out
 do
- str1=${str%_ecoPCR_out}
- j=${str1#${ODIR}/${NAME}_ecoPCR/raw_out/}
- #reformat ecoPCR out and remove duplicate reads by taxid
- tail -n +14 ${str} |cut -d "|" -f 3,21|sed "s/ | /,/g"|awk -F"," '!_[$1]++' | sed "s/\s//g" |awk 'BEGIN { FS=","; } {print ">"$1"\n"$2}' > ${ODIR}/${NAME}_ecoPCR/clean_up/${j}_ecoPCR_blast_input.fasta
- #run cut adapt
- ${CUTADAPT} -e ${CDERROR:=$CUTADAPT_ERROR} -a file:${ODIR}/cutadapt_files/a_${NAME}.fasta  --untrimmed-output ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_untrimmed_1.fasta -o ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_ecoPCR_blast_input_a_clean.fasta ${ODIR}/${NAME}_ecoPCR/clean_up/${j}_ecoPCR_blast_input.fasta >> ${ODIR}/Run_info/cut_adapt_out/${j}_cutadapt-report.txt
- ${CUTADAPT} -e ${CDERROR:=$CUTADAPT_ERROR} -g file:${ODIR}/cutadapt_files/g_${NAME}.fasta  --untrimmed-output ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_untrimmed_2.fasta -o ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_ecoPCR_blast_input_a_and_g_clean.fasta ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_ecoPCR_blast_input_a_clean.fasta >> ${ODIR}/Run_info/cut_adapt_out/${j}_cutadapt-report.txt
- echo "..."${j}" is clean"
+str1=${str%_ecoPCR_out}
+j=${str1#${ODIR}/${NAME}_ecoPCR/raw_out/}
+#reformat ecoPCR out and remove duplicate reads by taxid
+tail -n +14 ${str} |cut -d "|" -f 3,21|sed "s/ | /,/g"|awk -F"," '!_[$1]++' | sed "s/\s//g" |awk 'BEGIN { FS=","; } {print ">"$1"\n"$2}' > ${ODIR}/${NAME}_ecoPCR/clean_up/${j}_ecoPCR_blast_input.fasta
+#run cut adapt
+${CUTADAPT} -e ${CDERROR:=$CUTADAPT_ERROR} -a file:${ODIR}/cutadapt_files/a_${NAME}.fasta  --untrimmed-output ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_untrimmed_1.fasta -o ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_ecoPCR_blast_input_a_clean.fasta ${ODIR}/${NAME}_ecoPCR/clean_up/${j}_ecoPCR_blast_input.fasta >> ${ODIR}/Run_info/cut_adapt_out/${j}_cutadapt-report.txt
+${CUTADAPT} -e ${CDERROR:=$CUTADAPT_ERROR} -g file:${ODIR}/cutadapt_files/g_${NAME}.fasta  --untrimmed-output ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_untrimmed_2.fasta -o ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_ecoPCR_blast_input_a_and_g_clean.fasta ${ODIR}/${NAME}_ecoPCR/cleaned/${j}_ecoPCR_blast_input_a_clean.fasta >> ${ODIR}/Run_info/cut_adapt_out/${j}_cutadapt-report.txt
+echo "..."${j}" is clean"
 date
 done
 ###
 
-##########################
-# Part 1.2: Submit BLAST 1 job
-##########################
-
-echo " "
-echo " "
-echo "Part 1.3:"
-echo "Clean ${NAME} ecoPCR output for blasting and run BLAST jobs"
-
-## loop through ecoPCR results
-
-if [ "${LOCALMODE}" = "FALSE" ];
-then
- for str in ${ODIR}/${NAME}_ecoPCR/cleaned/*_ecoPCR_blast_input_a_and_g_clean.fasta
- do
-  str1=${str%_ecoPCR_blast_input_a_and_g_clean.fasta}
-  j=${str1#${ODIR}/${NAME}_ecoPCR/cleaned/}
-  mkdir -p ${ODIR}/${NAME}_ecoPCR/cleaned/${j}
-
-  if [ -s "${str}" ];
-  then
-    mkdir -p ${ODIR}/${NAME}_BLAST/
-    mkdir -p ${ODIR}/${NAME}_BLAST/${j}_BLAST_out
-    mkdir -p ${ODIR}/${NAME}_BLAST/${j}_BLAST_out/raw
-    mkdir -p ${ODIR}/${NAME}_BLAST/${j}_BLAST_out/fasta
-    echo " "
-    echo "${str} has ecoPCR reads that passed the minimum criteria to move to the next step."
-    # split ecopcr output into files with 500 reads each
-    split -l 1000 ${str} ${ODIR}/${NAME}_ecoPCR/cleaned/${j}/blast_ready_
-     # do something as file has data
-    i=1
-    for nam in ${ODIR}/${NAME}_ecoPCR/cleaned/${j}/blast_ready_*
-  	do
-	    nam1=${nam%_*}
-	 # submit blast jobs for each file, and then remove reads with duplicate accession version numbers
-      cp ${nam} ${nam1}_${i}
-      rm ${nam}
-      echo "${nam1}_${i}_blast_1.complete" >> ${ODIR}/${NAME}_BLAST/blast_complete_outfiles.txt
-      echo "${nam1}_${i}_blast_2.complete" >> ${ODIR}/${NAME}_BLAST/blast_complete_outfiles.txt
-      ((i=i+1))
-    done
-    # if local blast in line
-    # if not local submit blast array jobs
-    ### count number of files in the directory
-    file_count=$( shopt -s nullglob ; set -- ${ODIR}/${NAME}_ecoPCR/cleaned/${j}/blast_ready_* ; echo $#)
-    # submit blast jobs for each file, and then remove reads with duplicate accession version numbers
-    array_var="\$SGE_TASK_ID"
-    printf "${BLAST1_HEADER}\n#$ -t 1-${file_count}\n\n\n/bin/bash ${DB}/scripts/sub_blast1.sh -n ${NAME} -q ${nam1}_${array_var} -o ${ODIR} -k ${j} -l blast_ready_${array_var} -d ${DB} -v ${EVAL1:=$BLAST1_eVALUE} -t ${THREAD1:=$BLAST1_NUM_THREADS} -i ${ID1:=$BLAST1_PERC_IDENTITY} -c ${COV1:=$BLAST1_HSP_PERC} -a ${RETURN:=$BLAST1_NUM_ALIGNMENTS} -y ${GO:=$GAP_OPEN} -z ${GE:=$GAP_EXTEND}\n" > ${ODIR}/Run_info/blast_jobs/blast1_${j}.sh
-    ${QUEUESUBMIT} ${ODIR}/Run_info/blast_jobs/blast1_${j}.sh
-    printf "${BLAST2_HEADER}\n#$ -t 1-${file_count}\n\n\n/bin/bash ${DB}/scripts/sub_blast2.sh -n ${NAME} -q ${nam1}_${array_var} -o ${ODIR} -k ${j} -l blast_ready_${array_var} -d ${DB} -w ${EVAL2:=$BLAST2_eVALUE} -j ${THREAD2:=$BLAST2_NUM_THREADS} -p ${ID2:=$BLAST2_PERC_IDENTITY} -x ${COV2:=$BLAST2_HSP_PERC} -a ${RETURN:=$BLAST2_NUM_ALIGNMENTS} -y ${GO:=$GAP_OPEN} -z ${GE:=$GAP_EXTEND}\n" > ${ODIR}/Run_info/blast_jobs/blast2_${j}.sh
-    ${QUEUESUBMIT} ${ODIR}/Run_info/blast_jobs/blast2_${j}.sh
-  else
-    echo " "
-    echo "${str} did not pass the minimum criteria that passes ecoPCR reads to the next step."
-    rm ${str}
-  fi
- done
-else
-  for str in ${ODIR}/${NAME}_ecoPCR/cleaned/*_ecoPCR_blast_input_a_and_g_clean.fasta
-  do
-   str1=${str%_ecoPCR_blast_input_a_and_g_clean.fasta}
-   j=${str1#${ODIR}/${NAME}_ecoPCR/cleaned/}
-   mkdir -p ${ODIR}/${NAME}_ecoPCR/cleaned/${j}
-   echo ""
-   echo "run BLAST inline"
-   if [ -s "${str}" ];
-   then
-     mkdir -p ${ODIR}/${NAME}_BLAST/
-     mkdir -p ${ODIR}/${NAME}_BLAST/${j}_BLAST_out
-     mkdir -p ${ODIR}/${NAME}_BLAST/${j}_BLAST_out/raw
-     mkdir -p ${ODIR}/${NAME}_BLAST/${j}_BLAST_out/fasta
-     echo " "
-     echo "${str} has ecoPCR reads that passed the minimum criteria."
-     # split ecopcr output into files with 500 reads each
-     split -l 1000 ${str} ${ODIR}/${NAME}_ecoPCR/cleaned/${j}/blast_ready_
-      # do something as file has data
-     i=1
-     for nam in ${ODIR}/${NAME}_ecoPCR/cleaned/${j}/blast_ready_*
-     do
-       nam1=${nam%_*}
-    # submit blast jobs for each file, and then remove reads with duplicate accession version numbers
-       cp ${nam} ${nam1}_${i}
-      #  rm ${nam}
-       echo ""
-       echo "Running BLAST1 on ${nam1}_${i}"
-       date
-       printf "#!/bin/bash\n\n\n/bin/bash ${DB}/scripts/sub_blast1.sh -n ${NAME} -q ${nam1}_${i} -o ${ODIR} -k ${j} -l blast_ready_${i} -d ${DB} -v ${EVAL1:=$BLAST1_eVALUE} -t ${THREAD1:=$BLAST1_NUM_THREADS} -i ${ID1:=$BLAST1_PERC_IDENTITY} -c ${COV1:=$BLAST1_HSP_PERC} -a ${RETURN:=$BLAST1_NUM_ALIGNMENTS} -y ${GO:=$GAP_OPEN} -z ${GE:=$GAP_EXTEND}\n" > ${ODIR}/Run_info/blast_jobs/blast1_${j}_${i}.sh
-       /bin/bash ${ODIR}/Run_info/blast_jobs/blast1_${j}_${i}.sh
-       echo "Running BLAST2 on ${nam1}_${i}"
-       date
-       printf "#!/bin/bash\n\n\n/bin/bash ${DB}/scripts/sub_blast2.sh -n ${NAME} -q ${nam1}_${i} -o ${ODIR} -k ${j} -l blast_ready_${i} -d ${DB} -w ${EVAL2:=$BLAST2_eVALUE} -j ${THREAD2:=$BLAST2_NUM_THREADS} -p ${ID2:=$BLAST2_PERC_IDENTITY} -x ${COV2:=$BLAST2_HSP_PERC} -a ${RETURN:=$BLAST2_NUM_ALIGNMENTS} -y ${GO:=$GAP_OPEN} -z ${GE:=$GAP_EXTEND}\n" > ${ODIR}/Run_info/blast_jobs/blast2_${j}_${i}.sh
-       /bin/bash ${ODIR}/Run_info/blast_jobs/blast2_${j}_${i}.sh
-       ((i=i+1))
-     done
-     date
-   else
-     echo " "
-     echo "${str} did not pass the minimum criteria that passes ecoPCR reads to the next step."
-     rm ${str}
-   fi
-  done
-fi
-
-# need to check if the array is done before moving on to the next step
-if [ "${LOCALMODE}" = "FALSE" ];
-then
- filename="${ODIR}/${NAME}_BLAST/blast_complete_outfiles.txt"
- filelines=`cat $filename`
- echo Start
- for line in $filelines ; do
-  while ! [ -f ${line} ];
-  do
-   echo "files not ready"
-   sleep 600
-  done
- done
-else
-  echo ""
-fi
 
 ###
 
@@ -368,20 +261,10 @@ echo "     Then use entrez-qiime to generate a corresponding taxonomy file, and 
 mkdir -p ${ODIR}/${NAME}_db_filtered/${NAME}_fasta_and_taxonomy/
 mkdir -p ${ODIR}/${NAME}_db_unfiltered/${NAME}_fasta_and_taxonomy
 
-# for each BLAST_out fasta folder
-for str in ${ODIR}/${NAME}_BLAST/${NAME}_*_out
-do
-  str1=${str%_BLAST_out}
-  j=${str1#${ODIR}/${NAME}_BLAST/${NAME}_}
-  echo "${str}"
-  echo "${j}"
-  # reduce size blast files by combining and dereplicating by length.
-  python ${DB}/scripts/combine_and_dereplicate_fasta.py -o ${ODIR}/${NAME}_db_unfiltered/${NAME}_fasta_and_taxonomy/${NAME}_${j}_blast_out.fasta -a ${str}/fasta/*_out.fasta
-done
 
-# for all of of derepliated blast hits, combine and depreplicate by length
-python ${DB}/scripts/combine_and_dereplicate_fasta.py -o ${ODIR}/${NAME}_db_unfiltered/${NAME}_fasta_and_taxonomy/${NAME}_.fasta -a ${ODIR}/${NAME}_db_unfiltered/${NAME}_fasta_and_taxonomy/*_blast_out.fasta
-rm ${ODIR}/${NAME}_db_unfiltered/${NAME}_fasta_and_taxonomy/*_blast_out.fasta
+# create reference fasta from blast
+blastdbcmd -entry all -db ${BLAST_DB} -out ${ODIR}/${NAME}_db_unfiltered/${NAME}_fasta_and_taxonomy/${NAME}_.fasta
+
 
 ### add taxonomy using entrez_qiime.py
 echo "...Running ${j} entrez-qiime and cleaning up fasta and taxonomy files"
