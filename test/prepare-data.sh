@@ -36,6 +36,6 @@ mkdir kraken
 cd kraken
 # the following will take a while
 ./bin/kraken2-build --download-taxonomy --db nt
-./bin/kraken2-build --threads 6 --add-to-library ../nt-test.fasta --db nt
+./bin/kraken2-build --threads 6 --no-masking --add-to-library ../nt-test.fasta --db nt
 ./bin/kraken2-build --build --threads 6 --db nt
 cd ..
