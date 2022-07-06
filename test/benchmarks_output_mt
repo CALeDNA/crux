@@ -1,0 +1,49 @@
+bowtie2
+
+6162 reads; of these:
+  6162 (100.00%) were unpaired; of these:
+    3249 (52.73%) aligned 0 times
+    442 (7.17%) aligned exactly 1 time
+    2471 (40.10%) aligned >1 times
+47.27% overall alignment rate
+
+real	2m5.878s
+user	3m36.931s
+sys	12m10.073s
+
+real	0m12.020s
+user	0m10.741s
+sys	0m1.196s
+
+real	0m5.852s
+user	0m4.826s
+sys	0m1.053s
+
+real	4m54.050s
+user	4m47.250s
+sys	0m6.736s
+
+blast
+
+real	7m58.993s
+user	51m15.780s
+sys	1m7.051s
+
+real	0m22.404s
+user	0m22.665s
+sys	0m6.051s
+
+real	5m8.780s
+user	4m59.833s
+sys	0m8.927s
+
+kraken2
+
+Loading database information... done.
+6162 sequences (2.81 Mbp) processed in 0.388s (951.9 Kseq/m, 434.02 Mbp/m).
+  6152 sequences classified (99.84%)
+  10 sequences unclassified (0.16%)
+
+real	0m16.890s
+user	0m2.262s
+sys	0m16.521s
