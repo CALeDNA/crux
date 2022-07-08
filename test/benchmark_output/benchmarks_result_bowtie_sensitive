@@ -1,0 +1,30 @@
+running bowtie2
+6162 reads; of these:
+  6162 (100.00%) were unpaired; of these:
+    48 (0.78%) aligned 0 times
+    2 (0.03%) aligned exactly 1 time
+    6112 (99.19%) aligned >1 times
+99.22% overall alignment rate
+
+real	743m42.606s
+user	45591m20.850s
+sys	31m36.889s
+[bam_sort_core] merging from 237 files and 1 in-memory blocks...
+
+real	56m12.407s
+user	53m47.560s
+sys	1m55.114s
+
+real	47m57.939s
+user	47m27.879s
+sys	12m9.793s
+yes
+
+real	8m26.341s
+user	7m51.126s
+sys	0m34.346s
+finished bowtie2
+
+real	856m19.302s
+user	45700m27.422s
+sys	46m16.143s
