@@ -1,0 +1,33 @@
+running bowtie2
+6162 reads; of these:
+  6162 (100.00%) were unpaired; of these:
+    3184 (51.67%) aligned 0 times
+    552 (8.96%) aligned exactly 1 time
+    2426 (39.37%) aligned >1 times
+48.33% overall alignment rate
+
+real	4m14.815s
+user	155m55.196s
+sys	1m44.357s
+
+real	0m15.112s
+user	0m13.887s
+sys	0m1.180s
+
+real	0m9.361s
+user	0m8.850s
+sys	0m1.508s
+yes
+
+real	4m56.230s
+user	4m50.225s
+sys	0m5.976s
+finished bowtie2
+running blast
+finished blast
+running kraken2
+finished kraken2
+
+real	9m35.525s
+user	161m8.165s
+sys	1m53.023s
