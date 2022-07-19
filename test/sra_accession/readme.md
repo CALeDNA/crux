@@ -1,4 +1,4 @@
-# Collectingand Downloading SRA Accession IDs
+# Collecting and Downloading SRA Accession IDs
 
 - run sra_accession.py using the following command:
   - python3 sra_accession.py --input "prefixes" --output "links"
