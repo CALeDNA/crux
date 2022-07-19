@@ -37,7 +37,7 @@ async def main(lines) -> int:
     size = 0
     with open(links, 'a') as out:
         connector = aiohttp.TCPConnector(limit=100)
-        timeout = aiohttp.ClientTimeout(total=None)
+        timeout = aiohttp.ClientTimeout(total=300)
         async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
             tasks = []
             for line in lines:
