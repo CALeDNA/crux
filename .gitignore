@@ -3,3 +3,4 @@
 *.ipynb_checkpoints
 *.ipynb
 test/crux_db
+ecopcr/ecopcr/.aws
