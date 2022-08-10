@@ -72,7 +72,7 @@ for arr in chunklinks:
         vm = "%02d" % (chunkcounter)
         os.makedirs(f'{args.output}/chunk{vm}')
         chunkcounter += 1
-    with open(f'chunk{vm}/{core}', 'w') as out:
+    with open(f'{args.output}/chunk{vm}/{core}', 'w') as out:
         for size in arr:
             out.writelines(urlDict[size][-1] + '\n')
             urlDict[size].pop()
