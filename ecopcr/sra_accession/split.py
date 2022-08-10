@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('--chunks', type=int)
 parser.add_argument('--cores', type=int)
 parser.add_argument('--input', type=str)
+parser.add_argument('--output', type=str)
 args = parser.parse_args()
 
 def even_split(lst, chunks):
@@ -69,7 +70,7 @@ for arr in chunklinks:
     core = "%02d" % (counter)
     if counter == 0:
         vm = "%02d" % (chunkcounter)
-        os.makedirs(f'chunk{vm}')
+        os.makedirs(f'{args.output}/chunk{vm}')
         chunkcounter += 1
     with open(f'chunk{vm}/{core}', 'w') as out:
         for size in arr:
