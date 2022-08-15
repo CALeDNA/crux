@@ -25,11 +25,11 @@ header = ''
 seq = ''
 for line in infile:
     if line[0] == ">":
-    	header = line.strip() 
+        header = line.strip() 
         outfile1.write(header + "\n")  
     else:
-    	seq = line.strip()
-    	outfile1.write("^" + seq + "\n")
+        seq = line.strip()
+        outfile1.write("^" + seq + "\n")
 outfile1.close()
 infile.close()
 
@@ -40,11 +40,11 @@ header = ''
 seq = ''
 for line in infile:
     if line[0] == ">":
-    	header = line.strip() 
+        header = line.strip() 
         outfile2.write(header + "_rc" + "\n")  
     else:
-    	seq = line.strip()
-    	outfile2.write(rComp(seq)+ "$" + "\n")
+        seq = line.strip()
+        outfile2.write(rComp(seq)+ "$" + "\n")
 outfile2.close()
 
  

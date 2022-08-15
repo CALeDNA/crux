@@ -24,8 +24,8 @@ COV2=""
 
 while getopts "n:q:o:k:l:d:t:v:i:c:a:j:w:p:x:b:z:y:" opt; do
     case $opt in
-    	n) NAME="$OPTARG"
-    	;;
+        n) NAME="$OPTARG"
+        ;;
         q) QU="$OPTARG"
         ;;
         o) ODIR="$OPTARG"
