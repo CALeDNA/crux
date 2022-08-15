@@ -1,10 +1,10 @@
 #!/bin/bash
 
-OS_USERNAME="hbaez"
-APIKEY="hbaez-api-key"
-JSCRED="app-cred-docker-cli-auth-openrc.sh"
-NUMINSTANCES="10"
-HOSTNAME="hostnames"
+OS_USERNAME=""
+APIKEY=""
+JSCRED="a"
+NUMINSTANCES=""
+HOSTNAME=""
 
 while getopts "u:k:j:n:h:" opt; do
     case $opt in
@@ -22,13 +22,13 @@ while getopts "u:k:j:n:h:" opt; do
 done
 
 #Check that user has all of the default flags set
-if [[ ! -u ${OS_USERNAME} && ! -k ${APIKEY} && ! -j ${JSCRED} && ! -n ${NUMINSTANCES} && ! -h ${HOSTNAME} ]];
+if [[ ! -z ${OS_USERNAME} && ! -z ${APIKEY} && ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${HOSTNAME} ]];
 then
   echo "Required Arguments Given"
   echo ""
 else
   echo "Required Arguments Missing:"
-  echo "check that you included arguments or correct paths for -u -f -i -k -j -n and -h"
+  echo "check that you included arguments or correct paths for -u -k -j -n and -h"
   echo ""
   exit
 fi
@@ -49,13 +49,14 @@ do
     # delete IP
     openstack floating ip delete ${ip_address}
     # delete instance
-    openstack server delete chunk${chunk}
+    openstack server delete chunk${chunk} --wait
 done
 
 # delete the security group
-openstack security group delete ${OS_USERNAME}-global-ssh
+#openstack security group delete ${OS_USERNAME}-global-ssh
 # delete api key
-openstack keypair delete ${OS_USERNAME}-api-key
+#openstack keypair delete ${OS_USERNAME}-api-key
 # delete hostnames file
+
 rm hostnames
 

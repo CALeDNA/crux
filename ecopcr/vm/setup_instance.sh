@@ -6,8 +6,9 @@ IMAGE=""
 APIKEY=""
 JSCRED=""
 NUMINSTANCES=""
+SECURITY=""
 
-while getopts "u:f:i:k:j:n:" opt; do
+while getopts "u:f:i:k:j:n:s:" opt; do
     case $opt in
         u) OS_USERNAME="$OPTARG"
         ;;
@@ -21,17 +22,19 @@ while getopts "u:f:i:k:j:n:" opt; do
         ;;
         n) NUMINSTANCES="$OPTARG"
         ;;
+        s) SECURITY="$OPTARG"
+        ;;
     esac
 done
 
 #Check that user has all of the default flags set
-if [[ ! -u ${OS_USERNAME} && -f ${FLAVOR} && ! -i ${IMAGE} && ! -k ${APIKEY} && ! -j ${JSCRED} && ! -n ${NUMINSTANCES} ]];
+if [[ ! -z ${OS_USERNAME} && ! -z ${FLAVOR} && ! -z ${IMAGE} && ! -z ${APIKEY} && ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${SECURITY} ]];
 then
   echo "Required Arguments Given"
   echo ""
 else
   echo "Required Arguments Missing:"
-  echo "check that you included arguments or correct paths for -u -f -i -k -j and -n"
+  echo "check that you included arguments or correct paths for -u -f -i -k -j -n and -s"
   echo ""
   exit
 fi
@@ -50,20 +53,20 @@ source ${JSCRED}
 
 
 # PART 1: create security group and add rules to the group
-echo "PART 1: create security group and add rules to the group"
+#echo "PART 1: create security group and add rules to the group"
 # create group
-openstack security group create --description "ssh & icmp enabled" ${OS_USERNAME}-global-ssh
+#openstack security group create --description "ssh & icmp enabled" ${OS_USERNAME}-global-ssh
 # create rule to allow ssh
-openstack security group rule create --protocol tcp --dst-port 22:22 --remote-ip 0.0.0.0/0 ${OS_USERNAME}-global-ssh
+#openstack security group rule create --protocol tcp --dst-port 22:22 --remote-ip 0.0.0.0/0 ${OS_USERNAME}-global-ssh
 # create rule to allow ping and other ICMP packets
-openstack security group rule create --proto icmp ${OS_USERNAME}-global-ssh
+#openstack security group rule create --proto icmp ${OS_USERNAME}-global-ssh
 
 
 # PART 2: create an SSH Key and upload to OpenStack
 # # create the ssh key
-ssh-keygen -b 2048 -t rsa -f ${APIKEY}
+#ssh-keygen -b 2048 -t rsa -f ${APIKEY}
 # upload to OpenStack
-openstack keypair create --public-key ${APIKEY}.pub ${APIKEY}
+#openstack keypair create --public-key ${APIKEY}.pub ${APIKEY}
 
 
 # PART 4: create and start an instance
@@ -76,7 +79,7 @@ do
     --flavor ${FLAVOR} \
     --image ${IMAGE} \
     --key-name ${APIKEY} \
-    --security-group ${OS_USERNAME}-global-ssh \
+    --security-group ${SECURITY} \
     --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \
     --wait
 done
