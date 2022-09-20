@@ -7,6 +7,7 @@ while getopts "i:" opt; do
     esac
 done
 
+HOSTNAME=$(hostname | tr -dc '0-9')
 # # step 1:
 # docker run run_scheduler.sh -c crux.yaml
 # # crux.yaml: # of machines, etc
@@ -16,10 +17,10 @@ done
 docker build -t crux .
 
 # step 2: run ecopcr inside docker container
-docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh
+docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh -h ${HOSTNAME}
 
 # step 3: run bwa inside docker container
-sudo docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh
+sudo docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}
 
 # step 4: get largest sequence per accid
 

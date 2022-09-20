@@ -2,9 +2,11 @@
 
 CONFIG=""
 
-while getopts "c:" opt; do
+while getopts "c:h:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
+        ;;
+        h) HOSTNAME="$OPTARG"
         ;;
     esac
 done
@@ -29,7 +31,7 @@ do
 done
 
 # run bwa mem
-./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} >> logs 2>&1
+./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} -h ${HOSTNAME} >> logs 2>&1
 
 # upload log file
 gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/bwa/logs/logs_${RUNID}.txt
