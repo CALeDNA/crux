@@ -1,10 +1,11 @@
 #!/bin/bash
 
 CONFIG=""
-while getopts "c:" opt; do
+while getopts "c:h:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
+        h) HOSTNAME="$OPTARG"
     esac
 done
 
@@ -20,10 +21,7 @@ source ${CONFIG}
 # . /root/.bashrc
 
 # conda activate base;
-
-HOSTNAME=$(hostname | tr -dc '0-9')
 OUTPUT="fasta_output"
-
 mkdir ${OUTPUT}
 
 # download link files

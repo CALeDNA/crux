@@ -2,18 +2,20 @@
 OUTPUT=""
 INDEX=""
 RUNID=""
-HOSTNAME=$(hostname | tr -dc '0-9')
+# HOSTNAME=$(hostname | tr -dc '0-9')
 THREADS=3
 URLS="chunks.txt"
 CYVERSE="config.yaml"
 
-while getopts "o:i:r:" opt; do
+while getopts "o:i:r:h:" opt; do
     case $opt in
         o) OUTPUT="$OPTARG"
         ;;
         i) INDEX="$OPTARG" 
         ;;
         r) RUNID="$OPTARG"
+        ;;
+        h) HOSTNAME="$OPTARG"
         ;;
     esac
 done
