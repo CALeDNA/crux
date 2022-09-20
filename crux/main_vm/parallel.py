@@ -1,10 +1,11 @@
 from pssh.clients import ParallelSSHClient
 import argparse
 import datetime
+from gevent import joinall
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--hosts', type=int)
-parser.add_argument('--user', type=int)
+parser.add_argument('--hosts', type=str)
+parser.add_argument('--user', type=str)
 parser.add_argument('--pkey', type=str)
 args = parser.parse_args()
 
@@ -25,14 +26,6 @@ print(hosts)
 
 client = ParallelSSHClient(hosts, user=user, pkey=pkey)
 
-# cmd='$(hostname)'
-# output = client.run_command(cmd)
-# for host_out in output:
-#     for line in host_out.stdout:
-#         print(line)
-#     for line in host_out.stderr:
-#         print(line)
-
 # clone gh repo
 cmd = 'git clone -b crux-hector https://github.com/CALeDNA/crux.git'
 output = client.run_command(cmd)
@@ -44,44 +37,19 @@ for host_out in output:
 
 # copy config, primer, etc. files to VMs
 cmd = client.copy_file('config.yaml', 'crux/crux/app/bwa/config.yaml')
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+joinall(cmd, raise_error=True)
 
 cmd = client.copy_file('config.yaml', 'crux/crux/app/ecopcr/config.yaml')
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+joinall(cmd, raise_error=True)
 
 cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/bwa/crux_vars.sh')
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+joinall(cmd, raise_error=True)
 
 cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/ecopcr/crux_vars.sh')
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+joinall(cmd, raise_error=True)
 
 cmd = client.copy_file('primers', 'crux/crux/app/ecopcr/primers')
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+joinall(cmd, raise_error=True)
 
 # run commands inside docker container
 cmd = 'cd crux/crux; ./run.sh -i {date}'
