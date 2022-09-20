@@ -1,7 +1,7 @@
 PRIMERS="primers" # primers file name
 CYVERSE="config.yaml" # cyverse config file name
 THREADS=8
-RUNID="2022-09-19"
+RUNID="2022-09-20"
 
 # Obitools ecopcr variables
 ERROR=3
@@ -26,3 +26,4 @@ VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 # accession ID file/folder names
 LINKS="linksize"
 URLS="urls"
+NTOTAL=71 # number of nt chunks
