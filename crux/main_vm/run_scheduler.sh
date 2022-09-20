@@ -25,7 +25,7 @@ fi
 
 
 # run scripts using parallel ssh
-
+python3 parallel.py
 
 
 # dismantle VMs
