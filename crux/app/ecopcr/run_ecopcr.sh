@@ -24,6 +24,8 @@ source ${CONFIG}
 HOSTNAME=$(hostname | tr -dc '0-9')
 OUTPUT="fasta_output"
 
+mkdir ${OUTPUT}
+
 # download link files
 gocmd get -c ${CYVERSE} /iplant/home/shared/eDNA_Explorer/urls/${RUNID}/chunk${HOSTNAME}/ .
 
