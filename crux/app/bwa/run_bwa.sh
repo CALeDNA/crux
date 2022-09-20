@@ -17,11 +17,11 @@ source ${CONFIG}
 
 # create empty folders
 mkdir db/
-mkdir ecopcr
+mkdir ecopcr/
 mkdir mem_output/
 
 # run bwa index
-./bwa_index.sh -n db -i indexes -r ${RUNID} >> logs 2>&1
+./bwa_index.sh -n db -i indexes -r ${RUNID} -h ${HOSTNAME} >> logs 2>&1
 
 # download ecopcr fasta files and combine them
 gocmd -c ${CYVERSE} get /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}/ ecopcr/

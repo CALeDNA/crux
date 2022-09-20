@@ -5,13 +5,15 @@ INDEX=""
 RUNID=""
 CYVERSE="config.yaml"
 
-while getopts "n:i:r:" opt; do
+while getopts "n:i:r:h:" opt; do
     case $opt in
         n) NTDB="$OPTARG"
         ;;
         i) INDEX="$OPTARG" 
         ;;
         r) RUNID="$OPTARG"
+        ;;
+        h) HOSTNAME="$OPTARG"
         ;;
     esac
 done
@@ -29,16 +31,17 @@ else
 fi
 
 ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
-# HOSTNAME=$(hostname | tr -dc '0-9')
-HOSTNAME="02"
-HOSTNAME=$((HOSTNAME * 8))
-# end=$((HOSTNAME + 8))
-end=$((HOSTNAME + 2))
+START="02"
+END=$((START + 2))
 
-if (( end > 65 ));
-then
-    (( end - 1 ))
-fi
+
+# SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+# START=$(( $HOSTNAME * $SCALE ))
+# END=$(( $START + $SCALE ))
+# if (( $NTOTAL - ( $END - 1) < $SCALE ))
+# then
+#     END=${NTOTAL}
+# fi
 
 # first, download nt00 extra files that aren't in the other nt chunks
 wget -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.00.tar.gz
@@ -47,9 +50,9 @@ rm ${NTDB}/nt.00*
 
 # download nt file from cyverse and untar it
 # then run blastdbcmd to create fasta file
-for (( c=${HOSTNAME}; c<${end}; c++ ))
+for (( i=${START}; i<${END}; i++ ))
 do
-    chunk=$(printf '%02d' "$c")
+    chunk=$(printf '%02d' "$i")
     echo "wget -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.${chunk}.tar.gz"
     wget -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.${chunk}.tar.gz
     tar -xf ${NTDB}/nt.${chunk}.tar.gz -C ${NTDB}

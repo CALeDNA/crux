@@ -20,10 +20,10 @@ docker build -t crux .
 docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh -h ${HOSTNAME}
 
 # step 3: run bwa inside docker container
-sudo docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}
+docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}
 
 # step 4: get largest sequence per accid
-
+docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c crux_vars.sh -h ${HOSTNAME}
 
 # step 5: run tronko
 # docker run tronko.sh
