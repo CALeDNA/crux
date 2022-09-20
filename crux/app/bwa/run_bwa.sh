@@ -13,6 +13,11 @@ cd /mnt
 
 source ${CONFIG}
 
+# create empty folders
+mkdir db/
+mkdir ecopcr
+mkdir mem_output/
+
 # run bwa index
 ./bwa_index.sh -n db -i indexes -r ${RUNID} >> logs 2>&1
 
