@@ -8,7 +8,7 @@ ERROR="" # ecopcr error
 MINLENGTH="" # ecopcr min length
 MAXLENGTH="" # ecopcr max length
 
-while getopts "g:p:o:b:e:s:l:" opt; do
+while getopts "g:p:o:b:e:s:l:c:" opt; do
     case $opt in
         g) GENBANK="$OPTARG"
         ;;
@@ -24,11 +24,13 @@ while getopts "g:p:o:b:e:s:l:" opt; do
         ;;
         l) MAXLENGTH="$OPTARG"
         ;;
+        c) CONFIG="$OPTARG"
+        ;;
     esac
 done
 echo "${BATCHTAG}"
 
-source crux_vars.sh
+source ${CONFIG}
 
 LINKS=$(cat $GENBANK)
 PRIMERS=$(cat $PRIMERS)
