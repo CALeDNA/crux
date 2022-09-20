@@ -34,4 +34,4 @@ done
 ./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} -h ${HOSTNAME} >> logs 2>&1
 
 # upload log file
-gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/bwa/logs/logs_${RUNID}.txt
+gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}/logs_chunk${HOSTNAME}.txt
