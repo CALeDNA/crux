@@ -33,7 +33,58 @@ client = ParallelSSHClient(hosts, user=user, pkey=pkey)
 #     for line in host_out.stderr:
 #         print(line)
 
-cmd = './run.sh -i {date}'
+# clone gh repo
+cmd = 'git clone -b crux-hector https://github.com/CALeDNA/crux.git'
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
+# copy config, primer, etc. files to VMs
+cmd = client.copy_file('config.yaml', 'crux/crux/app/bwa/config.yaml')
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
+cmd = client.copy_file('config.yaml', 'crux/crux/app/ecopcr/config.yaml')
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
+cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/bwa/crux_vars.sh')
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
+cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/ecopcr/crux_vars.sh')
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
+cmd = client.copy_file('primers', 'crux/crux/app/ecopcr/primers')
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
+# run commands inside docker container
+cmd = 'cd crux/crux; ./run.sh -i {date}'
 output = client.run_command(cmd)
 for host_out in output:
     for line in host_out.stdout:
