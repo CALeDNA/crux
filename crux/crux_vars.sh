@@ -1,6 +1,6 @@
 PRIMERS="primers" # primers file name
 CYVERSE="config.yaml" # cyverse config file name
-THREADS=16
+THREADS=8
 RUNID="2022-09-16"
 
 # Obitools ecopcr variables

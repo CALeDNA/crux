@@ -14,11 +14,14 @@ cd /mnt
 source ${CONFIG}
 
 # run bwa index
-# ./bwa_index.sh -n db -i indexes -r ${RUNID} >> logs 2>&1
+./bwa_index.sh -n db -i indexes -r ${RUNID} >> logs 2>&1
 
-#TODO
-# # download ecopcr fasta files
-# gocmd -c ${CYVERSE} get 
+# download ecopcr fasta files and combine them
+gocmd -c ${CYVERSE} get /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}/ ecopcr/
+for d in ecopcr/${RUNID}/*/
+do
+    cat ${d}*.fasta > "${d%/}".fasta
+done
 
 # run bwa mem
 ./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} >> logs 2>&1
