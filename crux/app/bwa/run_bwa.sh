@@ -19,6 +19,7 @@ source ${CONFIG}
 mkdir db/
 mkdir ecopcr/
 mkdir mem_output/
+mkdir indexes/
 
 # download ecopcr fasta files and combine them
 gocmd -c ${CYVERSE} get /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}/ ecopcr/
