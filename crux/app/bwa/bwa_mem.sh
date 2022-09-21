@@ -58,18 +58,18 @@ END=$((START + 2))
 for (( c=${START}; c<${END}; c++ ))
 do
     chunk=$(printf '%02d' "$c")
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.amb" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.ann" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.bwt" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.pac" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.sa" >> ${URLS}
+    # echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta" >> ${URLS}
+    # echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.amb" >> ${URLS}
+    # echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.ann" >> ${URLS}
+    # echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.bwt" >> ${URLS}
+    # echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.pac" >> ${URLS}
+    # echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.sa" >> ${URLS}
 
-    #download index
-    mkdir ${INDEX}
-    cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}
-    wait $!
-    rm ${URLS}
+    # #download index
+    # mkdir ${INDEX}
+    # cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}
+    # wait $!
+    # rm ${URLS}
 
     mkdir ${OUTPUT}/${RUNID}
 
