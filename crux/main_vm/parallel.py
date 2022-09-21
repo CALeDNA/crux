@@ -70,7 +70,7 @@ for host_out in output:
         print(line)
 
 # run ecopcr
-cmd = 'cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh -h ${HOSTNAME}'
+cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh -h ${HOSTNAME}"
 output = client.run_command(cmd)
 for host_out in output:
     for line in host_out.stdout:
@@ -79,7 +79,7 @@ for host_out in output:
         print(line)
 
 # run bwa
-cmd = 'cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}'
+cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}"
 output = client.run_command(cmd)
 for host_out in output:
     for line in host_out.stdout:
@@ -88,7 +88,7 @@ for host_out in output:
         print(line)
 
 # run taxfilter
-cmd = 'cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c crux_vars.sh -h ${HOSTNAME}'
+cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c crux_vars.sh -h ${HOSTNAME}"
 output = client.run_command(cmd)
 for host_out in output:
     for line in host_out.stdout:
