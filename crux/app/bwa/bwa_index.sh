@@ -30,8 +30,7 @@ else
   exit
 fi
 
-ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
-START="02"
+START=$(( $HOSTNAME * 2 + 2))
 END=$((START + 2))
 
 
@@ -44,7 +43,7 @@ END=$((START + 2))
 # fi
 
 # first, download nt00 extra files that aren't in the other nt chunks
-wget -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.00.tar.gz
+wget -q -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.00.tar.gz
 tar -xf ${NTDB}/nt.00.tar.gz -C ${NTDB}
 rm ${NTDB}/nt.00*
 
@@ -54,7 +53,7 @@ for (( i=${START}; i<${END}; i++ ))
 do
     chunk=$(printf '%02d' "$i")
     echo "wget -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.${chunk}.tar.gz"
-    wget -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.${chunk}.tar.gz
+    wget -q -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.${chunk}.tar.gz
     tar -xf ${NTDB}/nt.${chunk}.tar.gz -C ${NTDB}
     sed -i "s/^DBLIST.*/DBLIST nt.${chunk} /" ${NTDB}/nt.nal
     echo "blastdbcmd -entry all -db ${NTDB}/nt -out ${INDEX}/nt${chunk}.fasta"
@@ -67,6 +66,6 @@ echo "find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 3 time 
 find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 3 time bwa index -a bwtsw -b 100000000 %
 
 # upload indexes to cyverse
-mv ${INDEX}/ ${RUNID}
+mv ${INDEX}/ ${RUNID}/
 gocmd put -c ${CYVERSE} ${RUNID}/ /iplant/home/shared/eDNA_Explorer/bwa/bwa-index
 rm -r ${RUNID}

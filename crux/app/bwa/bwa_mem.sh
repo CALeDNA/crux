@@ -42,10 +42,20 @@ ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
 # then
 #     end=$(( end + 1 ))
 # fi
-HOSTNAME="16"
-end="18"
+START=$(( $HOSTNAME * 2 + 2))
+END=$((START + 2))
+# HOSTNAME="16"
+# end="18"
 
-for (( c=${HOSTNAME}; c<${end}; c++ ))
+# SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+# START=$(( $HOSTNAME * $SCALE ))
+# END=$(( $START + $SCALE ))
+# if (( $NTOTAL - ( $END - 1) < $SCALE ))
+# then
+#     END=${NTOTAL}
+# fi
+
+for (( c=${START}; c<${END}; c++ ))
 do
     chunk=$(printf '%02d' "$c")
     echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta" >> ${URLS}
@@ -57,7 +67,7 @@ do
 
     #download index
     mkdir ${INDEX}
-    cat ${URLS} | xargs nugget -t -c -s 6 -d ${INDEX}
+    cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}
     wait $!
     rm ${URLS}
 
