@@ -73,10 +73,10 @@ for host_out in output:
 cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh -h ${HOSTNAME}"
 output = client.run_command(cmd)
 for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+   for line in host_out.stdout:
+       print(line)
+   for line in host_out.stderr:
+       print(line)
 
 # run bwa
 cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}"
@@ -91,10 +91,10 @@ for host_out in output:
 cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c crux_vars.sh -h ${HOSTNAME}"
 output = client.run_command(cmd)
 for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+   for line in host_out.stdout:
+       print(line)
+   for line in host_out.stderr:
+       print(line)
 
 # # run commands inside docker container
 # cmd = 'cd crux/crux; ./run.sh -i {date}'

@@ -16,15 +16,16 @@ source ${CONFIG}
 wget ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz
 gunzip nucl_gb.accession2taxid.gz
 
-
-# split nt chunks across all VMs
-SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
-START=$(( $HOSTNAME * $SCALE ))
-END=$(( $START + $SCALE ))
-if (( $NTOTAL - ( $END - 1) < $SCALE ))
-then
-    END=${NTOTAL}
-fi
+START=$(( $HOSTNAME * 2 + 2))
+END=$((START + 2))
+# # split nt chunks across all VMs
+# SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+# START=$(( $HOSTNAME * $SCALE ))
+# END=$(( $START + $SCALE ))
+# if (( $NTOTAL - ( $END - 1) < $SCALE ))
+# then
+#     END=${NTOTAL}
+# fi
 
 cat ${PRIMERS} | while read primer
 do
