@@ -68,4 +68,4 @@ find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 3 time bwa in
 # upload indexes to cyverse
 mv ${INDEX}/ ${RUNID}/
 gocmd put -c ${CYVERSE} ${RUNID}/ /iplant/home/shared/eDNA_Explorer/bwa/bwa-index
-mv ${RUNID}/ ${INDEX}/
+rm -r ${RUNID}/
