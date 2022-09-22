@@ -63,7 +63,7 @@ done
 
 # build bwa index
 echo "find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 3 time bwa index -a bwtsw -b 100000000 %"
-find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 3 time bwa index -a bwtsw -b 100000000 %
+find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 2 time bwa index -a bwtsw -b 100000000 %
 
 # upload indexes to cyverse
 mv ${INDEX}/ ${RUNID}/
