@@ -36,4 +36,4 @@ done
 
 # upload log file
 gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}
-gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}/logs_chunk${HOSTNAME}.txt
+gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}/bwa_chunk${HOSTNAME}.txt
