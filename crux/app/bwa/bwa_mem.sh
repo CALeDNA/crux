@@ -5,9 +5,9 @@ RUNID=""
 # HOSTNAME=$(hostname | tr -dc '0-9')
 THREADS=""
 URLS="chunks.txt"
-CYVERSE="config.yaml"
+CYVERSE=""
 
-while getopts "o:i:r:h:" opt; do
+while getopts "o:i:r:h:t:c:" opt; do
     case $opt in
         o) OUTPUT="$OPTARG"
         ;;
@@ -17,11 +17,14 @@ while getopts "o:i:r:h:" opt; do
         ;;
         h) HOSTNAME="$OPTARG"
         ;;
+        t) THREADS="$OPTARG"
+        ;;
+        c) CYVERSE="$OPTARG"
     esac
 done
 
 #Check that user has all of the default flags set
-if [[ ! -z ${OUTPUT} && ! -z ${INDEX} && ! -z ${RUNID} ]];
+if [[ ! -z ${OUTPUT} && ! -z ${INDEX} && ! -z ${RUNID} && ! -z ${THREADS} && ! -z ${CYVERSE} ]];
 then
   echo "Required Arguments Given"
   echo ""
@@ -33,6 +36,7 @@ else
 fi
 
 ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
+mkdir ${OUTPUT}/${RUNID}
 # # configured for 10 VM and 71 NT chunks
 # NAME=$(hostname | tr -dc '0-9')
 # HOSTNAME=${NAME#0}
@@ -56,7 +60,7 @@ END=$((START + 2))
 for (( c=${START}; c<${END}; c++ ))
 do
     chunk=$(printf '%02d' "$c")
-      echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta"
+    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta*"
     echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta" >> ${URLS}
     echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.amb" >> ${URLS}
     echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.ann" >> ${URLS}
@@ -66,11 +70,10 @@ do
 
     #download index
     mkdir ${INDEX}
+    echo "cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}"
     cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}
     wait $!
     rm ${URLS}
-
-    mkdir ${OUTPUT}/${RUNID}
 
     #run bwa mem on each primer
     for ecopcrfasta in $ECOPCR
@@ -95,5 +98,5 @@ do
 done
 
 # upload files to cyverse
-echo "gocmd put -e ${OUTPUT}/${RUNID} /iplant/home/shared/eDNA_Explorer/bwa/bwa-output/"
+echo "gocmd put -c ${CYVERSE} ${OUTPUT}/${RUNID} /iplant/home/shared/eDNA_Explorer/bwa/bwa-output/"
 gocmd put -c ${CYVERSE} ${OUTPUT}/${RUNID} /iplant/home/shared/eDNA_Explorer/bwa/bwa-output/

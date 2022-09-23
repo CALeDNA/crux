@@ -32,7 +32,7 @@ done
 ./bwa_index.sh -n db -i indexes -r ${RUNID} -h ${HOSTNAME} >> logs 2>&1
 
 # run bwa mem
-./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} -h ${HOSTNAME} >> logs 2>&1
+./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} -h ${HOSTNAME} -t ${THREADS} -C ${CYVERSE} >> logs 2>&1
 
 # upload log file
 gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}
