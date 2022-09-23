@@ -60,6 +60,16 @@ joinall(cmd, raise_error=True)
 cmd = client.copy_file('primers', 'crux/crux/app/taxfilter/primers')
 joinall(cmd, raise_error=True)
 
+
+#create swap space
+cmd = 'sudo fallocate -l 10G /swapfile; sudo chmod 600 /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
+
 # build docker
 cmd = 'cd crux/crux; docker build -t crux .'
 output = client.run_command(cmd)
