@@ -10,6 +10,8 @@ while getopts "c:h:" opt; do
     esac
 done
 
+cd /mnt
+
 source ${CONFIG}
 
 # download nucl acc2taxid
