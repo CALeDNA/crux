@@ -47,7 +47,7 @@ do
         rm ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.bam
         # get largest seq per nt accesion id
         python get-largest.py --primer ${primer} --output ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa --sam ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.sam --nucltaxid nucl_gb.accession2taxid --log logs.txt
-        # remove bam and sam files
+        # remove sam
         rm ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.sam
     done
 
@@ -57,5 +57,7 @@ do
     gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/fa-taxid/logs/${RUNID}
     
     gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}/chunk${HOSTNAME}.fa
-    gocmd -c ${CYVERSE} put logs.txt /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/logs/logs_${HOSTNAME}.fa
+    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}/chunk${HOSTNAME}.fa.taxid
+    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}/chunk${HOSTNAME}.tax.tsv
+    gocmd -c ${CYVERSE} put logs.txt /iplant/home/shared/eDNA_Explorer/fa-taxid/logs/${RUNID}/logs_${HOSTNAME}.fa
 done
