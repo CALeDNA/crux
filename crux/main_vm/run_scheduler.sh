@@ -1,13 +1,17 @@
 #! /bin/bash
 
 CONFIG=""
+VARS="vars"
 while getopts "c:" opt; do
     case $opt in
-        i) CONFIG="$OPTARG"
+        c) CONFIG="$OPTARG"
         ;;
     esac
 done
 
+
+cp ${VARS}/* .
+# remove forward slash from paths meant for docker
 source ${CONFIG}
 
 # split urls into folders
@@ -22,10 +26,3 @@ if [[ ${VOLUME} -eq 0 ]]; then
 else
     JS2/setup_instance.sh -u ${OS_USERNAME} -f ${FLAVOR} -i ${IMAGE} -k ${APIKEY} -j ${JSCRED} -n ${NUMINSTANCES} -s ${SECURITY} -v ${VOLUME}
 fi
-
-
-# run scripts using parallel ssh
-python3 parallel.py
-
-
-# dismantle VMs
