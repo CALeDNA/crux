@@ -7,11 +7,17 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('--hosts', type=str)
 parser.add_argument('--user', type=str)
 parser.add_argument('--pkey', type=str)
+parser.add_argument('--config', type=str)
+parser.add_argument('--primers', type=str)
+parser.add_argument('--cyverse', type=str)
 args = parser.parse_args()
 
 hostnames = args.hosts
 user = args.user
 pkey = args.pkey
+config = args.config
+primers = args.primers
+cyverse = args.cyverse
 
 date = datetime.datetime.now()
 date = str(date).split(" ")[0]
@@ -35,40 +41,25 @@ for host_out in output:
     for line in host_out.stderr:
         print(line)
 
-# copy config, primer, etc. files to VMs
-cmd = client.copy_file('config.yaml', 'crux/crux/app/bwa/config.yaml')
-joinall(cmd, raise_error=True)
+# # copy config, primer, etc. files to VMs
+# cmd = client.copy_file(f'{cyverse}', f'{cyverse}')
+# joinall(cmd, raise_error=True)
 
-cmd = client.copy_file('config.yaml', 'crux/crux/app/ecopcr/config.yaml')
-joinall(cmd, raise_error=True)
+# cmd = client.copy_file(f'{config}', f'{config}')
+# joinall(cmd, raise_error=True)
 
-cmd = client.copy_file('config.yaml', 'crux/crux/app/taxfilter/config.yaml')
-joinall(cmd, raise_error=True)
-
-cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/bwa/crux_vars.sh')
-joinall(cmd, raise_error=True)
-
-cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/ecopcr/crux_vars.sh')
-joinall(cmd, raise_error=True)
-
-cmd = client.copy_file('crux_vars.sh', 'crux/crux/app/taxfilter/crux_vars.sh')
-joinall(cmd, raise_error=True)
-
-cmd = client.copy_file('primers', 'crux/crux/app/ecopcr/primers')
-joinall(cmd, raise_error=True)
-
-cmd = client.copy_file('primers', 'crux/crux/app/taxfilter/primers')
-joinall(cmd, raise_error=True)
+# cmd = client.copy_file(f'{primers}', f'{primers}')
+# joinall(cmd, raise_error=True)
 
 
-#create swap space
-cmd = 'sudo fallocate -l 10G /swapfile; sudo chmod 600 /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
+# #create swap space
+# cmd = 'sudo fallocate -l 10G /swapfile; sudo chmod 600 /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
+# output = client.run_command(cmd)
+# for host_out in output:
+#     for line in host_out.stdout:
+#         print(line)
+#     for line in host_out.stderr:
+#         print(line)
 
 # build docker
 cmd = 'cd crux/crux; docker build -t crux .'
@@ -80,7 +71,7 @@ for host_out in output:
         print(line)
 
 # run ecopcr
-cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt --name ecopcr crux /mnt/run_ecopcr.sh -c crux_vars.sh -h ${HOSTNAME}"
+cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt -v $(pwd)/vars:/vars --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
 output = client.run_command(cmd)
 for host_out in output:
    for line in host_out.stdout:
@@ -88,29 +79,20 @@ for host_out in output:
    for line in host_out.stderr:
        print(line)
 
-# run bwa
-cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c crux_vars.sh -h ${HOSTNAME}"
-output = client.run_command(cmd)
-for host_out in output:
-    for line in host_out.stdout:
-        print(line)
-    for line in host_out.stderr:
-        print(line)
-
-# run taxfilter
-cmd = "cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c crux_vars.sh -h ${HOSTNAME}"
-output = client.run_command(cmd)
-for host_out in output:
-   for line in host_out.stdout:
-       print(line)
-   for line in host_out.stderr:
-       print(line)
-
-# # run commands inside docker container
-# cmd = 'cd crux/crux; ./run.sh -i {date}'
+# # run bwa
+# cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c {config} -h ${{HOSTNAME}}"
 # output = client.run_command(cmd)
 # for host_out in output:
 #     for line in host_out.stdout:
 #         print(line)
 #     for line in host_out.stderr:
 #         print(line)
+
+# # run taxfilter
+# cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c {config} -h ${{HOSTNAME}}"
+# output = client.run_command(cmd)
+# for host_out in output:
+#    for line in host_out.stdout:
+#        print(line)
+#    for line in host_out.stderr:
+#        print(line)

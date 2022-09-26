@@ -1,16 +1,20 @@
 #!/bin/bash
 
 CONFIG=""
-while getopts "c:h:" opt; do
+VARS="/vars"
+while getopts "c:h:v:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
         h) HOSTNAME="$OPTARG"
+        ;;
+        v) VARS="$OPTARG"
+        ;;
     esac
 done
 
 cd /mnt
-
+cp ${VARS}/* .
 # activate conda env
 export PATH="/usr/local/miniconda/bin:$PATH";
 

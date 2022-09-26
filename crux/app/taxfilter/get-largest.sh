@@ -1,16 +1,20 @@
 #! /bin/bash
 
 SAMDIR="bwa-output"
-while getopts "c:h:" opt; do
+VARS="/vars"
+while getopts "c:h:v:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
         h) HOSTNAME="$OPTARG"
         ;;
+        v) VARS="$OPTARG"
+        ;;
     esac
 done
 
 cd /mnt
+cp ${VARS}/* .
 
 source ${CONFIG}
 

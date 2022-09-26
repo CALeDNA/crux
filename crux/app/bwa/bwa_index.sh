@@ -3,9 +3,9 @@ NTDB=""
 OUTPUT=""
 INDEX=""
 RUNID=""
-CYVERSE="config.yaml"
+CYVERSE=""
 
-while getopts "n:i:r:h:" opt; do
+while getopts "n:i:r:h:c:" opt; do
     case $opt in
         n) NTDB="$OPTARG"
         ;;
@@ -14,6 +14,8 @@ while getopts "n:i:r:h:" opt; do
         r) RUNID="$OPTARG"
         ;;
         h) HOSTNAME="$OPTARG"
+        ;;
+        c) CYVERSE="$OPTARG"
         ;;
     esac
 done
@@ -30,17 +32,17 @@ else
   exit
 fi
 
-START=$(( $HOSTNAME * 2 + 2))
-END=$((START + 2))
+# START=$(( $HOSTNAME * 2 + 2))
+# END=$((START + 2))
 
 
-# SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
-# START=$(( $HOSTNAME * $SCALE ))
-# END=$(( $START + $SCALE ))
-# if (( $NTOTAL - ( $END - 1) < $SCALE ))
-# then
-#     END=${NTOTAL}
-# fi
+SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+START=$(( $HOSTNAME * $SCALE ))
+END=$(( $START + $SCALE ))
+if (( $NTOTAL - ( $END - 1) < $SCALE ))
+then
+    END=${NTOTAL}
+fi
 
 # first, download nt00 extra files that aren't in the other nt chunks
 wget -q -c --tries=0 -P ${NTDB} https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/nt/nt.00.tar.gz

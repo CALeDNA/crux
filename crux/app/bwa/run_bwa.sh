@@ -1,18 +1,20 @@
 #! /bin/bash
 
 CONFIG=""
-
-while getopts "c:h:" opt; do
+VARS="/vars"
+while getopts "c:h:v:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
         h) HOSTNAME="$OPTARG"
         ;;
+        v) VARS="$OPTARG"
+        ;;
     esac
 done
 
 cd /mnt
-
+cp ${VARS}/* .
 source ${CONFIG}
 
 # create empty folders
@@ -29,7 +31,7 @@ do
 done
 
 # run bwa index
-./bwa_index.sh -n db -i indexes -r ${RUNID} -h ${HOSTNAME} >> logs 2>&1
+./bwa_index.sh -n db -i indexes -r ${RUNID} -h ${HOSTNAME} -c ${CYVERSE} >> logs 2>&1
 
 # run bwa mem
 ./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} -h ${HOSTNAME} -t ${THREADS} -c ${CYVERSE} >> logs 2>&1
