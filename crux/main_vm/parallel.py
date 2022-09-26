@@ -42,6 +42,8 @@ for host_out in output:
         print(line)
 
 # # copy config, primer, etc. files to VMs
+cmd = client.copy_file('vars', 'crux/crux/vars', recurse=True)
+joinall(cmd, raise_error=True)
 # cmd = client.copy_file(f'{cyverse}', f'{cyverse}')
 # joinall(cmd, raise_error=True)
 
@@ -52,17 +54,17 @@ for host_out in output:
 # joinall(cmd, raise_error=True)
 
 
-# #create swap space
-# cmd = 'sudo fallocate -l 10G /swapfile; sudo chmod 600 /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
-# output = client.run_command(cmd)
-# for host_out in output:
-#     for line in host_out.stdout:
-#         print(line)
-#     for line in host_out.stderr:
-#         print(line)
+#create swap space
+cmd = 'sudo fallocate -l 10G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
 
 # build docker
-cmd = 'cd crux/crux; docker build -t crux .'
+cmd = 'cd crux/crux; docker build -q -t crux .'
 output = client.run_command(cmd)
 for host_out in output:
     for line in host_out.stdout:
@@ -79,20 +81,20 @@ for host_out in output:
    for line in host_out.stderr:
        print(line)
 
-# # run bwa
-# cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt --name bwa crux /mnt/run_bwa.sh -c {config} -h ${{HOSTNAME}}"
-# output = client.run_command(cmd)
-# for host_out in output:
-#     for line in host_out.stdout:
-#         print(line)
-#     for line in host_out.stderr:
-#         print(line)
+# run bwa
+cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt -v $(pwd)/vars:/vars --name bwa crux /mnt/run_bwa.sh -c {config} -h ${{HOSTNAME}}"
+output = client.run_command(cmd)
+for host_out in output:
+    for line in host_out.stdout:
+        print(line)
+    for line in host_out.stderr:
+        print(line)
 
-# # run taxfilter
-# cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt --name taxfilter crux /mnt/get-largest.sh -c {config} -h ${{HOSTNAME}}"
-# output = client.run_command(cmd)
-# for host_out in output:
-#    for line in host_out.stdout:
-#        print(line)
-#    for line in host_out.stderr:
-#        print(line)
+# run taxfilter
+cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt -v $(pwd)/vars:/vars --name taxfilter crux /mnt/get-largest.sh -c {config} -h ${{HOSTNAME}}"
+output = client.run_command(cmd)
+for host_out in output:
+   for line in host_out.stdout:
+       print(line)
+   for line in host_out.stderr:
+       print(line)
