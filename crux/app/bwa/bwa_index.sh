@@ -3,7 +3,7 @@ NTDB=""
 OUTPUT=""
 INDEX=""
 RUNID=""
-CYVERSE=""
+CONFIG=""
 
 while getopts "n:i:r:h:c:" opt; do
     case $opt in
@@ -15,10 +15,12 @@ while getopts "n:i:r:h:c:" opt; do
         ;;
         h) HOSTNAME="$OPTARG"
         ;;
-        c) CYVERSE="$OPTARG"
+        c) CONFIG="$OPTARG"
         ;;
     esac
 done
+
+source ${CONFIG}
 
 #Check that user has all of the default flags set
 if [[ ! -z ${NTDB} && ! -z ${INDEX} && ! -z ${RUNID} ]];
