@@ -5,7 +5,7 @@ RUNID=""
 # HOSTNAME=$(hostname | tr -dc '0-9')
 THREADS=""
 URLS="chunks.txt"
-CYVERSE=""
+CONFIG=""
 
 while getopts "o:i:r:h:t:c:" opt; do
     case $opt in
@@ -19,12 +19,12 @@ while getopts "o:i:r:h:t:c:" opt; do
         ;;
         t) THREADS="$OPTARG"
         ;;
-        c) CYVERSE="$OPTARG"
+        c) CONFIG="$OPTARG"
     esac
 done
 
 #Check that user has all of the default flags set
-if [[ ! -z ${OUTPUT} && ! -z ${INDEX} && ! -z ${RUNID} && ! -z ${THREADS} && ! -z ${CYVERSE} ]];
+if [[ ! -z ${OUTPUT} && ! -z ${INDEX} && ! -z ${RUNID} && ! -z ${THREADS} && ! -z ${CONFIG} ]];
 then
   echo "Required Arguments Given"
   echo ""
@@ -34,6 +34,8 @@ else
   echo ""
   exit
 fi
+
+source ${CONFIG}
 
 ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
 mkdir ${OUTPUT}/${RUNID}
@@ -46,16 +48,16 @@ mkdir ${OUTPUT}/${RUNID}
 # then
 #     end=$(( end + 1 ))
 # fi
-START=$(( $HOSTNAME * 2 + 2))
-END=$((START + 2))
+# START=$(( $HOSTNAME * 2 + 2))
+# END=$((START + 2))
 
-# SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
-# START=$(( $HOSTNAME * $SCALE ))
-# END=$(( $START + $SCALE ))
-# if (( $NTOTAL - ( $END - 1) < $SCALE ))
-# then
-#     END=${NTOTAL}
-# fi
+SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+START=$(( $HOSTNAME * $SCALE ))
+END=$(( $START + $SCALE ))
+if (( $NTOTAL - ( $END - 1) < $SCALE ))
+then
+    END=${NTOTAL}
+fi
 
 for (( c=${START}; c<${END}; c++ ))
 do
