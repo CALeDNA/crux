@@ -29,14 +29,12 @@ OUTPUT="fasta_output"
 mkdir ${OUTPUT}
 
 # download link files
-gocmd get -c ${CYVERSE} /iplant/home/shared/eDNA_Explorer/urls/${RUNID}/chunk${HOSTNAME}/ .
+gocmd get -c ${CYVERSE} ${CYVERSE_BASE}/${RUNID}/urls/chunk${HOSTNAME}/ .
 
 # run obi_ecopcr.sh on every links file
 find chunk${HOSTNAME}/* | parallel -I% --tag --max-args 1 -P ${THREADS} ./obi_ecopcr.sh -g % -p ${PRIMERS} -o ${OUTPUT} -b % -e ${ERROR} -s ${MINLENGTH} -l ${MAXLENGTH} -c ${CONFIG} >> logs 2>&1
 
-gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}
-gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/ecopcr/logs/${RUNID}
-gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/ecopcr/logs/${RUNID}/ecopcr_chunk${HOSTNAME}.txt
+gocmd put -c ${CYVERSE} logs ${CYVERSE_BASE}/${RUNID}/logs/ecopcr_chunk${HOSTNAME}.txt
 # combine primer fasta files into one
 for primer in $(cat $PRIMERS)
 do
@@ -44,8 +42,8 @@ do
     find ${OUTPUT}/ -type f -name "*${PRIMERNAME}.fasta" | xargs -I{} cat {} >> ${PRIMERNAME}_${HOSTNAME}.fasta
 
     # upload combined fasta file to cyverse
-    gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}/${PRIMERNAME}
-    gocmd put -c ${CYVERSE} ${PRIMERNAME}_${HOSTNAME}.fasta /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}/${PRIMERNAME}/chunk${HOSTNAME}.fasta
+    gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/ecopcr/${PRIMERNAME}
+    gocmd put -c ${CYVERSE} ${PRIMERNAME}_${HOSTNAME}.fasta ${CYVERSE_BASE}/${RUNID}/ecopcr/${PRIMERNAME}/chunk${HOSTNAME}.fasta
     rm ${PRIMERNAME}_${HOSTNAME}.fasta
 done
 

@@ -38,7 +38,6 @@ fi
 source ${CONFIG}
 
 ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
-mkdir ${OUTPUT}/${RUNID}
 HOSTNAME=${HOSTNAME#0}
 
 # split nt chunks evenly among all VMs
@@ -61,13 +60,13 @@ fi
 for (( c=${START}; c<${END}; c++ ))
 do
     chunk=$(printf '%02d' "$c")
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta*"
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.amb" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.ann" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.bwt" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.pac" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/iplant/projects/eDNA_Explorer/bwa/bwa-index/${RUNID}/nt${chunk}.fasta.sa" >> ${URLS}
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta*"
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta" >> ${URLS}
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.amb" >> ${URLS}
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.ann" >> ${URLS}
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.bwt" >> ${URLS}
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.pac" >> ${URLS}
+    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.sa" >> ${URLS}
 
     #download index
     mkdir ${INDEX}
@@ -86,12 +85,8 @@ do
 
         fasta=$(find ${INDEX}/*.fasta -type f)
         nt=$(basename $fasta)
-        echo "time bwa mem -a -t ${THREADS} ${fasta} ${ecopcrfasta} | samtools view -bS - > ${OUTPUT}/${RUNID}/${primer}-${nt}.bam"
-        time bwa mem -a -t ${THREADS} ${fasta} ${ecopcrfasta} | samtools view -bS - > ${OUTPUT}/${RUNID}/${primer}-${nt}.bam
-        # combine sam files by primer
-        # samtools merge ${OUTPUT}/${primer}-${NAME}.bam ${OUTPUT}/${primer}*
-        # upload combined file to cyverse
-        #rm ${OUTPUT}/*
+        echo "time bwa mem -a -t ${THREADS} ${fasta} ${ecopcrfasta} | samtools view -bS - > ${OUTPUT}/${primer}-${nt}.bam"
+        time bwa mem -a -t ${THREADS} ${fasta} ${ecopcrfasta} | samtools view -bS - > ${OUTPUT}/${primer}-${nt}.bam
     done
     # rm files to save space
     rm ${INDEX}/*
@@ -99,5 +94,5 @@ do
 done
 
 # upload files to cyverse
-echo "gocmd put -c ${CYVERSE} ${OUTPUT}/${RUNID} /iplant/home/shared/eDNA_Explorer/bwa/bwa-output/"
-gocmd put -c ${CYVERSE} ${OUTPUT}/${RUNID} /iplant/home/shared/eDNA_Explorer/bwa/bwa-output/
+echo "gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/"
+gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/

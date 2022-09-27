@@ -1,6 +1,8 @@
 PRIMERS="primers" # primers file name
 CYVERSE="config.yaml" # cyverse config file name
+CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 THREADS=8
+INDEX_THREADS=2 # each thread takes about 18GB of RAM
 RUNID="2022-09-26"
 
 # Obitools ecopcr variables

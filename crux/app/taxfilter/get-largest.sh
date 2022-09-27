@@ -64,12 +64,9 @@ do
     done
 
     # upload to cyverse
-    gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/
-    gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}
-    gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/fa-taxid/logs/${RUNID}
+    gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}
     
-    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}/chunk${HOSTNAME}.fa
-    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}/chunk${HOSTNAME}.fa.taxid
-    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa /iplant/home/shared/eDNA_Explorer/fa-taxid/${RUNID}/${primer}/chunk${HOSTNAME}.tax.tsv
-    gocmd -c ${CYVERSE} put logs.txt /iplant/home/shared/eDNA_Explorer/fa-taxid/logs/${RUNID}/logs_${HOSTNAME}.fa
+    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa
+    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid
+    gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt
 done
