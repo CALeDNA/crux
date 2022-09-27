@@ -1,8 +1,8 @@
 #! /bin/bash
+
 OUTPUT=""
 INDEX=""
 RUNID=""
-# HOSTNAME=$(hostname | tr -dc '0-9')
 THREADS=""
 URLS="chunks.txt"
 CONFIG=""
@@ -39,24 +39,23 @@ source ${CONFIG}
 
 ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
 mkdir ${OUTPUT}/${RUNID}
-# # configured for 10 VM and 71 NT chunks
-# NAME=$(hostname | tr -dc '0-9')
-# HOSTNAME=${NAME#0}
-# HOSTNAME=$((HOSTNAME * 7))
-# end=$((HOSTNAME + 7))
-# if (( end > 65 ));
-# then
-#     end=$(( end + 1 ))
-# fi
-# START=$(( $HOSTNAME * 2 + 2))
-# END=$((START + 2))
+HOSTNAME=${HOSTNAME#0}
 
-SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+# split nt chunks evenly among all VMs
+SCALE=$(( $NTOTAL / $NUMINSTANCES ))
+REMAINDER=$(( $NTOTAL % $NUMINSTANCES + 1 ))
 START=$(( $HOSTNAME * $SCALE ))
 END=$(( $START + $SCALE ))
-if (( $NTOTAL - ( $END - 1) < $SCALE ))
+if (( $HOSTNAME != "00" ))
 then
-    END=${NTOTAL}
+    if (( $HOSTNAME < $REMAINDER ))
+    then
+        START=$(( $HOSTNAME * $SCALE  + $HOSTNAME - 1 ))
+        END=$(( $START + $SCALE + 1 ))
+    else
+        START=$(( $HOSTNAME * $SCALE + $REMAINDER - 1 ))
+        END=$(( $START + $SCALE ))
+    fi
 fi
 
 for (( c=${START}; c<${END}; c++ ))
