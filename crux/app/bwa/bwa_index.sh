@@ -34,16 +34,23 @@ else
   exit
 fi
 
-# START=$(( $HOSTNAME * 2 + 2))
-# END=$((START + 2))
+HOSTNAME=${HOSTNAME#0}
 
-
-SCALE=$(( ( $NTOTAL + ($NUMINSTANCES / 2) ) / $NUMINSTANCES )) # round to nearest whole number
+# split nt chunks evenly among all VMs
+SCALE=$(( $NTOTAL / $NUMINSTANCES ))
+REMAINDER=$(( $NTOTAL % $NUMINSTANCES + 1 ))
 START=$(( $HOSTNAME * $SCALE ))
 END=$(( $START + $SCALE ))
-if (( $NTOTAL - ( $END - 1) < $SCALE ))
+if (( $HOSTNAME != "00" ))
 then
-    END=${NTOTAL}
+    if (( $HOSTNAME < $REMAINDER ))
+    then
+        START=$(( $HOSTNAME * $SCALE  + $HOSTNAME - 1 ))
+        END=$(( $START + $SCALE + 1 ))
+    else
+        START=$(( $HOSTNAME * $SCALE + $REMAINDER - 1 ))
+        END=$(( $START + $SCALE ))
+    fi
 fi
 
 # first, download nt00 extra files that aren't in the other nt chunks
