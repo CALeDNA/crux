@@ -72,11 +72,6 @@ do
     rm ${NTDB}/nt.${chunk}.*
 done
 
-# build bwa index
-echo "find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 3 time bwa index -a bwtsw -b 100000000 %"
-find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P 2 time bwa index -a bwtsw -b 100000000 %
-
-# upload indexes to cyverse
-mv ${INDEX}/ ${RUNID}/
-gocmd put -c ${CYVERSE} ${RUNID}/ /iplant/home/shared/eDNA_Explorer/bwa/bwa-index
-rm -r ${RUNID}/
+# build bwa index and upload to cyverse
+echo "find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P ${INDEX_THREADS} ./parallel_index.sh -a bwtsm -b 100000000 -f % -c ${CONFIG}"
+find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P ${INDEX_THREADS} parallel_index.sh -a bwtsm -b 100000000 -f % -c ${CONFIG}

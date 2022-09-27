@@ -24,7 +24,7 @@ mkdir mem_output/
 mkdir indexes/
 
 # download ecopcr fasta files and combine them
-gocmd -c ${CYVERSE} get /iplant/home/shared/eDNA_Explorer/ecopcr/${RUNID}/ ecopcr/
+gocmd -c ${CYVERSE} get ${CYVERSE_BASE}/${RUNID}/ecopcr ecopcr/
 for d in ecopcr/${RUNID}/*/
 do
     cat ${d}*.fasta > "${d%/}".fasta
@@ -37,5 +37,4 @@ done
 ./bwa_mem.sh -o mem_output -i indexes -r ${RUNID} -h ${HOSTNAME} -t ${THREADS} -c ${CONFIG} >> logs 2>&1
 
 # upload log file
-gocmd -c ${CYVERSE} mkdir /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}
-gocmd put -c ${CYVERSE} logs /iplant/home/shared/eDNA_Explorer/bwa/logs/${RUNID}/bwa_chunk${HOSTNAME}.txt
+gocmd put -c ${CYVERSE} logs ${CYVERSE_BASE}/${RUNID}/logs/bwa_chunk${HOSTNAME}.txt

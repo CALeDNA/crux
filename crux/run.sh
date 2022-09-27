@@ -16,6 +16,14 @@ done
 
 source ${VARS}/${CONFIG}
 
+# make cyverse folders
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/urls
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/ecopcr
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/bwa-index
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/bwa-mem
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid
+gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/logs
 
 # step 1: split urls and create VMs
 ./run_scheduler.sh -c ${CONFIG}
