@@ -58,7 +58,7 @@ with open(output, 'a') as out:
                 ntid = line[2]
                 try:
                     if counter == info_dict[line[2]]['index'] and ntid != "*":
-                    	tax_file.writelines(ntid + '\t' + taxid_dict[ntid] + '\n')
+                        tax_file.writelines(ntid + '\t' + taxid_dict[ntid] + '\n')
                         seq = line[9]
                         out.writelines('>' + ntid + '\n')
                         out.writelines(seq + '\n')
