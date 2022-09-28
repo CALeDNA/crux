@@ -37,7 +37,7 @@ fi
 
 source ${CONFIG}
 
-ECOPCR=$(find ecopcr/${RUNID}/ -maxdepth 1 -type f)
+ECOPCR=$(find ecopcr/ -maxdepth 1 -type f)
 HOSTNAME=${HOSTNAME#0}
 
 # split nt chunks evenly among all VMs
