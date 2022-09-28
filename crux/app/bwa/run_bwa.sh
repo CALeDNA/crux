@@ -19,13 +19,12 @@ source ${CONFIG}
 
 # create empty folders
 mkdir db/
-mkdir ecopcr/
 mkdir mem_output/
 mkdir indexes/
 
 # download ecopcr fasta files and combine them
-gocmd -c ${CYVERSE} get ${CYVERSE_BASE}/${RUNID}/ecopcr ecopcr/
-for d in ecopcr/${RUNID}/*/
+gocmd -c ${CYVERSE} get ${CYVERSE_BASE}/${RUNID}/ecopcr .
+for d in ecopcr/*/
 do
     cat ${d}*.fasta > "${d%/}".fasta
 done
