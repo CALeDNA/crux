@@ -73,5 +73,5 @@ do
 done
 
 # build bwa index and upload to cyverse
-echo "find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P ${INDEX_THREADS} ./parallel_index.sh -a bwtsm -b 100000000 -f % -c ${CONFIG}"
-find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P ${INDEX_THREADS} ./parallel_index.sh -a bwtsm -b 100000000 -f % -c ${CONFIG}
+echo "find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P ${INDEX_THREADS} ./parallel_index.sh -a bwtsw -b 100000000 -f % -c ${CONFIG}"
+find ${INDEX}/*.fasta -type f | parallel -I% --tag --max-args 1 -P ${INDEX_THREADS} ./parallel_index.sh -a bwtsw -b 100000000 -f % -c ${CONFIG}
