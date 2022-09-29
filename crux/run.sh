@@ -30,7 +30,7 @@ gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/logs
 # run_scheduler: split urls, create VMs
 
 # step 2: run parallel script for files setup, docker build, ecopcr run, bwa index/mem, and filter largest seq
-time python3 parallel.py --hosts hostnames --user ubuntu --pkey hbaez-api-key --config ${CONFIG} --primers ${PRIMERS} --cyverse ${CYVERSE}
+time python3 parallel.py --hosts hostnames --user ${OS_USERNAME} --pkey ${APIKEY} --config ${CONFIG} --primers ${PRIMERS} --cyverse ${CYVERSE}
 
-# # step 3: dismantle VMs
-# ./dismantle_instances.sh -j ${JSCRED} -n ${NUMINSTANCES} -h hostnames
+# step 3: dismantle VMs
+./dismantle_instances.sh -j ${JSCRED} -n ${NUMINSTANCES} -h hostnames

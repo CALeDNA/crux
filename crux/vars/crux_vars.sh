@@ -11,7 +11,7 @@ MINLENGTH=100
 MAXLENGTH=1000
 
 # Jetstream2 variables and credentials
-OS_USERNAME="hbaez"
+OS_USERNAME="ubuntu"
 FLAVOR="m3.large"
 IMAGE="Featured-Ubuntu20"
 # create the ssh key
