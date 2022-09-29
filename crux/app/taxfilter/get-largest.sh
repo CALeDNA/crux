@@ -22,21 +22,21 @@ source ${CONFIG}
 wget -q -c --tries=0 ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz
 gunzip nucl_gb.accession2taxid.gz
 
-HOSTNAME=${HOSTNAME#0}
+HOSTNAME_=${HOSTNAME#0}
 
 # split nt chunks evenly among all VMs
 SCALE=$(( $NTOTAL / $NUMINSTANCES ))
 REMAINDER=$(( $NTOTAL % $NUMINSTANCES + 1 ))
-START=$(( $HOSTNAME * $SCALE ))
+START=$(( $HOSTNAME_ * $SCALE ))
 END=$(( $START + $SCALE ))
 if (( $HOSTNAME != "00" ))
 then
     if (( $HOSTNAME < $REMAINDER ))
     then
-        START=$(( $HOSTNAME * $SCALE  + $HOSTNAME - 1 ))
+        START=$(( $HOSTNAME_ * $SCALE  + $HOSTNAME_ - 1 ))
         END=$(( $START + $SCALE + 1 ))
     else
-        START=$(( $HOSTNAME * $SCALE + $REMAINDER - 1 ))
+        START=$(( $HOSTNAME_ * $SCALE + $REMAINDER - 1 ))
         END=$(( $START + $SCALE ))
     fi
 fi
@@ -51,8 +51,8 @@ do
     do
         chunk=$(printf '%02d' "$i")
         # download one bam file at a time
-        echo "wget -q -c --tries=0 -P ${SAMDIR}/${primer} https://data.cyverse.org/dav-anon/iplant/home/shared/eDNA_Explorer/bwa/bwa-output/${RUNID}/${primer}-nt${chunk}.fasta.bam"
-        wget -q -c --tries=0 -P ${SAMDIR}/${primer} https://data.cyverse.org/dav-anon/iplant/home/shared/eDNA_Explorer/bwa/bwa-output/${RUNID}/${primer}-nt${chunk}.fasta.bam
+        echo "wget -q -c --tries=0 -P ${SAMDIR}/${primer} https://data.cyverse.org/dav-anon${CYVERSE_BASE}/${RUNID}/bwa-mem/${primer}-nt${chunk}.fasta.bam"
+        wget -q -c --tries=0 -P ${SAMDIR}/${primer} https://data.cyverse.org/dav-anon${CYVERSE_BASE}/${RUNID}/bwa-mem/${primer}-nt${chunk}.fasta.bam
         # convert to sam
         samtools view -o ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.sam ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.bam
         # remove bam
