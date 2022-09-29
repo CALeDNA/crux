@@ -101,5 +101,6 @@ do
     echo "${ip_address}"
     echo "${ip_address}" >> hostnames
     # add ip to instance
-    openstack server add floating ip chunk${chunk} ${ip_address}
+    openstack server add floating ip chunk${chunk} ${ip_address} # || $(sleep 2; openstack server remove floating ip chunk${chunk} ${ip_address}; openstack server add floating ip chunk${chunk} ${ip_address})
+    sleep 10
 done
