@@ -3,10 +3,8 @@
 RUNID=""
 CONFIG=""
 VARS="vars"
-while getopts "i:c:v:" opt; do
+while getopts "c:v:" opt; do
     case $opt in
-        i) RUNID="$OPTARG"
-        ;;
         c) CONFIG="$OPTARG"
         ;;
         v) VARS="$OPTARG"
@@ -34,3 +32,5 @@ gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/logs
 # step 2: run parallel script for files setup, docker build, ecopcr run, bwa index/mem, and filter largest seq
 time python3 parallel.py --hosts hostnames --user ubuntu --pkey hbaez-api-key --config ${CONFIG} --primers ${PRIMERS} --cyverse ${CYVERSE}
 
+# # step 3: dismantle VMs
+# ./dismantle_instances.sh -j ${JSCRED} -n ${NUMINSTANCES} -h hostnames

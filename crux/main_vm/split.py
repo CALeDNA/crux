@@ -56,17 +56,12 @@ for line in lines:
     else:
         urlDict[size] = [url]
 
-# print(urlDict)
-# print(lst)
-# print(sum(lst))
 lst.sort()
-# print(lst)
 
 chunklinks = even_split(lst, args.chunks * args.cores)
 counter = 0
 chunkcounter = 0
 for arr in chunklinks:
-    print(sum(arr))
     core = "%02d" % (counter)
     if counter == 0:
         vm = "%02d" % (chunkcounter)
