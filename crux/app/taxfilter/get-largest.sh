@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 SAMDIR="bwa-output"
 VARS="/vars"
 while getopts "c:h:v:" opt; do
@@ -68,7 +70,5 @@ do
     
     gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa
     gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid
-    gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt
 done
-
-sudo shutdown now
+gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt
