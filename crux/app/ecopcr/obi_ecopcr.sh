@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 GENBANK="" # file containing genbank links
 PRIMERS="" # file containing list of primers
 OUTPUT="" # folder to output fasta files

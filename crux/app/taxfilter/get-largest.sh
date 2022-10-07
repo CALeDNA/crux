@@ -68,7 +68,8 @@ do
     # upload to cyverse
     gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}
     
-    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa
-    gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid
+    for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa && echo "Successful gocmd upload" && break || sleep 15; done
+    for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid && echo "Successful gocmd upload" && break || sleep 15; done
+
 done
 gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt

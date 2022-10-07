@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 OS_USERNAME=""
 FLAVOR=""
 IMAGE=""
@@ -8,8 +10,8 @@ JSCRED=""
 NUMINSTANCES=""
 SECURITY=""
 VOLUME=""
-
-while getopts "u:f:i:k:j:n:s:v:" opt; do
+SWAP="0" # in MiB
+while getopts "u:f:i:k:j:n:s:v:w:" opt; do
     case $opt in
         u) OS_USERNAME="$OPTARG"
         ;;
@@ -27,6 +29,8 @@ while getopts "u:f:i:k:j:n:s:v:" opt; do
         ;;
         v) VOLUME="$OPTARG"
         ;;
+        w) SWAP="$OPTARG"
+        ;;
     esac
 done
 
@@ -43,7 +47,7 @@ else
 fi
 
 # # username
-# OS_USERNAME="hbaez"
+# OS_USERNAME="ubuntu"
 # #flavor
 # FLAVOR="m3.tiny" # cli: openstack flavor list
 # IMAGE="Featured-Ubuntu20" # cli: openstack image list --limit 500
@@ -74,6 +78,7 @@ do
             openstack server create chunk${chunk} \
             --flavor ${FLAVOR} \
             --image ${IMAGE} \
+            --swap ${SWAP} \
             --key-name ${APIKEY} \
             --security-group ${SECURITY} \
             --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \
@@ -85,13 +90,14 @@ do
             openstack server create chunk${chunk} \
             --flavor ${FLAVOR} \
             --image ${IMAGE} \
+            --swap ${SWAP} \
             --key-name ${APIKEY} \
             --security-group ${SECURITY} \
             --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \
             --wait
     fi
 done
-# if error try: ssh-keygen -R <host>
+
 echo "create and add floating ip's"
 for (( c=0; c<$NUMINSTANCES; c++ ))
 do
