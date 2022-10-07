@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 OUTPUT=""
 INDEX=""
 RUNID=""
@@ -39,6 +41,7 @@ source ${CONFIG}
 
 ECOPCR=$(find ecopcr/ -maxdepth 1 -type f)
 HOSTNAME=${HOSTNAME#0}
+URL_BASE="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/${RUNID}/bwa-index"
 
 # split nt chunks evenly among all VMs
 SCALE=$(( $NTOTAL / $NUMINSTANCES ))
@@ -60,19 +63,18 @@ fi
 for (( c=${START}; c<${END}; c++ ))
 do
     chunk=$(printf '%02d' "$c")
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta*"
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.amb" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.ann" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.bwt" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.pac" >> ${URLS}
-    echo "https://data.cyverse.org/dav-anon/${CYVERSE_BASE}/${RUNID}/bwa-index/nt${chunk}.fasta.sa" >> ${URLS}
+    echo "wget ${URL_BASE}*"
+    echo "${URL_BASE}/nt${chunk}.fasta" >> ${URLS}
+    echo "${URL_BASE}/nt${chunk}.fasta.amb" >> ${URLS}
+    echo "${URL_BASE}/nt${chunk}.fasta.ann" >> ${URLS}
+    echo "${URL_BASE}/nt${chunk}.fasta.bwt" >> ${URLS}
+    echo "${URL_BASE}/nt${chunk}.fasta.pac" >> ${URLS}
+    echo "${URL_BASE}/nt${chunk}.fasta.sa" >> ${URLS}
 
     #download index
     mkdir ${INDEX}
-    echo "cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}"
-    cat ${URLS} | xargs nugget -q -t -c -s 6 -d ${INDEX}
-    wait $!
+    echo "cat ${URLS} | xargs wget -q -c --tries=0 -P ${INDEX}"
+    cat ${URLS} | xargs wget -q -c --tries=0 -P ${INDEX}
     rm ${URLS}
 
     #run bwa mem on each primer
@@ -95,4 +97,5 @@ done
 
 # upload files to cyverse
 echo "gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/"
-gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/
+for i in {1..5}; do gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/ && echo "Successful gocmd upload" && break || sleep 15; done
+

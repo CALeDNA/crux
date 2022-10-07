@@ -46,7 +46,7 @@ cmd = client.copy_file('vars', 'crux/crux/vars', recurse=True)
 joinall(cmd, raise_error=True)
 
 #create swap space
-cmd = 'sudo fallocate -l 10G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
+cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
 runcmd(cmd)
 
 # build docker
@@ -57,10 +57,6 @@ runcmd(cmd)
 cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt -v $(pwd)/vars:/vars --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
 
-# run bwa
-cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/bwa:/mnt -v $(pwd)/vars:/vars --name bwa crux /mnt/run_bwa.sh -c {config} -h ${{HOSTNAME}}"
-runcmd(cmd)
-
-# run taxfilter
-cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/taxfilter:/mnt -v $(pwd)/vars:/vars --name taxfilter crux /mnt/get-largest.sh -c {config} -h ${{HOSTNAME}}"
+# run bwa & taxfilter
+cmd = f"cd crux/crux; ./run_docker.sh -c {config}"
 runcmd(cmd)

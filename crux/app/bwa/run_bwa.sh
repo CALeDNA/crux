@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -x
+
 CONFIG=""
 VARS="/vars"
 while getopts "c:h:v:" opt; do
