@@ -97,5 +97,8 @@ done
 
 # upload files to cyverse
 echo "gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/"
-for i in {1..5}; do gocmd put -c ${CYVERSE} ${OUTPUT}/* ${CYVERSE_BASE}/${RUNID}/bwa-mem/ && echo "Successful gocmd upload" && break || sleep 15; done
+for file in ${OUTPUT}/*
+do
+    for i in {1..5}; do gocmd put -c ${CYVERSE} ${file} ${CYVERSE_BASE}/${RUNID}/bwa-mem/ && echo "Successful gocmd upload" && break || sleep 15; done
+done
 

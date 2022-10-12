@@ -30,5 +30,9 @@ do
     cat ${PRIMERNAME}/*.fa.taxid >> ${PRIMERNAME}/${PRIMERNAME}.fa.taxid
     find ${PRIMERNAME} -type f -name "*chunk*" -delete
     time python3 taxid2taxonpath/taxid2taxonpath.py -d taxdump/nodes.dmp -m taxdump/names.dmp -e taxdump/merged.dmp -l taxdump/delnodes.dmp -i ${PRIMERNAME}/${PRIMERNAME}.fa.taxid -o ${PRIMERNAME}/${PRIMERNAME}.tax.tsv -c 2 -r 1
-    gocmd put -c ${VARS}/${CYVERSE} ${PRIMERNAME}/* ${CYVERSE_BASE}/${RUNID}/fa-taxid/
+    # gocmd put -c ${VARS}/${CYVERSE} ${PRIMERNAME}/* ${CYVERSE_BASE}/${RUNID}/fa-taxid/
+    for file in ${PRIMERNAME}/*
+    do
+        for i in {1..5}; do gocmd put -c ${VARS}/${CYVERSE} ${file} ${CYVERSE_BASE}/${RUNID}/fa-taxid/ && echo "Successful gocmd upload" && break || sleep 15; done
+    done
 done
