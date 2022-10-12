@@ -21,7 +21,10 @@ source ${CONFIG}
 time bwa index -a ${ALGO} -b ${LENGTH} ${FILE}
 
 # upload index to cyverse
-for i in {1..5}; do gocmd put -c ${CYVERSE} ${FILE}* ${CYVERSE_BASE}/${RUNID}/bwa-index/ && echo "Successful gocmd upload" && break || sleep 15; done
+for file in ${FILE}*
+do
+    for i in {1..5}; do gocmd put -c ${CYVERSE} ${file} ${CYVERSE_BASE}/${RUNID}/bwa-index/ && echo "Successful gocmd upload" && break || sleep 15; done
+done
 
 # delete index
 rm ${FILE}*

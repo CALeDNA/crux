@@ -3,11 +3,11 @@ CYVERSE="config.yaml" # cyverse config file name
 CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 THREADS=16
 INDEX_THREADS=4 # each thread takes about 18GB of RAM
-RUNID="2022-10-07"
+RUNID="2022-10-10"
 
 # Obitools ecopcr variables
 ERROR=3
-MINLENGTH=100
+MINLENGTH=30
 MAXLENGTH=1000
 
 # Jetstream2 variables and credentials
