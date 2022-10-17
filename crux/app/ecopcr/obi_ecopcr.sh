@@ -41,7 +41,6 @@ PRIMERS=$(cat $PRIMERS)
 #cp -R taxdump tax${BATCHTAG}/
 mkdir tax${BATCHTAG}${BATCHTAG}; cd tax${BATCHTAG}${BATCHTAG}; mkdir ${OUTPUT}; cp ../taxdump.tar.gz .
 TAXDB="tax${BATCHTAG}/taxonomy/taxdump"
-echo "obi import --taxdump taxdump.tar.gz ${TAXDB}"
 obi import --taxdump taxdump.tar.gz ${TAXDB}
 # TAXDB=tax${BATCHTAG}${BATCHTAG}/tax${BATCHTAG}/taxonomy/taxdump
 # cd ..
@@ -49,22 +48,18 @@ obi import --taxdump taxdump.tar.gz ${TAXDB}
 
 for link in $LINKS
 do
-    echo "wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P GB/ ${link}"
     wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P GB/ ${link}
     filename=$(basename "$link")
     name="${filename%.gbff.gz}"
 
-    echo "timeout 300s obi import --genbank-input GB/${filename} gb${name}/${name}"
-    timeout 300s obi import --genbank-input GB/${filename} gb${name}/${name}
+    timeout -v 300s obi import --genbank-input GB/${filename} gb${name}/${name}
 
     for primer in ${PRIMERS}
     do
         FP=$( echo ${primer} | cut -d ',' -f1 ) # split primer into FP and RP then obi ecopcr then export and combine fasta output
         RP=$( echo ${primer} | cut -d ',' -f2 )
         PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 )
-        echo "obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name}"
         obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name}
-        echo "obi export --fasta-output output${name}_${PRIMERNAME}/${name} -o tmp${name}_${PRIMERNAME}.fasta"
         obi export --fasta-output output${name}_${PRIMERNAME}/${name} -o tmp${name}_${PRIMERNAME}.fasta
 
         cat tmp${name}_${PRIMERNAME}.fasta >> ${OUTPUT}/out_${BATCHTAG}_${PRIMERNAME}.fasta
