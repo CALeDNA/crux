@@ -37,3 +37,7 @@ time python3 parallel.py --hosts hostnames --user ${OS_USERNAME} --pkey ${APIKEY
 
 # step 4: dismantle VMs
 ./dismantle_instances.sh -j ${JSCRED} -n ${NUMINSTANCES} -h hostnames
+
+# step 5: upload variable files
+gocmd -c ${VARS}/${CYVERSE} put ${VARS}/${CONFIG} ${CYVERSE_BASE}/${RUNID}/logs/
+gocmd -c ${VARS}/${CYVERSE} put ${VARS}/${PRIMERS} ${CYVERSE_BASE}/${RUNID}/logs/
