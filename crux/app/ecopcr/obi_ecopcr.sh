@@ -48,33 +48,46 @@ obi import --taxdump taxdump.tar.gz ${TAXDB}
 
 for link in $LINKS
 do
-    wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P GB/ ${link}
-    filename=$(basename "$link")
-    name="${filename%.gbff.gz}"
-
-    timeout -v 300s obi import --genbank-input GB/${filename} gb${name}/${name}
-
-    for primer in ${PRIMERS}
+    for i in {1..5} # retry up to 5 times if any step of obi ecopcr fails
     do
-        FP=$( echo ${primer} | cut -d ',' -f1 ) # split primer into FP and RP then obi ecopcr then export and combine fasta output
-        RP=$( echo ${primer} | cut -d ',' -f2 )
-        PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 )
-        obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name}
-        obi export --fasta-output output${name}_${PRIMERNAME}/${name} -o tmp${name}_${PRIMERNAME}.fasta
+        wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P GB/ ${link} &&
+        filename=$(basename "$link") &&
+        name="${filename%.gbff.gz}" &&
 
-        cat tmp${name}_${PRIMERNAME}.fasta >> ${OUTPUT}/out_${BATCHTAG}_${PRIMERNAME}.fasta
+        timeout -v 300s obi import --genbank-input GB/${filename} gb${name}/${name} &&
+        
+        for primer in ${PRIMERS}
+        do
+            FP=$( echo ${primer} | cut -d ',' -f1 ) && # split primer into FP and RP then obi ecopcr then export and combine fasta output
+            RP=$( echo ${primer} | cut -d ',' -f2 ) &&
+            PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 ) &&
+            obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name} &&
+            obi export --fasta-output output${name}_${PRIMERNAME}/${name} -o tmp${name}_${PRIMERNAME}.fasta &&
+            cat tmp${name}_${PRIMERNAME}.fasta >> ${OUTPUT}/out_${BATCHTAG}_${PRIMERNAME}.fasta &&
 
+            #clean obitools databases
+            obi clean_dms tax${BATCHTAG} &&
+            obi clean_dms gb${name} &&
+            # delete files
+            rm -r output${name}_${PRIMERNAME}.obidms &&
+            rm tmp${name}_${PRIMERNAME}.fasta
+        done &&
+        # clean genbank input
+        rm -r gb${name}.obidms &&
+        rm GB/${filename} &&
+
+        echo "Successful obi ecopcr $name" &&
+        break ||
+        
+        echo "Obi ecopcr failed. Cleaning and retrying $name" &&
         #clean obitools databases
-        obi clean_dms tax${BATCHTAG}
-        obi clean_dms gb${name}
+        obi clean_dms tax${BATCHTAG} &&
+        obi clean_dms gb${name} &&
         # delete files
-        rm -r output${name}_${PRIMERNAME}.obidms
-        rm tmp${name}_${PRIMERNAME}.fasta
+        rm -r output${name}_${PRIMERNAME}.obidms &&
+        rm tmp${name}_${PRIMERNAME}.fasta &&
+        rm ${OUTPUT}/out_${BATCHTAG}_${PRIMERNAME}.fasta
     done
-
-    # clean genbank input
-    rm -r gb${name}.obidms
-    rm GB/${filename}
 
 done
 # rm tmp.fasta
