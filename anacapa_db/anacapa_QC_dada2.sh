@@ -98,21 +98,6 @@ fi
 #
 ######################################
 
-###Local or HPC mode check for username
-if [[ "${LOCALMODE}" = "TRUE"  ]];
-then
-  echo "Running in local mode"
-elif [[ "${LOCALMODE}" = "FALSE" && ! -z ${UN} ]];
-then
-  echo "Running in HPC mode"
-elif [[ "${LOCALMODE}" = "FALSE" &&  -z ${UN} ]];
-then
-  echo "Running in HPC mode"
-  echo "No username given..."
-  echo ""
-  exit
-fi
-
 ###Check that User has the correct set of primer files
 if [[ ! -e ${FP} && ! -e ${RP} && ! -e ${MIN_MERGE_LENGTH} ]];
 then
@@ -155,23 +140,15 @@ fi
 
 # location of the config and var files
 source $DB/scripts/anacapa_vars.sh  # edit to change variables and parameters
-source $DB/scripts/anacapa_config.sh # edit for proper configuration
+RUNNER='bash'
+# source $DB/scripts/anacapa_config.sh # edit for proper configuration
 DEF_MIN_LENGTH="${DB}/metabarcode_loci_min_merge_length.txt"
 
-if [[ -e ${HPC_HEADER} ]];
-then
-  source ${HPC_HEADER}
-  echo ""
-else
-  source $DB/scripts/Hoffman2_HPC_header.sh
-  echo ""
-fi
-
 ##load modules / software
-${MODULE_SOURCE} # use if you need to load modules from an HPC
-${FASTX_TOOLKIT} #load fastx_toolkit
-${ANACONDA_PYTHON} #load anaconda/python2-4.2
-${ATS} #load ATS, Hoffman2 specific module for managing submitted jobs.
+# ${MODULE_SOURCE} # use if you need to load modules from an HPC
+# ${FASTX_TOOLKIT} #load fastx_toolkit
+# ${ANACONDA_PYTHON} #load anaconda/python2-4.2
+# ${ATS} #load ATS, Hoffman2 specific module for managing submitted jobs.
 
 ###
 
@@ -348,31 +325,16 @@ do
   echo ""
   echo "${j}"
 	mkdir -p ${OUT}/${j}/${j}dada2_out
-    if [ "${LOCALMODE}" = "TRUE"  ]  # if you are running loally (no hoffman2) you can run these jobs one after the other.
-    then
-        echo "Running Dada2 inline"
-        printf "#!/bin/bash\n ${RUNNER} ${DB}/scripts/run_dada2.sh -o ${OUT} -d ${DB} -m ${j} -t paired -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n" > ${OUT}/Run_info/run_scripts/${j}_dada2_paired_job.sh
-        printf "#!/bin/bash\n ${RUNNER} ${DB}/scripts/run_dada2.sh -o ${OUT} -d ${DB} -m ${j} -t forward -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n" > ${OUT}/Run_info/run_scripts/${j}_dada2_F_job.sh
-        printf "#!/bin/bash\n ${RUNNER} ${DB}/scripts/run_dada2.sh -o ${OUT} -d ${DB} -m ${j} -t reverse -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n" > ${OUT}/Run_info/run_scripts/${j}_dada2_R_job.sh
-        ${RUNNER} ${OUT}/Run_info/run_scripts/${j}_dada2_paired_job.sh
-        date
-        ${RUNNER} ${OUT}/Run_info/run_scripts/${j}_dada2_F_job.sh
-        date
-        ${RUNNER} ${OUT}/Run_info/run_scripts/${j}_dada2_R_job.sh
-        date
-    else
-        # generate runlogs that you can submit at any time!
-        mkdir -p ${OUT}/Run_info/run_logs
-        echo "Submitting Dada2 jobs"
-        printf "${DADA2_PAIRED_HEADER} \n\necho _BEGIN_ [run_dada2_bowtie2_paired.sh]: `date`\n\n${RUNNER} ${DB}/scripts/run_dada2.sh  -o ${OUT} -d ${DB} -m ${j} -t paired -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n\necho _END_ [run_dada2_paired.sh]"  > ${OUT}/Run_info/run_scripts/${j}_dada2_paired_job.sh
-        printf "${DADA2_UNPAIRED_F_HEADER}\n\necho _BEGIN_ [run_dada2_bowtie2_unpaired_F.sh]: `date`\n\n${RUNNER} ${DB}/scripts/run_dada2.sh  -o ${OUT} -d ${DB} -m ${j} -t forward -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n\necho _END_ [run_dada2_unpaired_F.sh]" > ${OUT}/Run_info/run_scripts/${j}_dada2_F_job.sh
-        printf "${DADA2_UNPAIRED_R_HEADER}\n\necho _BEGIN_ [run_dada2_bowtie2_unpaired_R.sh]: `date`\n\n${RUNNER} ${DB}/scripts/run_dada2.sh  -o ${OUT} -d ${DB} -m ${j} -t reverse -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n\necho _END_ [run_dada2_unpaired_R.sh]" > ${OUT}/Run_info/run_scripts/${j}_dada2_R_job.sh
-        # submit jobs to run dada2 and bowtie2 (only works if you have an ATS like module)
-        ${QUEUESUBMIT} ${OUT}/Run_info/run_scripts/${j}_dada2_paired_job.sh
-        ${QUEUESUBMIT} ${OUT}/Run_info/run_scripts/${j}_dada2_F_job.sh
-        ${QUEUESUBMIT} ${OUT}/Run_info/run_scripts/${j}_dada2_R_job.sh
-        date
-    fi
+  echo "Running Dada2 inline"
+  printf "#!/bin/bash\n ${RUNNER} ${DB}/scripts/run_dada2.sh -o ${OUT} -d ${DB} -m ${j} -t paired -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n" > ${OUT}/Run_info/run_scripts/${j}_dada2_paired_job.sh
+  printf "#!/bin/bash\n ${RUNNER} ${DB}/scripts/run_dada2.sh -o ${OUT} -d ${DB} -m ${j} -t forward -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n" > ${OUT}/Run_info/run_scripts/${j}_dada2_F_job.sh
+  printf "#!/bin/bash\n ${RUNNER} ${DB}/scripts/run_dada2.sh -o ${OUT} -d ${DB} -m ${j} -t reverse -e ${MIN_MERGE_LENGTH:=$DEF_MIN_LENGTH} -b ${MINTIMES_ASV:=$MIN_ASV_ABUNDANCE} \n" > ${OUT}/Run_info/run_scripts/${j}_dada2_R_job.sh
+  ${RUNNER} ${OUT}/Run_info/run_scripts/${j}_dada2_paired_job.sh
+  date
+  ${RUNNER} ${OUT}/Run_info/run_scripts/${j}_dada2_F_job.sh
+  date
+  ${RUNNER} ${OUT}/Run_info/run_scripts/${j}_dada2_R_job.sh
+  date
  fi
 done
 
