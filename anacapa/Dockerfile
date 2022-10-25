@@ -16,3 +16,6 @@ ENV PATH="/usr/local/miniconda/bin:$PATH"
 RUN conda install -c bioconda cutadapt fastx_toolkit
 RUN conda init && \
     . /root/.bashrc
+
+COPY install-deps.R /app/install-deps.R
+RUN Rscript --vanilla install-deps.R
