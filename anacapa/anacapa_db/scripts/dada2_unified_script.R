@@ -43,6 +43,7 @@ if (file.access(path, mode = 2) != 0) {
   stop("Please make sure that you have write access to the supplied path.")
 }
 
+library("dada2")
 library("seqRFLP")
 library("plyr")
 library("Biostrings")

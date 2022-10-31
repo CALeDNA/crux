@@ -1,7 +1,8 @@
 # Manage packages -----
 
+
 #1. Download packages from CRAN
-.cran_packages  <-  c("ggplot2", "plyr", "dplyr", "reshape2", "tibble", "devtools", "Matrix", "mgcv", "readr", "stringr")
+.cran_packages  <-  c("BiocManager", "ggplot2", "plyr", "dplyr", "reshape2", "tibble", "devtools", "Matrix", "mgcv", "readr", "stringr")
 .inst <- .cran_packages %in% installed.packages()
 if (any(!.inst)) {
   install.packages(.cran_packages[!.inst], repos = "http://cran.rstudio.com/")

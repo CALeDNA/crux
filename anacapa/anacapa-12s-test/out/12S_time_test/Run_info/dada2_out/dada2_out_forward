@@ -1,18 +1,112 @@
-Installing package into ‘/usr/local/lib/R/site-library’
-(as ‘lib’ is unspecified)
-Warning message:
-package ‘seqRFLP’ is not available for this version of R
-
-A version of this package for your version of R might be available elsewhere,
-see the ideas at
-https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Installing-packages 
-Error: With R version 3.5 or greater, install Bioconductor packages using BiocManager; see https://bioconductor.org/install
-Execution halted
-Downloading GitHub repo benjjneb/dada2@v1.6
-Downloading GitHub repo benjjneb/dada2@v1.6
-Error in utils::download.file(url, path, method = method, quiet = quiet,  : 
-  cannot open URL 'https://api.github.com/repos/benjjneb/dada2/tarball/v1.6'
 Loading required package: Rcpp
-Error: Failed to install 'dada2' from GitHub:
-  SSL certificate problem: EE certificate key too weak
+Loading required package: methods
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, cbind, colMeans, colnames,
+    colSums, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, lengths, Map, mapply, match,
+    mget, order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max, which.min
+
+Loading required package: S4Vectors
+Loading required package: stats4
+
+Attaching package: ‘S4Vectors’
+
+The following object is masked from ‘package:plyr’:
+
+    rename
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+
+Attaching package: ‘IRanges’
+
+The following object is masked from ‘package:plyr’:
+
+    desc
+
+Loading required package: XVector
+
+Attaching package: ‘XVector’
+
+The following object is masked from ‘package:plyr’:
+
+    compact
+
+
+Attaching package: ‘Biostrings’
+
+The following object is masked from ‘package:base’:
+
+    strsplit
+
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:Biostrings’:
+
+    collapse, intersect, setdiff, setequal, union
+
+The following object is masked from ‘package:XVector’:
+
+    slice
+
+The following objects are masked from ‘package:IRanges’:
+
+    collapse, desc, intersect, setdiff, slice, union
+
+The following objects are masked from ‘package:S4Vectors’:
+
+    first, intersect, rename, setdiff, setequal, union
+
+The following objects are masked from ‘package:BiocGenerics’:
+
+    combine, intersect, setdiff, union
+
+The following objects are masked from ‘package:plyr’:
+
+    arrange, count, desc, failwith, id, mutate, rename, summarise,
+    summarize
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+[1] "12S_first1000reads-LSC-A-1-S19-L001_Paired_1_singles.fastq"
+[2] "12S_first1000reads-LSC-A-2-S20-L001_Paired_1_singles.fastq"
+Creating output directory: /mnt/anacapa-12s-test/out/12S_time_test/12S/12S_sort_by_read_type/unpaired_F/filtered
+The filter removed all reads: /mnt/anacapa-12s-test/out/12S_time_test/12S/12S_sort_by_read_type/unpaired_F/filtered/12S_first1000reads-LSC-A-2-S20-L001_F_filt.fastq.gz not written.
+The filter removed all reads: /mnt/anacapa-12s-test/out/12S_time_test/12S/12S_sort_by_read_type/unpaired_F/filtered/12S_first1000reads-LSC-A-1-S19-L001_F_filt.fastq.gz not written.
+Warning message:
+In filterAndTrim(fnFs, filtered_seqs_name, minLen = 10, maxN = 0,  :
+  No reads passed the filter. Please revisit your filtering parameters.
+                                                           reads.in reads.out
+12S_first1000reads-LSC-A-1-S19-L001_Paired_1_singles.fastq        0         0
+12S_first1000reads-LSC-A-2-S20-L001_Paired_1_singles.fastq        0         0
+Error in 1:i : argument of length 0
+Calls: learnErrors
 Execution halted
