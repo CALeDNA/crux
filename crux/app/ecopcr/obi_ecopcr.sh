@@ -54,7 +54,7 @@ do
         filename=$(basename "$link") &&
         name="${filename%.gbff.gz}" &&
 
-        timeout -v 300s obi import --genbank-input GB/${filename} gb${name}/${name} &&
+        timeout -v 600s obi import --genbank-input GB/${filename} gb${name}/${name} &&
         
         for primer in ${PRIMERS}
         do
