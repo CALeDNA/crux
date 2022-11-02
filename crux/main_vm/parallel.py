@@ -38,7 +38,7 @@ def runcmd(cmd):
 
 
 # clone gh repo
-cmd = 'git clone -b crux-hector https://github.com/CALeDNA/crux.git'
+cmd = 'git clone https://github.com/CALeDNA/crux.git'
 runcmd(cmd)
 
 # # copy config, primer, etc. files to VMs
