@@ -61,7 +61,12 @@ do
             FP=$( echo ${primer} | cut -d ',' -f1 ) && # split primer into FP and RP then obi ecopcr then export and combine fasta output
             RP=$( echo ${primer} | cut -d ',' -f2 ) &&
             PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 ) &&
-            obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name} &&
+            if [ $MAXLENGTH -eq 0 ]
+            then
+                obi ecopcr -e ${ERROR} -l ${MINLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name} &&
+            else
+                obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name}
+            fi &&
             obi export --fasta-output output${name}_${PRIMERNAME}/${name} -o tmp${name}_${PRIMERNAME}.fasta &&
             cat tmp${name}_${PRIMERNAME}.fasta >> ${OUTPUT}/out_${BATCHTAG}_${PRIMERNAME}.fasta &&
 
