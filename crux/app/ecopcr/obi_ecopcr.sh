@@ -61,6 +61,8 @@ do
             FP=$( echo ${primer} | cut -d ',' -f1 ) && # split primer into FP and RP then obi ecopcr then export and combine fasta output
             RP=$( echo ${primer} | cut -d ',' -f2 ) &&
             PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 ) &&
+            MINLENGTH=$( echo ${primer} | cut -d ',' -f4 ) &&
+            MAXLENGTH=$( echo ${primer} | cut -d ',' -f5 )
             if [ $MAXLENGTH -eq 0 ]
             then
                 obi ecopcr -e ${ERROR} -l ${MINLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name} &&
