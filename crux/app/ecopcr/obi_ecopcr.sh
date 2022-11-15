@@ -65,7 +65,7 @@ do
             MAXLENGTH=$( echo ${primer} | cut -d ',' -f5 )
             if [ $MAXLENGTH -eq 0 ]
             then
-                obi ecopcr -e ${ERROR} -l ${MINLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name} &&
+                obi ecopcr -e ${ERROR} -l ${MINLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name}
             else
                 obi ecopcr -e ${ERROR} -l ${MINLENGTH} -L ${MAXLENGTH} -F ${FP} -R ${RP} --taxonomy ${TAXDB} gb${name}/${name} output${name}_${PRIMERNAME}/${name}
             fi &&
