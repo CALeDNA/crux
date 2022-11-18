@@ -41,7 +41,6 @@ source ${CONFIG}
 
 ECOPCR=$(find ecopcr/ -maxdepth 1 -type f)
 HOSTNAME=${HOSTNAME#0}
-URL_BASE="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/${RUNID}/bwa-index"
 
 # split nt chunks evenly among all VMs
 SCALE=$(( $NTOTAL / $NUMINSTANCES ))
@@ -63,13 +62,13 @@ fi
 for (( c=${START}; c<${END}; c++ ))
 do
     chunk=$(printf '%02d' "$c")
-    echo "wget ${URL_BASE}*"
-    echo "${URL_BASE}/nt${chunk}.fasta" >> ${URLS}
-    echo "${URL_BASE}/nt${chunk}.fasta.amb" >> ${URLS}
-    echo "${URL_BASE}/nt${chunk}.fasta.ann" >> ${URLS}
-    echo "${URL_BASE}/nt${chunk}.fasta.bwt" >> ${URLS}
-    echo "${URL_BASE}/nt${chunk}.fasta.pac" >> ${URLS}
-    echo "${URL_BASE}/nt${chunk}.fasta.sa" >> ${URLS}
+    echo "wget ${BWA_INDEX_URL}*"
+    echo "${BWA_INDEX_URL}/nt${chunk}.fasta" >> ${URLS}
+    echo "${BWA_INDEX_URL}/nt${chunk}.fasta.amb" >> ${URLS}
+    echo "${BWA_INDEX_URL}/nt${chunk}.fasta.ann" >> ${URLS}
+    echo "${BWA_INDEX_URL}/nt${chunk}.fasta.bwt" >> ${URLS}
+    echo "${BWA_INDEX_URL}/nt${chunk}.fasta.pac" >> ${URLS}
+    echo "${BWA_INDEX_URL}/nt${chunk}.fasta.sa" >> ${URLS}
 
     #download index
     mkdir ${INDEX}
