@@ -2,7 +2,7 @@
 
 OS_USERNAME=""
 APIKEY=""
-JSCRED="a"
+JSCRED=""
 NUMINSTANCES=""
 HOSTNAME=""
 
@@ -49,7 +49,7 @@ do
     # delete instance
     openstack server delete chunk${chunk} --wait
     # delete volume
-    if [[  ${volumeid} -ne "null" ]]
+    if [[  ${volumeid} != "null" ]]
     then
         openstack volume delete ${volumeid}
     fi

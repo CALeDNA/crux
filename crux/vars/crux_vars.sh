@@ -1,6 +1,7 @@
 PRIMERS="primers" # primers file name
 CYVERSE="config.yaml" # cyverse config file name
 CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
+BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
 INDEX_THREADS=4 # each thread takes about 18GB of RAM
 RUNID="2022-10-10"
