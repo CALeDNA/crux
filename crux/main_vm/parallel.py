@@ -38,7 +38,7 @@ def runcmd(cmd):
 
 
 # clone gh repo
-cmd = 'git clone -b crux-hector https://github.com/CALeDNA/crux.git'
+cmd = 'git clone https://github.com/CALeDNA/crux.git'
 runcmd(cmd)
 
 # # copy config, primer, etc. files to VMs
@@ -50,13 +50,13 @@ cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swap
 runcmd(cmd)
 
 # build docker
-cmd = 'cd crux/crux; docker build -q -t crux .'
+cmd = 'cd crux; docker build -q -t crux .'
 runcmd(cmd)
 
 # run ecopcr
-cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt -v $(pwd)/vars:/vars --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/ecopcr:/mnt -v $(pwd)/crux/vars:/vars --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
 
 # run bwa & taxfilter
-cmd = f"cd crux/crux; ./run_docker.sh -c {config}"
+cmd = f"cd crux; ./bwa_taxid_docker.sh -c {config}"
 runcmd(cmd)

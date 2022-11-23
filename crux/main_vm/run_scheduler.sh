@@ -29,4 +29,4 @@ else
     ./setup_instance.sh -u ${OS_USERNAME} -f ${FLAVOR} -i ${IMAGE} -k ${APIKEY} -j ${JSCRED} -n ${NUMINSTANCES} -s ${SECURITY} -v ${VOLUME} -w ${SWAP}
 fi
 
-rm ${CYVERSE} ${CONFIG} ${PRIMERS}
+rm ${CYVERSE} ${CONFIG}
