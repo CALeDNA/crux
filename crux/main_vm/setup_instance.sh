@@ -78,7 +78,6 @@ do
             openstack server create chunk${chunk} \
             --flavor ${FLAVOR} \
             --image ${IMAGE} \
-            --swap ${SWAP} \
             --key-name ${APIKEY} \
             --security-group ${SECURITY} \
             --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \
@@ -90,7 +89,6 @@ do
             openstack server create chunk${chunk} \
             --flavor ${FLAVOR} \
             --image ${IMAGE} \
-            --swap ${SWAP} \
             --key-name ${APIKEY} \
             --security-group ${SECURITY} \
             --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \

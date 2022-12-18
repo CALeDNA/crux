@@ -4,12 +4,12 @@ CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
 INDEX_THREADS=4 # each thread takes about 18GB of RAM
-RUNID="2022-10-10"
+RUNID="2022-12-16"
 
 # Obitools ecopcr variables
 ERROR=3
-MINLENGTH=30
-MAXLENGTH=1000
+# MINLENGTH=30
+# MAXLENGTH=1000
 
 # Jetstream2 variables and credentials
 OS_USERNAME="ubuntu"
@@ -25,10 +25,10 @@ APIKEY="hbaez-api-key"
 JSCRED="app-cred-docker-cli-auth-openrc.sh"
 NUMINSTANCES=10 # number of virtual machines
 SECURITY="caledna-global-ssh"
-VOLUME=300 # volume backed storage for virtual machines. 0 for default size
+VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 
 # accession ID file/folder names
-LINKS="linksize"
+LINKS="gburlsize"
 URLS="urls"
 NTOTAL=71 # number of nt chunks
 
