@@ -34,7 +34,7 @@ mkdir ${OUTPUT}
 gocmd get -c ${CYVERSE} ${CYVERSE_BASE}/${RUNID}/urls/chunk${HOSTNAME}/ .
 
 # run obi_ecopcr.sh on every links file
-find chunk${HOSTNAME}/* | parallel -I% --tag --max-args 1 -P ${THREADS} ./obi_ecopcr.sh -g % -p ${PRIMERS} -o ${OUTPUT} -b % -e ${ERROR} -s ${MINLENGTH} -l ${MAXLENGTH} -c ${CONFIG} >> logs 2>&1
+find chunk${HOSTNAME}/* | parallel -I% --tag --max-args 1 -P ${THREADS} ./obi_ecopcr.sh -g % -p ${PRIMERS} -o ${OUTPUT} -b % -e ${ERROR} -c ${CONFIG} >> logs 2>&1
 
 
 gocmd put -c ${CYVERSE} logs ${CYVERSE_BASE}/${RUNID}/logs/ecopcr_chunk${HOSTNAME}.txt

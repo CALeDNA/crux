@@ -10,7 +10,7 @@ ERROR="" # ecopcr error
 MINLENGTH="" # ecopcr min length
 MAXLENGTH="" # ecopcr max length
 
-while getopts "g:p:o:b:e:s:l:c:" opt; do
+while getopts "g:p:o:b:e:c:" opt; do
     case $opt in
         g) GENBANK="$OPTARG"
         ;;
@@ -21,10 +21,6 @@ while getopts "g:p:o:b:e:s:l:c:" opt; do
         b) BATCHTAG="$(basename $OPTARG)"
         ;;
         e) ERROR="$OPTARG"
-        ;;
-        s) MINLENGTH="$OPTARG"
-        ;;
-        l) MAXLENGTH="$OPTARG"
         ;;
         c) CONFIG="$OPTARG"
         ;;
