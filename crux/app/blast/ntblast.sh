@@ -75,7 +75,8 @@ blast () {
     ((nt=$2-1))
     chunk=$( basename $url | sed 's/[^0-9]*//g' ) # get nt chunk number
     # ((nt=10#$nt)) 
-    chunk=$(printf '%02d' "${10#$chunk}")
+    $((chunk=10#$chunk))
+    chunk=$(printf '%02d' $chunk)
     gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/nt/nt.${chunk}.tar.gz" ${NTDB}${nt}/nt.${chunk}.tar.gz
     gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/crux/nt-fasta/nt${chunk}.fasta" .
     tar -xf ${NTDB}${nt}/nt.${chunk}.tar.gz -C ${NTDB}${nt}
