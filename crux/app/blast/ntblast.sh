@@ -89,7 +89,7 @@ blast () {
         primer=$(echo "${primer%.*}")
         output="${input}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
         input="${input}.fasta"
-        time blastn -query ${input} -out ${output}_${nt}.txt -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 -evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
+        time blastn -query ${input} -out ${output}_${nt}.txt -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 #-evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
         cat ${output}_${nt}.txt >> ${output}_${nt}
         rm ${output}_${nt}.txt
     done
