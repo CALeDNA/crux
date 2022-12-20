@@ -84,7 +84,7 @@ blast () {
     
     for ecopcrfasta in $ECOPCR
     do
-        input=$ecopcrfasta | tr -d '.fasta\n'
+        input=$(echo $ecopcrfasta | tr -d '.fasta\n')
         primer=$(basename $input)
         primer=$(echo "${primer%.*}")
         output="${input}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
