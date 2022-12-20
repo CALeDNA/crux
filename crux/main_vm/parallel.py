@@ -58,7 +58,7 @@ cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/cr
 runcmd(cmd)
 
 # run blast
-cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/blast:/mnt -v $(pwd)/crux/vars:/vars --name blast crux /mnt/ntblast.sh -c {config} -h ${{HOSTNAME}}"
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/blast:/mnt -v $(pwd)/crux/vars:/vars --name blast crux /mnt/run_blast.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
 
 # run bwa & taxfilter

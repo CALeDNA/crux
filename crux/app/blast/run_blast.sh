@@ -17,6 +17,8 @@ done
 
 cd /mnt
 cp ${VARS}/* .
+# activate conda env
+export PATH="/usr/local/miniconda/bin:$PATH";
 source ${CONFIG}
 
 # download ecopcr fasta files and combine them
