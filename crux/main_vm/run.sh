@@ -15,18 +15,21 @@ done
 source ${VARS}/${CONFIG}
 
 # make cyverse folders
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/urls
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/ecopcr
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/bwa-index
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/bwa-mem
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid
-gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/logs
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/urls
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/ecopcr
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/bwa-index
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/bwa-mem
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid
+# gocmd -c ${VARS}/${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/logs
 
 
 # step 1: upload variable files
-gocmd -c ${VARS}/${CYVERSE} put ${VARS}/${CONFIG} ${CYVERSE_BASE}/${RUNID}/logs/
-gocmd -c ${VARS}/${CYVERSE} put ${VARS}/${PRIMERS} ${CYVERSE_BASE}/${RUNID}/logs/
+aws s3 cp ${VARS}/${CONFIG} s3://ednaexplorer/crux/${RUNID}/logs/${CONFIG} --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp ${VARS}/${PRIMERS} s3://ednaexplorer/crux/${RUNID}/logs/${PRIMERS} --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+# gocmd -c ${VARS}/${CYVERSE} put ${VARS}/${CONFIG} ${CYVERSE_BASE}/${RUNID}/logs/
+# gocmd -c ${VARS}/${CYVERSE} put ${VARS}/${PRIMERS} ${CYVERSE_BASE}/${RUNID}/logs/
 
 # step 2: split urls and create VMs
 ./run_scheduler.sh -c ${CONFIG}

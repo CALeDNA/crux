@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
 
 RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential software-properties-common \ 
-    apt-transport-https npm cmake parallel python3-openstackclient jq \ 
+    apt-transport-https npm cmake parallel python3-openstackclient jq awscli \ 
     curl wget git libssl-dev libcurl4-openssl-dev libxml2-dev -y && \
     npm i nugget -g && \
     wget -P /tmp/ "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh" && \

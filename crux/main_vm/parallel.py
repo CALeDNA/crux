@@ -36,18 +36,21 @@ def runcmd(cmd):
         for line in host_out.stderr:
             print(line)
 
-
 # clone gh repo
-cmd = 'git clone https://github.com/CALeDNA/crux.git'
+cmd = 'git clone -c crux-hector https://github.com/CALeDNA/crux.git'
 runcmd(cmd)
 
-# # copy config, primer, etc. files to VMs
+# copy config, primer, etc. files to VMs
 cmd = client.copy_file('vars', 'crux/crux/vars', recurse=True)
 joinall(cmd, raise_error=True)
 
-#create swap space
-cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
-runcmd(cmd)
+# copy aws
+cmd = client.copy_file('.aws', '.aws', recurse=True)
+joinall(cmd, raise_error=True)
+
+# #create swap space
+# cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
+# runcmd(cmd)
 
 # build docker
 cmd = 'cd crux; docker build -q -t crux .'
