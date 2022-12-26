@@ -31,6 +31,7 @@ VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 LINKS="gburlsize"
 URLS="urls"
 NTOTAL=71 # number of nt chunks
+NTFILE="nt-ftp"
 
 
 # parallel.py docker commands

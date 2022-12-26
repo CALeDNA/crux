@@ -4,8 +4,8 @@ set -x
 set -o allexport
 
 NTDB="nt"
-NTFILE="nt-cyverse"
-#mkdir ${NTDB}
+# NTFILE="nt-ftp"
+# mkdir ${NTDB}
 
 CONFIG="config.yaml"
 HOSTNAME=""
@@ -58,8 +58,6 @@ then
    fi
 fi
 
-# get file with nt cyverse urls
-gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/crux/${NTFILE}" .
 # remove all urls except from [START,END]
 sed -ni "${START}, ${END}p" ${NTFILE}
 
@@ -77,10 +75,12 @@ blast () {
     # ((nt=10#$nt)) 
     $((chunk=10#$chunk))
     chunk=$(printf '%02d' $chunk)
-    gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/nt/nt.${chunk}.tar.gz" ${NTDB}${nt}/nt.${chunk}.tar.gz
-    gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/crux/nt-fasta/nt${chunk}.fasta" .
+    wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P ${NTDB}${nt} ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.${chunk}.tar.gz
+    # gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/nt/nt.${chunk}.tar.gz" ${NTDB}${nt}/nt.${chunk}.tar.gz
+    # gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/crux/nt-fasta/nt${chunk}.fasta" .
     tar -xf ${NTDB}${nt}/nt.${chunk}.tar.gz -C ${NTDB}${nt}
     sed -i "s/^DBLIST.*/DBLIST nt.${chunk} /" ${NTDB}${nt}/nt.nal
+    blastdbcmd -entry all -db ${NTDB}${nt}/nt -out ./nt${chunk}.fasta
     
     for ecopcrfasta in $ECOPCR
     do
@@ -98,7 +98,8 @@ blast () {
 
 # get nt00 files in each folder
 mkdir ${NTDB}0
-gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/nt/nt.00.tar.gz" ${NTDB}0/nt.00.tar.gz
+wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P ${NTDB}0 ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.00.tar.gz
+# gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/nt/nt.00.tar.gz" ${NTDB}0/nt.00.tar.gz
 tar -xf ${NTDB}0/nt.00.tar.gz -C ${NTDB}0
 rm ${NTDB}0/nt.00*
 N=4

@@ -8,7 +8,7 @@ primer="12S_MiFish_U_30_1000"
 OUTPUT="out"
 
 START=0
-END=71
+END=81
 SAMDIR="bwa-mem"
 for (( i=${START}; i<${END}; i++ ))
 do

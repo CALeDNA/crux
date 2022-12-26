@@ -66,10 +66,13 @@ do
     done
 
     # upload to cyverse
-    gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}
+    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}
     
-    for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa && echo "Successful gocmd upload" && break || sleep 15; done
-    for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid && echo "Successful gocmd upload" && break || sleep 15; done
+    # for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa && echo "Successful gocmd upload" && break || sleep 15; done
+    # for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid && echo "Successful gocmd upload" && break || sleep 15; done
 
 done
-gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt
+aws s3 cp logs.txt s3://ednaexplorer/crux/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+# gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt
