@@ -120,6 +120,7 @@ do
     output="${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
 
     find . -maxdepth 1 -name "${output}_*" | xargs -i sh -c 'cat {} >> ${output} && rm {}'
+    aws s3 cp ${output}  s3://ednaexplorer/crux/${RUNID}/blast/${primer}_blast_${HOSTNAME}.fasta --endpoint-url https://js2.jetstream-cloud.org:8001/
 done
 echo "Done"
 #TODO: upload to cyverse
