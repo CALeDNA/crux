@@ -28,9 +28,9 @@ SECURITY="caledna-global-ssh"
 VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 
 # accession ID file/folder names
-LINKS="gburlsize"
+LINKS="wgsgbsize"
 URLS="urls"
-NTOTAL=71 # number of nt chunks
+NTOTAL=81 # number of nt chunks
 NTFILE="nt-ftp"
 
 

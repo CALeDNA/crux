@@ -37,7 +37,7 @@ def runcmd(cmd):
             print(line)
 
 # clone gh repo
-cmd = 'git clone -c crux-hector https://github.com/CALeDNA/crux.git'
+cmd = 'git clone -b crux-hector https://github.com/CALeDNA/crux.git'
 runcmd(cmd)
 
 # copy config, primer, etc. files to VMs
@@ -57,11 +57,11 @@ cmd = 'cd crux; docker build -q -t crux .'
 runcmd(cmd)
 
 # run ecopcr
-cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/ecopcr:/mnt -v $(pwd)/crux/vars:/vars --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/ecopcr:/mnt -v $(pwd)/crux/vars:/vars -v $(pwd)/.aws:/root/.aws --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
 
 # run blast
-cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/blast:/mnt -v $(pwd)/crux/vars:/vars --name blast crux /mnt/run_blast.sh -c {config} -h ${{HOSTNAME}}"
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/blast:/mnt -v $(pwd)/crux/vars:/vars -v $(pwd)/.aws:/root/.aws --name blast crux /mnt/run_blast.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
 
 # run bwa & taxfilter
