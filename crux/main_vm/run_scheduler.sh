@@ -20,7 +20,7 @@ source ${CONFIG}
 aws s3 cp s3://ednaexplorer/crux/${LINKS} . --endpoint-url https://js2.jetstream-cloud.org:8001/
 # gocmd get -c ${CYVERSE} ${CYVERSE_BASE}/${LINKS} .
 python3 split.py --chunks ${NUMINSTANCES} --cores ${THREADS} --input ${LINKS} --output ${RUNID}
-aws s3 sync ${RUNID} s3://ednaexplorer/crux/urls --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync ${RUNID} s3://ednaexplorer/crux/${RUNID}/urls --endpoint-url https://js2.jetstream-cloud.org:8001/
 # for i in {1..5}; do gocmd put -c ${CYVERSE} ${RUNID}/* ${CYVERSE_BASE}/${RUNID}/urls/ && echo "Successful gocmd upload" && break || sleep 15; done
 rm -r ${RUNID} ${LINKS}
 

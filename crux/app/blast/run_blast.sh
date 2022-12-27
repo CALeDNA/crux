@@ -22,7 +22,7 @@ export PATH="/usr/local/miniconda/bin:$PATH";
 source ${CONFIG}
 
 # download ecopcr fasta files and combine them
-aws s3 sync s3://ednaexplorer/crux/${RUNID}/ecopcr . --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://ednaexplorer/crux/${RUNID}/ecopcr ./ecopcr --endpoint-url https://js2.jetstream-cloud.org:8001/
 # gocmd -c ${CYVERSE} get ${CYVERSE_BASE}/${RUNID}/ecopcr .
 for d in ecopcr/*/
 do

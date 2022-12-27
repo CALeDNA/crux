@@ -31,7 +31,7 @@ OUTPUT="fasta_output"
 mkdir ${OUTPUT}
 
 # download link files
-aws s3 sync s3://ednaexplorer/crux/${RUNID}/urls/chunk${HOSTNAME}/ . --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://ednaexplorer/crux/${RUNID}/urls/chunk${HOSTNAME}/ ./chunk${HOSTNAME} --endpoint-url https://js2.jetstream-cloud.org:8001/
 # gocmd get -c ${CYVERSE} ${CYVERSE_BASE}/${RUNID}/urls/chunk${HOSTNAME}/ .
 
 # run obi_ecopcr.sh on every links file
