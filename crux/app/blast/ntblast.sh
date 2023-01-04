@@ -23,19 +23,17 @@ while getopts "h:c:v:" opt; do
 done
 
 #Check that user has all of the default flags set
-if [[ ! -z ${HOSTNAME} && ! -z ${CONFIG} ]];
+if [[ ! -z ${HOSTNAME} && ! -z ${CONFIG} && ! -z ${VARS} ]];
 then
   echo "Required Arguments Given"
   echo ""
 else
   echo "Required Arguments Missing:"
-  echo "check that you included arguments or correct paths for -c, -i, -h and -o"
+  echo "check that you included arguments or correct paths for -c, -h and -v"
   echo ""
   exit
 fi
 
-cd /mnt
-cp ${VARS}/* .
 source ${CONFIG}
 
 ECOPCR=$(find ecopcr/ -maxdepth 1 -type f)
@@ -59,7 +57,9 @@ then
 fi
 
 # remove all urls except from [START,END]
-sed -ni "${START}, ${END}p" ${NTFILE}
+linestart=$(( $START + 1 ))
+lineend=$(( $END + 1))
+sed -ni "${linestart}, ${lineend}p" ${NTFILE}
 
 eVALUE="0.00001"
 PERC_IDENTITY="70"
@@ -114,7 +114,7 @@ cat ${NTFILE} | parallel -I{} --tag --max-args 1 -P ${N} blast {} {%}
 
 for ecopcrfasta in $ECOPCR
 do
-    primer=$ecopcrfasta | tr -d '.fasta\n'
+    primer=$(echo $ecopcrfasta | tr -d '.fasta\n')
     primer=$(basename $primer)
     primer=$(echo "${primer%.*}")
     output="${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
