@@ -84,14 +84,12 @@ blast () {
     
     for ecopcrfasta in $ECOPCR
     do
-        input=$(echo $ecopcrfasta | tr -d '.fasta\n')
+        input=$(echo $ecopcrfasta | cut -d\. -f1 )
         primer=$(basename $input)
         primer=$(echo "${primer%.*}")
         output="${input}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
         input="${input}.fasta"
-        time blastn -query ${input} -out ${output}_${nt}.txt -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 #-evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
-        cat ${output}_${nt}.txt >> ${output}_${nt}
-        rm ${output}_${nt}.txt
+        time blastn -query ${input} -out ${output}_${nt} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 #-evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
     done
     rm nt${chunk}.fasta ${NTDB}${nt}/nt.${chunk}*
 }
@@ -114,12 +112,12 @@ cat ${NTFILE} | parallel -I{} --tag --max-args 1 -P ${N} blast {} {%}
 
 for ecopcrfasta in $ECOPCR
 do
-    primer=$(echo $ecopcrfasta | tr -d '.fasta\n')
+    primer=$(echo $ecopcrfasta | cut -d\. -f1 )
     primer=$(basename $primer)
     primer=$(echo "${primer%.*}")
     output="${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
 
-    find . -maxdepth 1 -name "${output}_*" | xargs -i sh -c 'cat {} >> ${output} && rm {}'
+    find ./ecopcr -maxdepth 1 -name "${output}_*" | xargs -i sh -c 'cat {} >> ${output} && rm {}'
     aws s3 cp ${output}  s3://ednaexplorer/crux/${RUNID}/blast/${primer}_blast_${HOSTNAME}.fasta --endpoint-url https://js2.jetstream-cloud.org:8001/
 done
 echo "Done"
