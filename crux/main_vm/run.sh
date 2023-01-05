@@ -38,7 +38,7 @@ aws s3 cp ${VARS}/${PRIMERS} s3://ednaexplorer/crux/${RUNID}/logs/${PRIMERS} --e
 # run_scheduler: split urls, create VMs
 
 # step 3: run parallel script for files setup, docker build, ecopcr run, bwa index/mem, and filter largest seq
-time python3 parallel.py --hosts hostnames --user ${OS_USERNAME} --pkey ${APIKEY} --config ${CONFIG} --primers ${PRIMERS} --cyverse ${CYVERSE}
+time python3 parallel.py --hosts hostnames --user ${OS_USERNAME} --pkey ${APIKEY} --config ${CONFIG} --primers ${PRIMERS} --cyverse ${CYVERSE} --aws_key ${AWS_ACCESS_KEY_ID} --aws_secret ${AWS_SECRET_ACCESS_KEY} --aws_region ${AWS_DEFAULT_REGION}
 
 # step 4: dismantle VMs
 ./dismantle_instances.sh -j ${JSCRED} -n ${NUMINSTANCES} -h hostnames

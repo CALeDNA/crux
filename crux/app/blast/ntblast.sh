@@ -89,7 +89,9 @@ blast () {
         primer=$(echo "${primer%.*}")
         output="${input}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
         input="${input}.fasta"
-        time blastn -query ${input} -out ${output}_${nt} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 #-evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
+        time blastn -query ${input} -out ${output}_${chunk} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 -evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
+        aws s3 cp ${output}_${chunk}  s3://ednaexplorer/crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/
+        rm ${output}_${chunk}
     done
     rm nt${chunk}.fasta ${NTDB}${nt}/nt.${chunk}*
 }
