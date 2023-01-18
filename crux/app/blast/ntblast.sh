@@ -75,7 +75,7 @@ blast () {
     # ((nt=10#$nt)) 
     $((chunk=10#$chunk))
     chunk=$(printf '%02d' $chunk)
-    wget -q --retry-connrefused --timeout=45 --tries=inf --continue -P ${NTDB}${nt} ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.${chunk}.tar.gz
+    wget -q --retry-connrefused --timeout=300 --tries=inf --continue -P ${NTDB}${nt} ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.${chunk}.tar.gz
     # gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/nt/nt.${chunk}.tar.gz" ${NTDB}${nt}/nt.${chunk}.tar.gz
     # gocmd get -c ${CYVERSE} "/iplant/home/shared/eDNA_Explorer/crux/nt-fasta/nt${chunk}.fasta" .
     tar -xf ${NTDB}${nt}/nt.${chunk}.tar.gz -C ${NTDB}${nt}
@@ -84,14 +84,34 @@ blast () {
     
     for ecopcrfasta in $ECOPCR
     do
+        #TODO: if aws s3api head-object --bucket www.codeengine.com --key index.html .. then
         input=$(echo $ecopcrfasta | cut -d\. -f1 )
         primer=$(basename $input)
         primer=$(echo "${primer%.*}")
         output="${input}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
         input="${input}.fasta"
-        time blastn -query ${input} -out ${output}_${chunk} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 -evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
-        aws s3 cp ${output}_${chunk}  s3://ednaexplorer/crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/
-        rm ${output}_${chunk}
+
+        # check if blast already ran this (primer,nt) pair
+        not_exists=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/blast/ecopcr/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
+        if [ $not_exists == 255 ];
+        then
+            # file does not exist. run blast
+            time blastn -query ${input} -out ${output}_${chunk} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 -evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
+            aws s3 cp ${output}_${chunk}  s3://ednaexplorer/crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/
+            rm ${output}_${chunk}
+        else
+            # file exists. checking if empty"
+            length=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/blast/ecopcr/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
+            if (( $length > 0 )); 
+            then
+                 echo "skipping $file"
+            else
+                # empty file exists. rerun blast just in case
+                time blastn -query ${input} -out ${output}_${chunk} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 -evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
+                aws s3 cp ${output}_${chunk}  s3://ednaexplorer/crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/
+                rm ${output}_${chunk}
+            fi
+        fi
     done
     rm nt${chunk}.fasta ${NTDB}${nt}/nt.${chunk}*
 }
@@ -112,15 +132,15 @@ done
 cat ${NTFILE} | parallel -I{} --tag --max-args 1 -P ${N} blast {} {%} 
 
 
-for ecopcrfasta in $ECOPCR
-do
-    primer=$(echo $ecopcrfasta | cut -d\. -f1 )
-    primer=$(basename $primer)
-    primer=$(echo "${primer%.*}")
-    output="${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
+#TODO: combine all fasta chunks into 1
+# for ecopcrfasta in $ECOPCR
+# do
+#     primer=$(echo $ecopcrfasta | cut -d\. -f1 )
+#     primer=$(basename $primer)
+#     primer=$(echo "${primer%.*}")
+#     output="${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
 
-    find ./ecopcr -maxdepth 1 -name "${output}_*" | xargs -i sh -c 'cat {} >> ${output} && rm {}'
-    aws s3 cp ${output}  s3://ednaexplorer/crux/${RUNID}/blast/${primer}_blast_${HOSTNAME}.fasta --endpoint-url https://js2.jetstream-cloud.org:8001/
-done
+#     find ./ecopcr -maxdepth 1 -name "${output}_*" | xargs -i sh -c 'cat {} >> ${output} && rm {}'
+#     aws s3 cp ${output}  s3://ednaexplorer/crux/${RUNID}/blast/${primer}_blast_${HOSTNAME}.fasta --endpoint-url https://js2.jetstream-cloud.org:8001/
+# done
 echo "Done"
-#TODO: upload to cyverse
