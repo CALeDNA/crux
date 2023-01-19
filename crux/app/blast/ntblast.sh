@@ -84,15 +84,16 @@ blast () {
     
     for ecopcrfasta in $ECOPCR
     do
-        #TODO: if aws s3api head-object --bucket www.codeengine.com --key index.html .. then
         input=$(echo $ecopcrfasta | cut -d\. -f1 )
         primer=$(basename $input)
         primer=$(echo "${primer%.*}")
+        # input=$(basename $ecopcrfasta | cut -d\. -f1 )
+        # primer=$(echo "${input%.*}")
         output="${input}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta"
         input="${input}.fasta"
 
         # check if blast already ran this (primer,nt) pair
-        not_exists=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/blast/ecopcr/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
+        not_exists=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
         if [ $not_exists == 255 ];
         then
             # file does not exist. run blast
@@ -101,7 +102,7 @@ blast () {
             rm ${output}_${chunk}
         else
             # file exists. checking if empty"
-            length=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/blast/ecopcr/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
+            length=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
             if (( $length > 0 )); 
             then
                  echo "skipping $file"
@@ -129,7 +130,7 @@ do
     cp ${NTDB}0/* ${NTDB}${i}
 done
 
-cat ${NTFILE} | parallel -I{} --tag --max-args 1 -P ${N} blast {} {%} 
+cat ${NTFILE} | parallel -I{} --tag --ungroup --max-args 1 -P ${N} blast {} {%} 
 
 
 #TODO: combine all fasta chunks into 1
