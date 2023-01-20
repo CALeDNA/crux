@@ -11,6 +11,13 @@ ERROR=3
 # MINLENGTH=30
 # MAXLENGTH=1000
 
+# BLAST variables
+eVALUE="0.00001"
+PERC_IDENTITY="70"
+NUM_ALIGNMENTS="1000"
+GAP_OPEN="1"
+GAP_EXTEND="1"
+
 # Jetstream2 variables and credentials
 OS_USERNAME="ubuntu"
 FLAVOR="m3.large"

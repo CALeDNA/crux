@@ -2,16 +2,14 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('--primer', type=str)
 parser.add_argument('--output', type=str)
-parser.add_argument('--sam', type=str)
+parser.add_argument('--input', type=str)
 parser.add_argument('--nucltaxid', type=str)
 parser.add_argument('--log', type=str)
 args = parser.parse_args()
 
 
-filepath = args.sam
-primer = args.primer
+filepath = args.input
 output = args.output
 logs=args.log
 taxid = f"{output}.taxid"
@@ -19,25 +17,27 @@ nucltaxid = args.nucltaxid
 
 info_dict = {}
 # get largest seq per ntid
-with open(filepath) as sam_file:
+with open(filepath) as infile:
     counter = 0
-    for line in sam_file:
-        line = line.split('\t')
-        ntid = line[2]
-        length = len(line[9])
-        index = counter
-        counter += 1
-        if len(line[9]) == 1:
-            continue
-        try:
-            if length > info_dict[ntid]['length']:
-                info_dict[ntid] = { 'length': length,
-                                    'index': index,
-                                    'filename': filepath}
-        except KeyError as e:
-                info_dict[ntid] = { 'length': length,
-                                    'index': index,
-                                    'filename': filepath}
+    multiline=False
+    for line in infile:
+        if(line.startswith(">")):
+            ntid = line.strip(">").rstrip()
+        else:
+            length = len(line)
+            index = counter
+            counter += 1
+            if length == 1:
+                continue
+            try:
+                if length > info_dict[ntid]['length']:
+                    info_dict[ntid] = { 'length': length,
+                                        'index': index,
+                                        'filename': filepath}
+            except KeyError as e:
+                    info_dict[ntid] = { 'length': length,
+                                        'index': index,
+                                        'filename': filepath}
 
 taxid_dict = {}
 with open(nucltaxid, 'r') as nucl:
@@ -49,11 +49,10 @@ with open(nucltaxid, 'r') as nucl:
             taxid_dict[ntid] = tax_id
 
 with open(output, 'a') as out:
-    with open(filepath, 'r') as sam_file:
+    with open(filepath, 'r') as input:
         with open(taxid, 'a') as tax_file:
-            
             counter = 0
-            for line in sam_file:
+            for line in input:
                 line = line.split('\t')
                 ntid = line[2]
                 try:
@@ -63,7 +62,6 @@ with open(output, 'a') as out:
                         out.writelines('>' + ntid + '\n')
                         out.writelines(seq + '\n')
                 except KeyError as e:
-                    pass
                     with open(logs, 'a+') as logfile:
                         logfile.writelines(ntid + '\n')
                 counter += 1
