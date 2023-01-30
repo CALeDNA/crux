@@ -54,8 +54,8 @@ do
         chunk=$(printf '%02d' "$i")
         aws s3 cp s3://ednaexplorer/crux/${RUNID}/blast/ecopcr/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} ${SAMDIR}/${primer}/ --endpoint-url https://js2.jetstream-cloud.org:8001/
         # get largest seq per nt accession id
-        cat ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa >> ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
-        python get-largest.py --primer ${primer} --output ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa --input ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --nucltaxid nucl_gb.accession2taxid --log logs.txt
+        # cat ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa >> ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
+        python get-largest.py --output ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa --input ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --nucltaxid nucl_gb.accession2taxid --log logs.txt
         # remove orig fasta file
         rm ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
     done

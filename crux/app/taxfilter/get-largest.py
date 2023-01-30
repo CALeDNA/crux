@@ -17,27 +17,25 @@ nucltaxid = args.nucltaxid
 
 info_dict = {}
 # get largest seq per ntid
-with open(filepath) as infile:
+with open(filepath) as input:
     counter = 0
-    multiline=False
-    for line in infile:
-        if(line.startswith(">")):
-            ntid = line.strip(">").rstrip()
-        else:
-            length = len(line)
-            index = counter
-            counter += 1
-            if length == 1:
-                continue
-            try:
-                if length > info_dict[ntid]['length']:
-                    info_dict[ntid] = { 'length': length,
-                                        'index': index,
-                                        'filename': filepath}
-            except KeyError as e:
-                    info_dict[ntid] = { 'length': length,
-                                        'index': index,
-                                        'filename': filepath}
+    for line in input:
+        line = line.split('\t')
+        ntid = line[0]
+        length = len(line[2].rstrip())
+        index = counter
+        counter += 1
+        if length == 1:
+            continue
+        try:
+            if length > info_dict[ntid]['length']:
+                info_dict[ntid] = { 'length': length,
+                                    'index': index,
+                                    'filename': filepath}
+        except KeyError as e:
+                info_dict[ntid] = { 'length': length,
+                                    'index': index,
+                                    'filename': filepath}
 
 taxid_dict = {}
 with open(nucltaxid, 'r') as nucl:
@@ -54,11 +52,11 @@ with open(output, 'a') as out:
             counter = 0
             for line in input:
                 line = line.split('\t')
-                ntid = line[2]
+                ntid = line[0]
                 try:
-                    if counter == info_dict[line[2]]['index'] and ntid != "*":
+                    if counter == info_dict[ntid]['index'] and ntid != "*":
                         tax_file.writelines(ntid + '\t' + taxid_dict[ntid] + '\n')
-                        seq = line[9]
+                        seq = line[2].rstrip()
                         out.writelines('>' + ntid + '\n')
                         out.writelines(seq + '\n')
                 except KeyError as e:
