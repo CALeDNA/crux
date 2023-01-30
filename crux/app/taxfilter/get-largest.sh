@@ -56,12 +56,16 @@ do
         # get largest seq per nt accession id
         # cat ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa >> ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
         python get-largest.py --output ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa --input ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --nucltaxid nucl_gb.accession2taxid --log logs.txt
+        # remove gaps
+        sed 's/-//g' ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa
+        # remove ambig bp
+        removeAmbiguousfromFa.pl ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa > ${SAMDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa
         # remove orig fasta file
         rm ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
     done
 
     # upload to js2 bucket
-    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/
     aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/
 done
 aws s3 cp logs.txt s3://ednaexplorer/crux/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/

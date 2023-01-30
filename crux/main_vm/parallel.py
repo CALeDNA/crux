@@ -71,5 +71,5 @@ cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/cr
 runcmd(cmd)
 
 # run bwa & taxfilter
-cmd = f"cd crux; ./bwa_taxid_docker.sh -c {config}"
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/taxfilter:/mnt -v $(pwd)/crux/vars:/vars -e AWS_ACCESS_KEY_ID={aws_key} -e AWS_SECRET_ACCESS_KEY={aws_secret} -e AWS_DEFAULT_REGION={aws_region} --name taxfilter crux /mnt/get-largest.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
