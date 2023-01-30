@@ -25,7 +25,7 @@ with open(filepath) as input:
         length = len(line[2].rstrip())
         index = counter
         counter += 1
-        if length == 1:
+        if length < 100:
             continue
         try:
             if length > info_dict[ntid]['length']:

@@ -15,15 +15,15 @@ done
 source ${VARS}/${CONFIG}
 
 # download taxdump and taxid2taxonpath script
- wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
- mkdir taxdump
- tar -xf taxdump.tar.gz -C taxdump
- rm taxdump.tar.gz
- git clone https://github.com/CALeDNA/taxid2taxonpath.git
+wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+mkdir taxdump
+tar -xf taxdump.tar.gz -C taxdump
+rm taxdump.tar.gz
+git clone https://github.com/CALeDNA/taxid2taxonpath.git
 
- # download nucl acc2taxid
- wget -q -c --tries=0 ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz
- gunzip nucl_gb.accession2taxid.gz
+# download nucl acc2taxid
+wget -q -c --tries=0 ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz
+gunzip nucl_gb.accession2taxid.gz
 
 # combine fa-taxid output by primer and create taxonomy path file
 PRIMERS=$(cat ${VARS}/$PRIMERS)
