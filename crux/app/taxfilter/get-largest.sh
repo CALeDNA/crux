@@ -54,7 +54,7 @@ do
         chunk=$(printf '%02d' "$i")
         aws s3 cp s3://ednaexplorer/crux/${RUNID}/blast/ecopcr/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} ${SAMDIR}/${primer}/ --endpoint-url https://js2.jetstream-cloud.org:8001/
         # remove gaps
-        sed 's/-//g' ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
+        sed -i 's/-//g' ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
         # remove ambig bp
         removeAmbiguousfromFa.pl ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} > ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_ambiguousremoved
         # get largest seq per nt accession id
