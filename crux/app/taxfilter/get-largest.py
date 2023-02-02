@@ -21,6 +21,8 @@ with open(filepath) as input:
     counter = 0
     for line in input:
         line = line.split('\t')
+        if(len(line)==1): # awk converts tabs to spaces
+            line = line.split(' ')
         ntid = line[0]
         length = len(line[2].rstrip())
         index = counter
