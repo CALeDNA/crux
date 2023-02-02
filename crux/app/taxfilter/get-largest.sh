@@ -53,12 +53,9 @@ do
     do
         chunk=$(printf '%02d' "$i")
         aws s3 cp s3://ednaexplorer/crux/${RUNID}/blast/ecopcr/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} ${SAMDIR}/${primer}/ --endpoint-url https://js2.jetstream-cloud.org:8001/
-        # remove gaps
-        sed -i 's/-//g' ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
         # remove ambig bp
-        removeAmbiguousfromFa.pl ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} > ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_ambiguousremoved
+        awk '{gsub(/-|M|R|W|S|Y|K|V|H|D|B|N/,"N", $3)}1' ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} >> ${SAMDIR}/${primer}/tmp && mv ${SAMDIR}/${primer}/tmp ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
         # get largest seq per nt accession id
-        # cat ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa >> ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
         python get-largest.py --output ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa --input ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_ambiguousremoved --nucltaxid nucl_gb.accession2taxid --log logs.txt
         # remove orig fasta file
         rm ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}*
