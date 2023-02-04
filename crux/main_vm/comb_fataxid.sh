@@ -30,7 +30,7 @@ PRIMERS=$(cat ${VARS}/$PRIMERS)
 for primer in $PRIMERS
 do
     PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 )
-    aws s3 cp s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}/ . --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}/ ${PRIMERNAME}/ --endpoint-url https://js2.jetstream-cloud.org:8001/
     # gocmd get -c ${VARS}/${CYVERSE} ${CYVERSE_BASE}/${RUNID}/fa-taxid/${PRIMERNAME}/ .
     cat ${PRIMERNAME}/*.fa >> ${PRIMERNAME}/${PRIMERNAME}.fa
     # cat ${PRIMERNAME}/*.fa.taxid >> ${PRIMERNAME}/${PRIMERNAME}.fa.taxid
@@ -40,9 +40,9 @@ do
     # get taxon path
     time python3 taxid2taxonpath/taxid2taxonpath.py -d taxdump/nodes.dmp -m taxdump/names.dmp -e taxdump/merged.dmp -l taxdump/delnodes.dmp -i ${PRIMERNAME}.fa.taxid -o ${PRIMERNAME}.tax.tsv -c 2 -r 1
     # gocmd put -c ${VARS}/${CYVERSE} ${PRIMERNAME}/* ${CYVERSE_BASE}/${RUNID}/fa-taxid/
-    aws s3 cp ${VARS}/${CYVERSE} ${PRIMERNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp ${VARS}/${CYVERSE} ${PRIMERNAME}.tax.tsv  s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}.tax.tsv  --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp ${VARS}/${CYVERSE} ${PRIMERNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp ${PRIMERNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp ${PRIMERNAME}.tax.tsv  s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}.tax.tsv  --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp ${PRIMERNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${PRIMERNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/
     # for i in {1..5}; do gocmd put -c ${VARS}/${CYVERSE} ${PRIMERNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${PRIMERNAME}.fa && echo "Successful gocmd upload" && break || sleep 15; done
     # for i in {1..5}; do gocmd put -c ${VARS}/${CYVERSE} ${PRIMERNAME}.tax.tsv ${CYVERSE_BASE}/${RUNID}/fa-taxid/${PRIMERNAME}.tax.tsv && echo "Successful gocmd upload" && break || sleep 15; done
     # for i in {1..5}; do gocmd put -c ${VARS}/${CYVERSE} ${PRIMERNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${PRIMERNAME}.fa.taxid && echo "Successful gocmd upload" && break || sleep 15; done
