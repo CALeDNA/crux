@@ -45,7 +45,7 @@ do
     # delete IP
     openstack floating ip delete ${ip_address}
     # get volume id
-    volumeid=$(openstack server show chunk${chunk} -f json | jq .volumes_attached[0].id | tr -d '"')
+    volumeid=$(openstack server show chunk${chunk} -f json | jq .volumes_attached[].id | tr -d '"')
     # delete instance
     openstack server delete chunk${chunk} --wait
     # delete volume
