@@ -14,13 +14,6 @@ RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential
 COPY env.yml /app/env.yml
 ADD crux/bin /usr/local/crux_bin
 
-RUN mkdir -p /root/.ssh && \
-    chmod 0700 /root/.ssh
-
-COPY config /root/.ssh/config
-COPY hbaez-private-key /root/.ssh/hbaez-private-key
-RUN chmod 600 /root/.ssh/*
-
 ENV PATH="/usr/local/crux_bin:$PATH"
 ENV PATH="/usr/local/miniconda/bin:$PATH"
 
