@@ -35,15 +35,6 @@ with open(filepath) as input:
             'index': index,
             'filename': filepath
         })
-        # try:
-        #     if info_dict[ntid]['length']:
-        #         info_dict[ntid] = { 'length': length,
-        #                             'index': index,
-        #                             'filename': filepath}
-        # except KeyError as e:
-        #         info_dict[ntid] = { 'length': length,
-        #                             'index': index,
-        #                             'filename': filepath}
 
 taxid_dict = {}
 with open(nucltaxid, 'r') as nucl:
@@ -68,12 +59,6 @@ with open(output, 'a') as out:
                             seq = line[2].rstrip()
                             out.writelines('>' + ntid + '\n')
                             out.writelines(seq + '\n')
-                # try:
-                #     if counter == info_dict[ntid]['index'] and ntid != "*":
-                #         tax_file.writelines(ntid + '\t' + taxid_dict[ntid] + '\n')
-                #         seq = line[2].rstrip()
-                #         out.writelines('>' + ntid + '\n')
-                #         out.writelines(seq + '\n')
                 except KeyError as e:
                     with open(logs, 'a+') as logfile:
                         logfile.writelines(ntid + '\n')
