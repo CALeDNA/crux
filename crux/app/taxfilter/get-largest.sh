@@ -59,7 +59,7 @@ do
     for (( i=${START}; i<${END}; i++ ))
     do
         chunk=$(printf '%02d' "$i")
-        aws s3 cp s3://ednaexplorer/crux/${RUNID}/blast/ecopcr/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} ${SAMDIR}/${primer}/ --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp s3://ednaexplorer/crux/${RUNID}/blast/ecopcr/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} ${SAMDIR}/${primer}/ --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
         # get taxid
         python3 create_taxa.py --input ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --output ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_tmp --log logs
         mv ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_tmp ${SAMDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
@@ -80,7 +80,7 @@ do
     # remove ambiguous bp
     removeAmbiguousfromFa.pl ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa > ${SAMDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa
     # upload to js2 bucket
-    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+    aws s3 cp ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 done
-aws s3 cp logs.txt s3://ednaexplorer/crux/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp logs.txt s3://ednaexplorer/crux/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
