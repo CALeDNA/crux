@@ -19,7 +19,7 @@ with open(output, 'a') as out:
             # counter = 0
             for line in input:
                 line = line.split('\t')
-                if(len(line) > 2):
+                if(len(line) > 3):
                     ntid = line[0]
                     taxid = line[1]
                     tax_file.writelines(ntid + '\t' + taxid + '\n')
