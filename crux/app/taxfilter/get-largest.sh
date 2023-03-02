@@ -79,7 +79,7 @@ do
     # remove ambiguous bp
     # removeAmbiguousfromFa.pl ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa > ${BLASTDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa
     # upload to js2 bucket
-    aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+    aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
     aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 done
 aws s3 cp logs.txt s3://ednaexplorer/crux/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
