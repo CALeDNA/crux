@@ -13,7 +13,7 @@ while(<TAX>){
 	chomp($line);
 	my @spl = split(/\t/,$line);
 	my $name = $spl[0];
-	if ( $spl[1] =~ /uncultured/ || $spl[1] =~ /environmental/ || $spl[1] =~ /NA\;NA\;NA\;NA/){
+	if ( $spl[1] =~ /uncultured/ || $spl[1] =~ /environmental/ || $spl[1] =~ /NA\;NA\;NA\;NA/ || $spl[1] =~ /unassigned/){
 		$remove{$name} = 1;
 	}else{
 		print TAXOUT "$line\n";
@@ -28,12 +28,10 @@ open(FASTAOUT, '>', $which[0] . '.fasta' . $which[1] . '_tmp') || die("cannot op
 while(<FASTA>){
 	my $line = $_;
 	chomp($line);
-	if ( $line =~ /\>/ ){
-		my @spl = split(/\>/,$line);
-		$acc = $spl[1];
-		if ( not exists $remove{$acc} ){
-			print FASTAOUT ">$acc\n$line\n";
-		}
+	my @spl = split(/\t/,$line);
+	$acc = $spl[0];
+	if ( not exists $remove{$acc} ){
+		print FASTAOUT "$line\n";
 	}
 }
 close(FASTA);

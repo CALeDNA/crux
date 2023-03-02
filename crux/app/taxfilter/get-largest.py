@@ -39,29 +39,29 @@ with open(filepath) as input:
                                     'index': index,
                                     'filename': filepath}
 
-taxid_dict = {}
-with open(nucltaxid, 'r') as nucl:
-    for line in nucl:
-        line = line.split('\t')
-        ntid = line[1]
-        tax_id = line[2]
-        if ntid in info_dict:
-            taxid_dict[ntid] = tax_id
+# taxid_dict = {}
+# with open(nucltaxid, 'r') as nucl:
+#     for line in nucl:
+#         line = line.split('\t')
+#         ntid = line[1]
+#         tax_id = line[2]
+#         if ntid in info_dict:
+#             taxid_dict[ntid] = tax_id
 
 with open(output, 'a') as out:
     with open(filepath, 'r') as input:
         with open(taxid, 'a') as tax_file:
             counter = 0
             for line in input:
-                line = line.split('\t')
-                ntid = line[0]
-                try:
+                linespl = line.split('\t')
+                ntid = linespl[0]
+                if(len(linespl) == 3):
                     if counter == info_dict[ntid]['index'] and ntid != "*":
-                        tax_file.writelines(ntid + '\t' + taxid_dict[ntid] + '\n')
-                        seq = line[2].rstrip()
+                        taxid = linespl[1]
+                        tax_file.writelines(ntid + '\t' + taxid + '\n')
                         out.writelines('>' + ntid + '\n')
-                        out.writelines(seq + '\n')
-                except KeyError as e:
+                        out.writelines(line.rstrip() + '\n')
+                else:
                     with open(logs, 'a+') as logfile:
                         logfile.writelines(ntid + '\n')
                 counter += 1
