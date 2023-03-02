@@ -18,14 +18,12 @@ with open(output, 'a') as out:
         with open(taxid, 'a') as tax_file:
             # counter = 0
             for line in input:
-                line = line.split('\t')
-                ntid = line[0]
-                if(len(line) == 3):
-                    taxid = line[1]
+                linespl = line.split('\t')
+                ntid = linespl[0]
+                if(len(linespl) == 3):
+                    taxid = linespl[1]
                     tax_file.writelines(ntid + '\t' + taxid + '\n')
-                    seq = line[2].rstrip()
-                    out.writelines('>' + ntid + '\n')
-                    out.writelines(seq + '\n')
+                    out.writelines(line.rstrip() + '\n')
                 else:
                     with open(logs, 'a+') as logfile:
                         logfile.writelines(ntid + '\n')
