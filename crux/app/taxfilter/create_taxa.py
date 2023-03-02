@@ -20,7 +20,7 @@ with open(output, 'a') as out:
             for line in input:
                 line = line.split('\t')
                 ntid = line[0]
-                if(len(line) > 3):
+                if(len(line) == 3):
                     taxid = line[1]
                     tax_file.writelines(ntid + '\t' + taxid + '\n')
                     seq = line[2].rstrip()
