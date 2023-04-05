@@ -20,10 +20,6 @@ cp ${VARS}/* .
 
 source ${CONFIG}
 
-# download nucl acc2taxid
-wget -q -c --tries=0 ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz
-gunzip nucl_gb.accession2taxid.gz
-
 # download taxdump and taxid2taxonpath script
 wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
 mkdir taxdump
@@ -71,13 +67,11 @@ do
         # remove gaps
         sed -i 's/-//g' ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
         # get largest seq per nt accession id
-        python3 get-largest.py --output ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa --input ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --nucltaxid nucl_gb.accession2taxid --log logs.txt
+        python3 get-largest.py --output ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa --input ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --log logs.txt
         # remove orig fasta file and temp tax
         rm ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}*
     done
 
-    # remove ambiguous bp
-    # removeAmbiguousfromFa.pl ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa > ${BLASTDIR}/${primer}/chunk${HOSTNAME}_ambiguousremoved.fa
     # upload to js2 bucket
     aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
     aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress

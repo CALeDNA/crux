@@ -49,6 +49,7 @@ with open(output, 'a') as out:
                         if counter == info_dict[ntid]['index'] and ntid != "*":
                             taxid = linespl[1]
                             tax_file.writelines(ntid + '\t' + taxid + '\n')
+                            out.writelines('>' + ntid + '\n')
                             out.writelines(line.rstrip() + '\n')
                     else:
                         with open(logs, 'a+') as logfile:
