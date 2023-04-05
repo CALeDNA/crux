@@ -7,11 +7,12 @@ FLAVOR=""
 IMAGE=""
 APIKEY=""
 JSCRED=""
-NUMINSTANCES=""
+NUMINSTANCES=0
 SECURITY=""
 VOLUME=""
-SWAP="0" # in MiB
-while getopts "u:f:i:k:j:n:s:v:w:" opt; do
+VMNAME="chunk"
+VMNUMBER=0
+while getopts "u:f:i:k:j:n:m:b:s:v:" opt; do
     case $opt in
         u) OS_USERNAME="$OPTARG"
         ;;
@@ -25,11 +26,13 @@ while getopts "u:f:i:k:j:n:s:v:w:" opt; do
         ;;
         n) NUMINSTANCES="$OPTARG"
         ;;
+        m) VMNAME="$OPTARG"
+        ;;
+        b) VMNUMBER="$OPTARG"
+        ;;
         s) SECURITY="$OPTARG"
         ;;
         v) VOLUME="$OPTARG"
-        ;;
-        w) SWAP="$OPTARG"
         ;;
     esac
 done
@@ -45,6 +48,9 @@ else
   echo ""
   exit
 fi
+
+START=$VMNUMBER
+END=$(( VMNUMBER + NUMINSTANCES))
 
 # # username
 # OS_USERNAME="ubuntu"
@@ -68,14 +74,14 @@ source ${JSCRED}
 
 # create and start an instance
 echo "create VMs"
-for (( c=0; c<$NUMINSTANCES; c++ ))
+for (( c=$START; c<$END; c++ ))
 do
     chunk=$(printf '%02d' "$c")
     if [[ ! -z ${VOLUME} ]]
         then
             echo "creating VM with ${VOLUME}GB root disk"
             # create an instance
-            openstack server create chunk${chunk} \
+            openstack server create ${VMNAME}${chunk} \
             --flavor ${FLAVOR} \
             --image ${IMAGE} \
             --key-name ${APIKEY} \
@@ -86,7 +92,7 @@ do
         else
             echo "creating VM with default root disk size"
             # create an instance
-            openstack server create chunk${chunk} \
+            openstack server create ${VMNAME}${chunk} \
             --flavor ${FLAVOR} \
             --image ${IMAGE} \
             --key-name ${APIKEY} \
@@ -97,7 +103,7 @@ do
 done
 
 echo "create and add floating ip's"
-for (( c=0; c<$NUMINSTANCES; c++ ))
+for (( c=$START; c<$END; c++ ))
 do
     chunk=$(printf '%02d' "$c")
     # create an IP address and save it
@@ -105,6 +111,6 @@ do
     echo "${ip_address}"
     echo "${ip_address}" >> hostnames
     # add ip to instance
-    openstack server add floating ip chunk${chunk} ${ip_address} # || $(sleep 2; openstack server remove floating ip chunk${chunk} ${ip_address}; openstack server add floating ip chunk${chunk} ${ip_address})
+    openstack server add floating ip ${VMNAME}${chunk} ${ip_address} # || $(sleep 2; openstack server remove floating ip chunk${chunk} ${ip_address}; openstack server add floating ip chunk${chunk} ${ip_address})
     sleep 10
 done

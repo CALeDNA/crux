@@ -50,10 +50,6 @@ runcmd(cmd)
 cmd = client.copy_file('vars', 'crux/crux/vars', recurse=True)
 joinall(cmd, raise_error=True)
 
-# copy aws
-#cmd = client.copy_file('/home/exouser/.aws', '.aws', recurse=True)
-#joinall(cmd, raise_error=False)
-
 # #create swap space
 # cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
 # runcmd(cmd)
