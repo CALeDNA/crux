@@ -109,6 +109,7 @@ blast () {
             else
                 # empty file exists. rerun blast just in case
                 time blastn -query ${input} -out ${output}_${chunk} -db ${NTDB}${nt}/nt -outfmt "6 saccver staxid sseq" -num_threads 4 -evalue ${eVALUE} -perc_identity ${PERC_IDENTITY} -num_alignments ${NUM_ALIGNMENTS} -gapopen ${GAP_OPEN} -gapextend ${GAP_EXTEND}
+                # run taxfilter instead of uploading to s3
                 aws s3 cp ${output}_${chunk}  s3://ednaexplorer/crux/${RUNID}/blast/${output}_${chunk} --endpoint-url https://js2.jetstream-cloud.org:8001/
                 rm ${output}_${chunk}
             fi
