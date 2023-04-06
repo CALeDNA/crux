@@ -3,7 +3,7 @@
 set -x
 
 BLASTDIR="blast-output"
-while getopts "f:p:c:i:j:k:s:r:" opt; do
+while getopts "f:p:c:i:j:" opt; do
     case $opt in
         f) FASTA="$OPTARG"
         ;;
@@ -15,27 +15,15 @@ while getopts "f:p:c:i:j:k:s:r:" opt; do
         ;;
         j) JOB="$OPTARG"
         ;;
-        k) AWS_ACCESS_KEY_ID="$OPTARG"
-        ;;
-        s) AWS_SECRET_ACCESS_KEY="$OPTARG"
-        ;;
-        r) AWS_DEFAULT_REGION="$OPTARG"
-        ;;
     esac
 done
 
-# activate conda env
-export PATH="/usr/local/miniconda/bin:$PATH";
 source ${CONFIG}
-
-export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
 
 # download taxdump and taxid2taxonpath script
 if [ ! -d "taxdump" ] ; then
-    wget -nc -r -l inf --no-remove-listing ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
-    mkdir -P taxdump
+    wget -nc ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+    mkdir -p taxdump
     tar -xf taxdump.tar.gz -C taxdump
     rm taxdump.tar.gz
 fi
@@ -45,8 +33,11 @@ if [ ! -d "taxid2taxonpath" ] ; then
 fi
 
 # aws s3 cp s3://ednaexplorer/crux/$RUNID/blast/$FASTA $JOB/$BLASTDIR --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+mkdir -p $JOB/$BLASTDIR
+touch $JOB/$BLASTDIR/${FASTA}_tmp
+touch $JOB/logs
 # get taxid
-python3 create_taxa.py --input $JOB/$FASTA --output $JOB/$BLASTDIR/${FASTA}_tmp --log logs
+python3 create_taxa.py --input $JOB/$FASTA --output $JOB/$BLASTDIR/${FASTA}_tmp --log $JOB/logs
 mv $JOB/$BLASTDIR/${FASTA}_tmp $JOB/$BLASTDIR/${FASTA}
 # create taxa
 python3 taxid2taxonpath/taxid2taxonpath.py -d taxdump/nodes.dmp -m taxdump/names.dmp -e taxdump/merged.dmp -l taxdump/delnodes.dmp -i $JOB/$BLASTDIR/${FASTA}_tmp.taxid -o $JOB/$BLASTDIR/$FASTA.tax.tsv -c 2 -r 1
@@ -56,7 +47,8 @@ python3 taxid2taxonpath/taxid2taxonpath.py -d taxdump/nodes.dmp -m taxdump/names
 # remove gaps
 sed -i 's/-//g' $JOB/$BLASTDIR/${FASTA}_tmp
 # get largest seq per nt accession id
-python3 get-largest.py --output $JOB/$BLASTDIR/${FASTA} --input $JOB/$BLASTDIR/${FASTA}_tmp --log logs.txt
+rm $JOB/$BLASTDIR/${FASTA}; touch $JOB/$BLASTDIR/${FASTA}
+python3 get-largest.py --output $JOB/$BLASTDIR/${FASTA} --input $JOB/$BLASTDIR/${FASTA}_tmp --log $JOB/logs
 # mv $JOB/$BLASTDIR/${FASTA}_tmp $JOB/$BLASTDIR/${FASTA}
 
 
@@ -66,4 +58,4 @@ python3 get-largest.py --output $JOB/$BLASTDIR/${FASTA} --input $JOB/$BLASTDIR/$
 # upload to js2 bucket
 aws s3 cp $JOB/$BLASTDIR/${FASTA} s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 aws s3 cp $JOB/$BLASTDIR/${FASTA}.taxid s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
-aws s3 cp logs.txt s3://ednaexplorer/crux/$RUNID/logs/fa-taxid_$FASTA.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+aws s3 cp $JOB/logs s3://ednaexplorer/crux/$RUNID/logs/fa-taxid_$FASTA.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress

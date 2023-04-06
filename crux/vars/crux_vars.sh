@@ -1,9 +1,9 @@
-PRIMERS="primers" # primers file name
-CYVERSE="config.yaml" # cyverse config file name
+PRIMERS="/vars/primers" # primers file name
+CYVERSE="/vars/config.yaml" # cyverse config file name
 CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
-INDEX_THREADS=4 # each thread takes about 18GB of RAM
+BLAST_THREADS=4 # each thread takes about 18GB of RAM
 RUNID="2022-12-27"
 
 # Obitools ecopcr variables
@@ -26,12 +26,13 @@ IMAGE="Featured-Ubuntu20"
 #ssh-keygen -b 2048 -t rsa -f ${APIKEY}
 # upload to OpenStack
 #openstack keypair create --public-key ${APIKEY}.pub ${APIKEY}
-APIKEY="hbaez-api-key"
+APIKEY="hbaez-private-key"
 # include your Jetstream credentials openrc file
 # https://github.com/jetstream-cloud/js2docs/blob/main/docs/ui/cli/openrc.md
 JSCRED="app-cred-docker-cli-auth-openrc.sh"
 NUMINSTANCES=10 # number of virtual machines
-SECURITY="caledna-global-ssh"
+SECURITY="exosphere"
+NETWORK=ef65cd35-08de-4d4c-a664-e9b1aed32793
 VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 
 # accession ID file/folder names

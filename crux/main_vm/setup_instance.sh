@@ -32,19 +32,21 @@ while getopts "u:f:i:k:j:n:m:b:s:v:" opt; do
         ;;
         s) SECURITY="$OPTARG"
         ;;
+        w) NETWORK="$OPTARG"
+        ;;
         v) VOLUME="$OPTARG"
         ;;
     esac
 done
 
 #Check that user has all of the default flags set
-if [[ ! -z ${OS_USERNAME} && ! -z ${FLAVOR} && ! -z ${IMAGE} && ! -z ${APIKEY} && ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${SECURITY} ]];
+if [[ ! -z ${OS_USERNAME} && ! -z ${FLAVOR} && ! -z ${IMAGE} && ! -z ${APIKEY} && ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${SECURITY} && ! -z ${NETWORK} ]];
 then
   echo "Required Arguments Given"
   echo ""
 else
   echo "Required Arguments Missing:"
-  echo "check that you included arguments or correct paths for -u -f -i -k -j -n and -s"
+  echo "check that you included arguments or correct paths for -u -f -i -k -j -n -w and -s"
   echo ""
   exit
 fi
@@ -86,7 +88,7 @@ do
             --image ${IMAGE} \
             --key-name ${APIKEY} \
             --security-group ${SECURITY} \
-            --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \
+            --nic net-id=${NETWORK} \
             --boot-from-volume ${VOLUME} \
             --wait
         else
@@ -97,7 +99,7 @@ do
             --image ${IMAGE} \
             --key-name ${APIKEY} \
             --security-group ${SECURITY} \
-            --nic net-id=ef65cd35-08de-4d4c-a664-e9b1aed32793 \
+            --nic net-id=${NETWORK} \
             --wait
     fi
 done
