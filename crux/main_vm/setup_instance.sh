@@ -12,7 +12,7 @@ SECURITY=""
 VOLUME=""
 VMNAME="chunk"
 VMNUMBER=0
-while getopts "u:f:i:k:j:n:m:b:s:v:" opt; do
+while getopts "u:f:i:k:j:n:m:b:s:w:v:" opt; do
     case $opt in
         u) OS_USERNAME="$OPTARG"
         ;;

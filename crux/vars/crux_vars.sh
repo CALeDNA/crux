@@ -4,7 +4,7 @@ CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
 BLAST_THREADS=4 # each thread takes about 18GB of RAM
-RUNID="2022-12-27"
+RUNID="2023-04-07"
 
 # Obitools ecopcr variables
 ERROR=3
