@@ -1,0 +1,90 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: ben-error-counter
+      folder: Services'
+      interval: 10s
+      rules:
+        - uid: 3yAZlYa4k
+          title: Ben Errors Count
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 300
+                to: 0
+              datasourceUid: ZkB2eaa4k
+              model:
+                datasource:
+                    type: prometheus
+                    uid: ZkB2eaa4k
+                editorMode: code
+                expr: rate(ben_new_error_logs[$__rate_interval])
+                interval: ""
+                intervalMs: 15000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: true
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                hide: false
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                hide: false
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: overview
+          panelId: 28
+          noDataState: NoData
+          execErrState: OK
+          for: 10s
+          annotations:
+            __dashboardUid__: overview
+            __panelId__: "28"
+          isPaused: false
+
