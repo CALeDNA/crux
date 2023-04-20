@@ -114,7 +114,7 @@ do
     ip_address=$(openstack floating ip create -f json public | jq '.floating_ip_address' | tr -d '"')
     echo $ip_address
     # add ip to instance
-    openstack server add floating ip ${VMNAME}${chunk} ${ip_address} # || $(sleep 2; openstack server remove floating ip chunk${chunk} ${ip_address}; openstack server add floating ip chunk${chunk} ${ip_address})
+    openstack server add floating ip ${VMNAME}${chunk} ${ip_address}
 
     echo "Host $VMNAME$chunk" >> $CONFIG
     echo "HostName $ip_address" >> $CONFIG
