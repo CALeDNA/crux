@@ -23,53 +23,47 @@ while getopts "h:p:u:s:n:" opt; do
     esac
 done
 
-#TODO: make tmp host file only with hosts after $START
-./grafana-pssh.sh -h $HOSTNAME -u $USER
+sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
+./grafana-pssh.sh -h tmphost -u $USER
 
-hostnames=$(cat $HOSTNAME)
-counter=0
-
+counter=$START
 if [ $START > 0 ]; then
+    # use tmphost file
+    hostnames=$(cat tmphost)
     for line in $hostnames
     do
-        if [ $counter -ge $START ]; then
-            counter=$(printf '%02d' $counter)
-            echo "  - name: $NAME$counter" >> $datasources
-            echo "    type: prometheus" >> $datasources
-            echo "    url: http://$line:9090" >> $datasources
-            echo "    uid: $NAME$counter" >> $datasources
-            echo "    readOnly: false" >> $datasources
-            echo "    editable: true" >> $datasources
-            echo "" >> $datasources
-            counter=$(( 10#$counter + 1 ))
-        fi
+        counter=$(printf '%02d' $counter)
+        echo "  - name: $NAME$counter" >> $datasources
+        echo "    type: prometheus" >> $datasources
+        echo "    url: http://$line:9090" >> $datasources
+        echo "    uid: $NAME$counter" >> $datasources
+        echo "    readOnly: false" >> $datasources
+        echo "    editable: true" >> $datasources
+        echo "" >> $datasources
         counter=$(( 10#$counter + 1 ))
     done
-
     sudo cat $datasources >> $DATASOURCE
 else
+    hostnames=$(cat $HOSTNAME)
     echo "apiVersion: 1" >> $datasources
     echo "datasources:" >> $datasources
-
     for line in $hostnames
     do
-        if [ $counter -ge $START ]; then
-            address=$(ssh -G $line | awk '/^hostname / { print $2 }')
-            counter=$(printf '%02d' $counter)
-            echo "  - name: $NAME$counter" >> $datasources
-            echo "    type: prometheus" >> $datasources
-            echo "    url: http://$address:9090" >> $datasources
-            echo "    uid: $NAME$counter" >> $datasources
-            echo "    readOnly: false" >> $datasources
-            echo "    editable: true" >> $datasources
-            echo "" >> $datasources
-            counter=$(( 10#$counter + 1 ))
-        fi
+        address=$(ssh -G $line | awk '/^hostname / { print $2 }')
+        counter=$(printf '%02d' $counter)
+        echo "  - name: $NAME$counter" >> $datasources
+        echo "    type: prometheus" >> $datasources
+        echo "    url: http://$address:9090" >> $datasources
+        echo "    uid: $NAME$counter" >> $datasources
+        echo "    readOnly: false" >> $datasources
+        echo "    editable: true" >> $datasources
+        echo "" >> $datasources
         counter=$(( 10#$counter + 1 ))
     done
-
     sudo mv $datasources $DATASOURCE
 fi
+
+rm tmphost
 
 #update dashboard panels reflecting datasources.yaml changes
 python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE

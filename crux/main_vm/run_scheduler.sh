@@ -3,7 +3,6 @@
 set -x
 
 CONFIG=""
-VARS="vars"
 while getopts "c:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
@@ -11,11 +10,9 @@ while getopts "c:" opt; do
     esac
 done
 
-
-cp ${VARS}/* .
-# remove forward slash from paths meant for docker
 source ${CONFIG}
 
+# links step used in ecopcr
 # split urls into folders
 aws s3 cp s3://ednaexplorer/crux/${LINKS} . --endpoint-url https://js2.jetstream-cloud.org:8001/
 # gocmd get -c ${CYVERSE} ${CYVERSE_BASE}/${LINKS} .
