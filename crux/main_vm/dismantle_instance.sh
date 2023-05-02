@@ -1,16 +1,14 @@
 #!/bin/bash
+set -x
 
 OS_USERNAME=""
 APIKEY=""
 JSCRED=""
-NUMINSTANCES=""
 HOSTNAME=""
 NAME=""
-while getopts "j:n:h:m:c:" opt; do
+while getopts "j:h:m:c:d:" opt; do
     case $opt in
         j) JSCRED="$OPTARG"
-        ;;
-        n) NUMINSTANCES="$OPTARG"
         ;;
         h) HOSTNAME="$OPTARG"
         ;;
@@ -18,11 +16,13 @@ while getopts "j:n:h:m:c:" opt; do
         ;;
         c) CONFIG="$OPTARG" # SSH config file: /home/ubuntu/.ssh/config
         ;;
+        d) DATASOURCE="$OPTARG"
+        ;;
     esac
 done
 
 #Check that user has all of the default flags set
-if [[ ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${HOSTNAME} && ! -z ${NAME} && ! -z ${CONFIG} ]];
+if [[ ! -z ${JSCRED} && ! -z ${HOSTNAME} && ! -z ${NAME} && ! -z ${CONFIG} ]];
 then
   echo "Required Arguments Given"
   echo ""
@@ -52,7 +52,14 @@ then
 fi
 
 #remove $NAME from $HOSTNAME
-grep -i -v $NAME $HOSTNAME
+grep -i -v $NAME $HOSTNAME > tmp && mv tmp $HOSTNAME
 
 # remove $NAME entry from $CONFIG
-grep -i -v -A 5 $NAME $CONFIG
+linenumber=$(grep -n $NAME $CONFIG | cut -d":" -f1)
+endnumber=$(( $linenumber + 7 ))
+sed -i "${linenumber},${endnumber}d" $CONFIG
+
+# remove $NAME from datasource
+linenumber=$(grep -n "name: $NAME" $DATASOURCE | cut -d":" -f1)
+endnumber=$(( $linenumber + 6 ))
+sudo sed -i "${linenumber},${endnumber}d" $DATASOURCE
