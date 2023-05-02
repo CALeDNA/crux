@@ -1,13 +1,13 @@
-PRIMERS="/vars/primers" # primers file name
+PRIMERS="/home/ubuntu/crux/crux/vars/primers" # primers file name
 CYVERSE="/vars/config.yaml" # cyverse config file name
 CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
-BLAST_THREADS=4
+BLAST_THREADS=16
 RUNID="2023-04-07"
 
 # Obitools ecopcr variables
-ERR=3
+ERROR=3
 # MINLENGTH=30
 # MAXLENGTH=1000
 
