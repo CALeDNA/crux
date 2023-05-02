@@ -11,7 +11,7 @@ NODES=4
 NAME="chunk"
 CLIENT_CONFIG="config"
 BENSERVER=/tmp/ben-ubuntu
-while getopts "h:s:n:m:" opt; do
+while getopts "h:s:n:m:b:p:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -22,6 +22,9 @@ while getopts "h:s:n:m:" opt; do
         m) NAME="$OPTARG"
         ;;
         b) BENSERVER="$OPTARG"
+        ;;
+        p) PKEY="$OPTARG"
+        ;;
     esac
 done
 
