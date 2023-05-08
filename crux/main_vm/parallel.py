@@ -9,6 +9,9 @@ parser.add_argument('--pkey', type=str)
 parser.add_argument('--config', type=str)
 parser.add_argument('--primers', type=str)
 parser.add_argument('--cyverse', type=str)
+parser.add_argument('--aws_key', type=str)
+parser.add_argument('--aws_secret', type=str)
+parser.add_argument('--aws_region', type=str)
 args = parser.parse_args()
 
 hostnames = args.hosts
@@ -17,6 +20,9 @@ pkey = args.pkey
 config = args.config
 primers = args.primers
 cyverse = args.cyverse
+aws_key=args.aws_key
+aws_secret=args.aws_secret
+aws_region=args.aws_region
 
 hosts = []
 with open(hostnames, 'r') as file:
@@ -36,27 +42,30 @@ def runcmd(cmd):
         for line in host_out.stderr:
             print(line)
 
-
 # clone gh repo
 cmd = 'git clone -b crux-hector https://github.com/CALeDNA/crux.git'
 runcmd(cmd)
 
-# # copy config, primer, etc. files to VMs
+# copy config, primer, etc. files to VMs
 cmd = client.copy_file('vars', 'crux/crux/vars', recurse=True)
 joinall(cmd, raise_error=True)
 
-#create swap space
-cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
-runcmd(cmd)
+# #create swap space
+# cmd = 'sudo fallocate -l 20G /swapfile; sudo mkswap /swapfile; sudo swapon /swapfile'
+# runcmd(cmd)
 
 # build docker
-cmd = 'cd crux/crux; docker build -q -t crux .'
+cmd = 'cd crux; docker build -q -t crux .'
 runcmd(cmd)
 
 # run ecopcr
-cmd = f"cd crux/crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/app/ecopcr:/mnt -v $(pwd)/vars:/vars --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/ecopcr:/mnt -v $(pwd)/crux/vars:/vars -e AWS_ACCESS_KEY_ID={aws_key} -e AWS_SECRET_ACCESS_KEY={aws_secret} -e AWS_DEFAULT_REGION={aws_region} --name ecopcr crux /mnt/run_ecopcr.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)
 
-# run bwa & taxfilter
-cmd = f"cd crux/crux; ./run_docker.sh -c {config}"
+# run blast
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/blast:/mnt -v $(pwd)/crux/vars:/vars -e AWS_ACCESS_KEY_ID={aws_key} -e AWS_SECRET_ACCESS_KEY={aws_secret} -e AWS_DEFAULT_REGION={aws_region} --name blast crux /mnt/run_blast.sh -c {config} -h ${{HOSTNAME}}"
+runcmd(cmd)
+
+# run taxfilter
+cmd = f"cd crux; HOSTNAME=$(hostname | tr -dc '0-9'); docker run -t -v $(pwd)/crux/app/taxfilter:/mnt -v $(pwd)/crux/vars:/vars -e AWS_ACCESS_KEY_ID={aws_key} -e AWS_SECRET_ACCESS_KEY={aws_secret} -e AWS_DEFAULT_REGION={aws_region} --name taxfilter crux /mnt/get-largest.sh -c {config} -h ${{HOSTNAME}}"
 runcmd(cmd)

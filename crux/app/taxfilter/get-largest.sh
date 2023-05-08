@@ -2,7 +2,7 @@
 
 set -x
 
-SAMDIR="bwa-output"
+BLASTDIR="blast-output"
 VARS="/vars"
 while getopts "c:h:v:" opt; do
     case $opt in
@@ -20,9 +20,12 @@ cp ${VARS}/* .
 
 source ${CONFIG}
 
-# download nucl acc2taxid
-wget -q -c --tries=0 ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz
-gunzip nucl_gb.accession2taxid.gz
+# download taxdump and taxid2taxonpath script
+wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+mkdir taxdump
+tar -xf taxdump.tar.gz -C taxdump
+rm taxdump.tar.gz
+git clone https://github.com/CALeDNA/taxid2taxonpath.git
 
 HOSTNAME_=${HOSTNAME#0}
 
@@ -46,30 +49,31 @@ fi
 cat ${PRIMERS} | while read primer
 do
     primer=$( echo ${primer} | cut -d ',' -f3 )
-    mkdir -p ${SAMDIR}/${primer}/
-    touch ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa
-    touch ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid
+    mkdir -p ${BLASTDIR}/${primer}/
+    touch ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa
+    touch ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa.taxid
     for (( i=${START}; i<${END}; i++ ))
     do
         chunk=$(printf '%02d' "$i")
-        # download one bam file at a time
-        echo "wget -q -c --tries=0 -P ${SAMDIR}/${primer} https://data.cyverse.org/dav-anon${CYVERSE_BASE}/${RUNID}/bwa-mem/${primer}-nt${chunk}.fasta.bam"
-        wget -q -c --tries=0 -P ${SAMDIR}/${primer} https://data.cyverse.org/dav-anon${CYVERSE_BASE}/${RUNID}/bwa-mem/${primer}-nt${chunk}.fasta.bam
-        # convert to sam
-        samtools view -o ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.sam ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.bam
-        # remove bam
-        rm ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.bam
-        # get largest seq per nt accesion id
-        python get-largest.py --primer ${primer} --output ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa --sam ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.sam --nucltaxid nucl_gb.accession2taxid --log logs.txt
-        # remove sam
-        rm ${SAMDIR}/${primer}/${primer}-nt${chunk}.fasta.sam
+        aws s3 cp s3://ednaexplorer/crux/${RUNID}/blast/ecopcr/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} ${BLASTDIR}/${primer}/ --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+        # get taxid
+        python3 create_taxa.py --input ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --output ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_tmp --log logs
+        mv ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_tmp ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
+        # create taxa
+        python3 taxid2taxonpath/taxid2taxonpath.py -d taxdump/nodes.dmp -m taxdump/names.dmp -e taxdump/merged.dmp -l taxdump/delnodes.dmp -i ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_tmp.taxid -o ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}.tax.tsv -c 2 -r 1
+        # clean blast
+        ./remove_uncultured.pl ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}.tax.tsv ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} 
+        mv ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}_tmp ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
+        # remove gaps
+        sed -i 's/-//g' ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}
+        # get largest seq per nt accession id
+        python3 get-largest.py --output ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa --input ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk} --log logs.txt
+        # remove orig fasta file and temp tax
+        rm ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}*
     done
 
-    # upload to cyverse
-    gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}
-    
-    for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa && echo "Successful gocmd upload" && break || sleep 15; done
-    for i in {1..5}; do gocmd -c ${CYVERSE} put ${SAMDIR}/${primer}/chunk${HOSTNAME}.fa.taxid ${CYVERSE_BASE}/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid && echo "Successful gocmd upload" && break || sleep 15; done
-
+    # upload to js2 bucket
+    aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+    aws s3 cp ${BLASTDIR}/${primer}/chunk${HOSTNAME}.fa.taxid s3://ednaexplorer/crux/${RUNID}/fa-taxid/${primer}/chunk${HOSTNAME}.fa.taxid --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 done
-gocmd -c ${CYVERSE} put logs.txt ${CYVERSE_BASE}/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt
+aws s3 cp logs.txt s3://ednaexplorer/crux/${RUNID}/logs/fa-taxid_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
