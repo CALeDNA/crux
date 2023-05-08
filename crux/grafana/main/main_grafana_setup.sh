@@ -6,7 +6,6 @@ PUSHGATEWAY_VERSION='1.5.1'
 ALERTMANAGER_VERSION='0.25.0'
 LOKI_VERSION='2.8.0'
 PROMTAIL_VERSION='2.8.0'
-BEN_VERSION='2.12'
 
 # prometheus setup
 sudo useradd     --system     --no-create-home     --shell /bin/false prometheus
@@ -122,32 +121,5 @@ systemctl status loki.service
 systemctl status promtail.service 
 
 
-# ben setup
-sudo useradd     --system     --no-create-home     --shell /bin/false ben
-wget https://www.poirrier.ca/ben/ben-$BEN_VERSION.tar.gz
-tar -xf ben-$BEN_VERSION.tar.gz
-sudo apt install -y pandoc
-cd ben && make && cd ..
-
-sudo mkdir -p /etc/ben
-sudo mkdir -p /etc/ben/output
-sudo mv ben/ben /etc/ben/ben
-sudo cp error_counter.sh /etc/ben/error_counter.sh
-sudo cp node_util.py /etc/ben/node_util.py
-
-sudo chown -R ben:ben /etc/ben
-
-sudo cp ben-grafana.service ben-logs.service ben-logs.timer /etc/systemd/system
-sudo systemctl start ben-logs.timer ben-logs.service
-
-# start ben
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-ecopcr -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-blast -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-newick -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-tronko -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-assign -d
-
-sudo systemctl start ben-grafana.service
-
 sudo systemctl restart prometheus
-sudo systemctl restart grafana
+sudo systemctl restart grafana-server.service

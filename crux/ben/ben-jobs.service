@@ -1,9 +1,10 @@
 [Unit]
-Description=Ben Grafana Service
+Description=Ben Jobs Service
 After=network-online.target
+Requires=grafana-server.service
 
 [Service]
-User=ben
+User=ubuntu
 ExecStart=/usr/bin/python3 /etc/ben/node_util.py
 Type=simple
 Restart=on-failure
