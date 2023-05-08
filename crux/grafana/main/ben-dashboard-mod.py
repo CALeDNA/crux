@@ -23,7 +23,7 @@ with open(dashbrd, "r") as jsonFile:
 
 nodes=[]
 for line in metrics.split("\n"):
-    if line.startswith("#") or "ben" in line or line == "":
+    if line.startswith("#") or line.startswith("ben") or line == "":
         continue
     nodes.append(line.split()[0])
     # print(line)
@@ -37,7 +37,7 @@ for panel in dashboard["panels"]:
             query=panel["targets"][0]
             newTargets=[]
             for i in range(0,len(nodes), 2):
-                source=nodes[i].split("_")[0]
+                source='_'.join(nodes[i].split("_")[0:-1])
                 query["expr"]=f"{nodes[i]} / {nodes[i+1]}"
                 query["legendFormat"]=source
                 query["refId"]=currRefId

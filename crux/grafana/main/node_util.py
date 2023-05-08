@@ -16,64 +16,67 @@ REGISTRY.register(RUNNINGJOBS)
 REGISTRY.register(QUEUEDJOBS)
 REGISTRY.register(FINISHEDJOBS)
 
-
 class ServerHandler(http.server.BaseHTTPRequestHandler):
   def do_GET(self):
     self.send_response(200)
     self.end_headers()
     self.wfile.write(b"Hello World!")
 
-    isFinished, isRunning, isQueued, totalJobs = benlist()
+    bennodes()
 
+    isFinished, isRunning, isQueued, totalJobs = benlist()
     TOTALJOBS.set(totalJobs)
     RUNNINGJOBS.set(isRunning)
     QUEUEDJOBS.set(isQueued)
     FINISHEDJOBS.set(isFinished)
 
-    bennodes()
-
 def benlist():
+  isRunning = 0
+  isQueued = 0
+  isFinished = 0
   benServers=glob.glob("/tmp/ben-*")
   for server in benServers:
-    result = subprocess.run(["/etc/ben/ben", "-s", f"{server}/socket-default", "list"], capture_output=True)
-    result = result.stdout.decode().strip().splitlines()
-    isRunning = 0
-    isQueued = 0
-    isFinished = 0
-    for row in result:
-        cols=row.split()
-        if(len(cols)>3):
-          if(cols[3] == "r"):
-            isRunning += 1
+    if(subprocess.run(["/etc/ben/ben", "list", "-s", server]).returncode == 0):
+      result = subprocess.run(["/etc/ben/ben", "-s", server, "list"], capture_output=True)
+      result = result.stdout.decode().strip().splitlines()
+      for row in result:
+          cols=row.split()
+          if(len(cols)>3):
+            if(cols[3] == "r"):
+              isRunning += 1
+            else:
+              isFinished += 1
           else:
-            isFinished += 1
-        else:
-          isQueued += 1
+            isQueued += 1
   totalJobs = isRunning + isQueued + isFinished
   return isFinished, isRunning, isQueued, totalJobs
 
 def bennodes():
-  result = subprocess.run(["/etc/ben/ben", "-s", "/tmp/ben-ubuntu/socket-default", "nodes"], capture_output=True)
-  result = result.stdout.decode().strip().splitlines()
-  for i in result:
-    i = i.split()
-    if len(i) == 4 and i[0] != "#":
-      size=i[3]
-      running=i[2]
-      name=i[1].replace('-','_')
-      try:
-        i=Gauge(f'{name}_running', 'ben node')
-        i.set(running)
-        REGISTRY.register(i)
-        i=Gauge(f'{name}_size', 'ben node')
-        i.set(size)
-        REGISTRY.register(i)
-      except:
-        i=REGISTRY._names_to_collectors[f'{name}_running']
-        i.set(running)
-        i=REGISTRY._names_to_collectors[f'{name}_size']
-        i.set(size)
-      
+  benServers=glob.glob("/tmp/ben-*")
+  for server in benServers:
+    if(subprocess.run(["/etc/ben/ben", "list", "-s", server]).returncode == 0):
+      result = subprocess.run(["/etc/ben/ben", "-s", server, "nodes"], capture_output=True)
+      result = result.stdout.decode().strip().splitlines()
+      for i in result:
+        i = i.split()
+        server=server.split('/')[-1].replace('-','_')
+        if len(i) == 4 and i[0] != "#":
+          size=i[3]
+          running=i[2]
+          name=i[1].replace('-','_')
+          try:
+            i=Gauge(f'{name}_{server}_running', 'ben node')
+            i.set(running)
+            REGISTRY.register(i)
+            i=Gauge(f'{name}_{server}_size', 'ben node')
+            i.set(size)
+            REGISTRY.register(i)
+          except:
+            i=REGISTRY._names_to_collectors[f'{name}_{server}_running']
+            i.set(running)
+            i=REGISTRY._names_to_collectors[f'{name}_{server}_size']
+            i.set(size)
+
 
 if __name__ == "__main__":
     start_http_server(8000,registry=REGISTRY)
