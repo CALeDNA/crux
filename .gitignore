@@ -4,3 +4,4 @@
 *.ipynb
 test/crux_db
 ecopcr/ecopcr/.aws
+crux/ben/supabase/database.ini

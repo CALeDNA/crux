@@ -20,6 +20,7 @@ sudo -H -u ben /etc/ben/ben server -s /tmp/ben-ecopcr -d
 sudo -H -u ben /etc/ben/ben server -s /tmp/ben-blast -d
 sudo -H -u ben /etc/ben/ben server -s /tmp/ben-newick -d
 sudo -H -u ben /etc/ben/ben server -s /tmp/ben-tronko -d
+sudo -H -u ben /etc/ben/ben server -s /tmp/ben-qc -d
 sudo -H -u ben /etc/ben/ben server -s /tmp/ben-assign -d
 
 sudo systemctl start ben-logs.service
