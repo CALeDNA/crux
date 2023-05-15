@@ -5,7 +5,7 @@ set -x
 CONFIG="/home/ubuntu/.ssh/config"
 USER="ubuntu"
 PKEY="/home/ubuntu/.ssh/hbaez-private-key"
-REMOTE_PATH=/home/${USER}/bin/ben
+REMOTE_PATH=/etc/ben/ben
 START=0
 NODES=4
 NAME="chunk"
@@ -52,7 +52,7 @@ else
     hostnames=$(cat $HOSTNAME)
 fi
 
-counter=$START
+counter=0
 for line in $hostnames
 do
     counter=$(printf '%02d' $counter)

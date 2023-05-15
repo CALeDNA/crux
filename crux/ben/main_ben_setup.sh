@@ -16,12 +16,12 @@ sudo cp node_util.py error_counter.sh /etc/ben/
 sudo cp ben-jobs.service ben-logs.service ben-logs.timer /etc/systemd/system
 
 # start ben
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-ecopcr -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-blast -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-newick -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-tronko -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-qc -d
-sudo -H -u ben /etc/ben/ben server -s /tmp/ben-assign -d
+/etc/ben/ben server -s /tmp/ben-ecopcr -d
+/etc/ben/ben server -s /tmp/ben-blast -d
+/etc/ben/ben server -s /tmp/ben-newick -d
+/etc/ben/ben server -s /tmp/ben-tronko -d
+/etc/ben/ben server -s /tmp/ben-qc -d
+/etc/ben/ben server -s /tmp/ben-assign -d
 
 sudo systemctl start ben-logs.service
 sudo systemctl start ben-jobs.service

@@ -45,27 +45,27 @@ aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_R/filtered s3://e
 
 # add ben tronko-assign jobs
 
-# paired
+# run tronko assign paired/unpaired_F/R on $PRIMER and sample file {}
 cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/paired/filtered
 
-find . -type f -name '*_F_filt.fastq*' | sed 's/\.\///g' | sed 's/_F_filt\.fastq.*//g' | ben add -s $BENSERVER -c "cd crux; docker run -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -f {} -i $PROJECTID -p $PRIMER -1" $PROJECTID-assign-$PRIMER -o $OUTPUT
+find . -type f -name '*_F_filt.fastq*' | sed 's/\.\///g' | sed 's/_F_filt\.fastq.*//g' | ben add -s $BENSERVER -c "cd crux; docker run -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -f {} -i $PROJECTID -p $PRIMER -1 -2 -3" $PROJECTID-assign-{}-$PRIMER -o $OUTPUT
 
 cd
 
-# unpaired_F
-cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_F/filtered
+# # unpaired_F
+# cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_F/filtered
 
-find . -type f -name '*_F_filt.fastq*' | sed 's/\.\///g' | sed 's/_F_filt\.fastq.*//g' | ben add -s $BENSERVER -c "cd crux; docker run -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -f {} -i $PROJECTID -p $PRIMER -2" $PROJECTID-assign-$PRIMER -o $OUTPUT
+# find . -type f -name '*_F_filt.fastq*' | sed 's/\.\///g' | sed 's/_F_filt\.fastq.*//g' | ben add -s $BENSERVER -c "cd crux; docker run -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -f {} -i $PROJECTID -p $PRIMER -2" $PROJECTID-assign-{}-$PRIMER -o $OUTPUT
 
-cd
+# cd
 
 
-# unpaired_R
-cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_R/filtered
+# # unpaired_R
+# cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_R/filtered
 
-find . -type f -name '*_R_filt.fastq*' | sed 's/\.\///g' | sed 's/_R_filt\.fastq.*//g' | ben add -s $BENSERVER -c "cd crux; docker run -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -f {} -i $PROJECTID -p $PRIMER -3" $PROJECTID-assign-$PRIMER -o $OUTPUT
+# find . -type f -name '*_R_filt.fastq*' | sed 's/\.\///g' | sed 's/_R_filt\.fastq.*//g' | ben add -s $BENSERVER -c "cd crux; docker run -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -f {} -i $PROJECTID -p $PRIMER -3" $PROJECTID-assign-{}-$PRIMER -o $OUTPUT
 
-cd
+# cd
 
 
 # clean up
