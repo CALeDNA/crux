@@ -5,6 +5,7 @@ BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
 BLAST_THREADS=16
 RUNID="2023-04-07"
+FILTER="filter" # temp taxfilter.sh folder name
 
 # Obitools ecopcr variables
 ERROR=3

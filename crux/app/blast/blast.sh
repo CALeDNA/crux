@@ -58,16 +58,22 @@ then
     sed -i "s/^DBLIST.*/DBLIST nt.$NTCHUNK /" $JOB/nt$NTCHUNK/nt.nal
 
     blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$NTCHUNK.fasta
-    # run blast
-    time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
-    # clean blast output for tronko
-    ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB -k $AWS_ACCESS_KEY_ID
+    # run blast in small chunks
+    parallel --block 100k --recstart '>' -P $BLAST_THREADS "time blastn -query <(echo '{}') -out $JOB/%_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \
+    ./taxfilter.sh -f %_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/${FASTA} >> $JOB/$PRIMER.fasta" ::: $(cat ecopcr/$input)
+    # # run blast
+    # time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
+    # # clean blast output for tronko
+    # ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
 else
     # file exists. checking if empty"
     length=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/fa-taxid/$PRIMER/$PRIMER-blast.fasta_$NTCHUNK --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
     if (( $length > 0 )); 
     then
             echo "skipping $file"
+            # free up storage for new jobs
+            rm -rf $JOB
+            exit 1
     else
         # empty file exists. rerun blast just in case
         # delete $JOB in case it exists locally from unfinished run
@@ -79,14 +85,23 @@ else
         sed -i "s/^DBLIST.*/DBLIST nt.$NTCHUNK /" $JOB/nt$NTCHUNK/nt.nal
 
         blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$chunk.fasta
-        # run blast
-        time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
-        # clean blast output for tronko
-        ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
-        # output files uploaded in taxfilter script
+        # run blast in small chunks
+        parallel --block 100k --recstart '>' -P $BLAST_THREADS "time blastn -query <(echo '{}') -out $JOB/%_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \
+        ./taxfilter.sh -f %_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/${FASTA} >> $JOB/$PRIMER.fasta" ::: $(cat ecopcr/$input)
+        # # run blast
+        # time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
+        # # clean blast output for tronko
+        # ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
+        # # output files uploaded in taxfilter script
     fi
 fi
 
+# rerurn taxfilter on master fasta
+./taxfilter.sh -f $JOB/$PRIMER.fasta -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
+# upload to js2
+aws s3 cp $JOB/$FILTER/${FASTA} s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+aws s3 cp $JOB/$FILTER/${FASTA}.tax.tsv s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA.tax.tsv --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+aws s3 cp $JOB/logs s3://ednaexplorer/crux/$RUNID/logs/fa-taxid_$FASTA.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 
 # free up storage for new jobs
 rm -rf $JOB
