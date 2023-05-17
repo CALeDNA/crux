@@ -32,10 +32,11 @@ if [ $START > 0 ]; then
     hostnames=$(cat tmphost)
     for line in $hostnames
     do
+        address=$(ssh -G $line | awk '/^hostname / { print $2 }')
         counter=$(printf '%02d' $counter)
         echo "  - name: $NAME$counter" >> $datasources
         echo "    type: prometheus" >> $datasources
-        echo "    url: http://$line:9090" >> $datasources
+        echo "    url: http://$address:9090" >> $datasources
         echo "    uid: $NAME$counter" >> $datasources
         echo "    readOnly: false" >> $datasources
         echo "    editable: true" >> $datasources
@@ -66,6 +67,6 @@ fi
 rm tmphost
 
 #update dashboard panels reflecting datasources.yaml changes
-python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
+sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
 
 sudo systemctl restart grafana-server

@@ -24,12 +24,12 @@ done
 
 source /vars/crux_vars.sh # to get tronko db run ID
 
-# download tronko database for $PRIMER
-aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-
 
 if [ "${PAIRED}" = "TRUE" ]
 then
+    # download tronko database
+    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
     # download QC sample paired files
     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/$PRIMER/QC/paired/ $PROJECTID-$FILE/ --exclude '*' --include "${FILE}*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
@@ -45,6 +45,9 @@ fi
 
 if [ "${UNPAIRED_F}" = "TRUE" ]
 then
+    # download tronko database
+    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
     # download QC sample unpaired_F
     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/$PRIMER/QC/unpaired_F/ $PROJECTID-$FILE/ --exclude '*' --include "${FILE}*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
@@ -60,6 +63,9 @@ fi
 
 if [ "${UNPAIRED_R}" = "TRUE" ]
 then
+    # download tronko database
+    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
     # download QC sample unpaired_R
     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/$PRIMER/QC/unpaired_R/ $PROJECTID-$FILE/ --exclude '*' --include "${FILE}*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 

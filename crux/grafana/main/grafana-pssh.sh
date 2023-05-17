@@ -9,7 +9,7 @@ while getopts "h:u:" opt; do
     esac
 done
 
-parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt-get update -y && sudo apt-get upgrade -y"
+# parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt-get update -y && sudo apt-get upgrade -y"
 
 parallel-scp -h $HOSTNAME ~/crux/crux/grafana/client/prometheus.service /home/$USER/prometheus.service
 

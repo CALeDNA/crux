@@ -42,7 +42,7 @@ echo "" >> $CLIENT_CONFIG
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
 # setup ben in client VMs
-./ben-pssh.sh -h tmphost $CONFIG -p $PKEY -c $CLIENT_CONFIG
+./ben-pssh.sh -h tmphost -p $PKEY -c $CLIENT_CONFIG
 
 rm $CLIENT_CONFIG
 

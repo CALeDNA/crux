@@ -16,7 +16,7 @@ while getopts "h:u:b:p:c:" opt; do
     esac
 done
 
-parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt-get update -y && sudo apt-get upgrade -y"
+# parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt-get update -y && sudo apt-get upgrade -y"
 
 parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt install pandoc -y"
 
