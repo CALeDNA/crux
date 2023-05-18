@@ -26,6 +26,14 @@ mkdir ${JOB}
 
 # download all ecopcr fasta files and combine them. 
 aws s3 sync s3://ednaexplorer/crux/$RUNID/ecopcr ./ecopcr --endpoint-url https://js2.jetstream-cloud.org:8001/
+# download ecopcr fasta and combine them
+aws s3 sync s3://ednaexplorer/crux/$RUNID/ecopcr/$PRIMER ./$JOB/ecopcr --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+for d in $JOB/ecopcr/*
+do
+    # saves a master fasta per primer in ~/ecopcr
+    cat ${d}*.fasta > "${d%/}".fasta
+done
 
 # download missing nt files
 if [ ! -d "nt-missing-files" ] ; then
@@ -33,12 +41,6 @@ if [ ! -d "nt-missing-files" ] ; then
     tar --skip-old-files -xf nt-missing-files.tar.gz
     rm nt-missing-files.tar.gz
 fi
-
-for d in ecopcr/*/
-do
-    # saves a master fasta per primer in ~/ecopcr
-    cat ${d}*.fasta > "${d%/}".fasta
-done
 
 #blast input output files
 output=$PRIMER-blast.fasta
@@ -59,8 +61,8 @@ then
 
     blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$NTCHUNK.fasta
     # run blast in small chunks
-    parallel --block 100k --recstart '>' -P $BLAST_THREADS "time blastn -query <(echo '{}') -out $JOB/%_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \
-    ./taxfilter.sh -f %_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/${FASTA} >> $JOB/$PRIMER.fasta" ::: $(cat ecopcr/$input)
+    parallel --block 100k --recstart '>' -a ecopcr/$input -P $BLAST_THREADS "time blastn -query <(echo '{}') -out $JOB/{%}_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt '6 saccver staxid sseq' -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \
+    if [ -s $JOB/{%}_${output}_$NTCHUNK ]; then ./taxfilter.sh -f {%}_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/${FASTA} >> $JOB/$PRIMER.fasta; fi"
     # # run blast
     # time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
     # # clean blast output for tronko
@@ -70,7 +72,7 @@ else
     length=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/fa-taxid/$PRIMER/$PRIMER-blast.fasta_$NTCHUNK --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
     if (( $length > 0 )); 
     then
-            echo "skipping $file"
+            echo "skipping $PRIMER-blast.fasta_$NTCHUNK"
             # free up storage for new jobs
             rm -rf $JOB
             exit 1
@@ -86,8 +88,8 @@ else
 
         blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$chunk.fasta
         # run blast in small chunks
-        parallel --block 100k --recstart '>' -P $BLAST_THREADS "time blastn -query <(echo '{}') -out $JOB/%_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \
-        ./taxfilter.sh -f %_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/${FASTA} >> $JOB/$PRIMER.fasta" ::: $(cat ecopcr/$input)
+        parallel --block 100k --recstart '>' -a ecopcr/$input -P $BLAST_THREADS "time blastn -query <(echo '{}') -out $JOB/{%}_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt '6 saccver staxid sseq' -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \
+        if [ -s $JOB/{%}_${output}_$NTCHUNK ]; then ./taxfilter.sh -f {%}_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/${FASTA} >> $JOB/$PRIMER.fasta; fi"
         # # run blast
         # time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
         # # clean blast output for tronko
