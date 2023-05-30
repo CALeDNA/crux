@@ -34,7 +34,7 @@ then
     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$FILE/ --exclude '*' --include "${FILE}*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
     # run tronko assign
-    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -p -z -w -q -1 $PROJECTID-$FILE/${FILE}_F_filt.fastq -2 $PROJECTID-$FILE/${FILE}_R_filt.fastq -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
+    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -p -z -w -q -1 $PROJECTID-$FILE/${FILE}_F_filt.fastq.gz -2 $PROJECTID-$FILE/${FILE}_R_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
 
     # upload to aws
     aws s3 cp $PROJECTID-$FILE/$FILE.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/$FILE.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
@@ -52,7 +52,7 @@ then
     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$FILE/ --exclude '*' --include "${FILE}*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
     # run tronko assign
-    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$FILE/${FILE}_F_filt.fastq -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
+    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$FILE/${FILE}_F_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
 
     # upload to aws
     aws s3 cp $PROJECTID-$FILE/$FILE.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$FILE.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
@@ -70,7 +70,7 @@ then
     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$FILE/ --exclude '*' --include "${FILE}*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
     # run tronko assign
-    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$FILE/${FILE}_R_filt.fastq -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
+    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$FILE/${FILE}_R_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
 
     # upload to aws
     aws s3 cp $PROJECTID-$FILE/$FILE.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$FILE.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
