@@ -25,14 +25,14 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
 mkdir $PROJECTID
 
 # touch files
-touch $PROJECTID/forwards_primers.txt
+touch $PROJECTID/forward_primers.txt
 touch $PROJECTID/reverse_primers.txt
 touch $PROJECTID/metabarcode_loci_min_merge_length.txt
 
 # download metadata file
-aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/InputMetadata.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://ednaexplorer/projects/${PROJECTID}/InputMetadata.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # download primer master sheet
-aws s3 sync s3://ednaexplorer/misc/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://ednaexplorer/CruxV2/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # Read the header row and split it into an array
 IFS="," read -ra headers < "$PROJECTID/InputMetadata.csv"
@@ -73,18 +73,18 @@ done
 while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
-        echo "Unique marker '$marker_value' and its corresponding primers appear in eDNAExplorerPrimers.csv"
+        echo "Unique marker '$marker_value' and its corresponding primers appear in InputMetadata.csv"
 
         # Add Primer for QC
-        echo ">$marker_value" >> $PROJECTID/forwards_primers.txt
-        echo "${row[2]}" >> $PROJECTID/forwards_primers.txt
+        echo ">$marker_value" >> $PROJECTID/forward_primers.txt
+        echo "${row[2]}" >> $PROJECTID/forward_primers.txt
 
         echo ">$marker_value" >> $PROJECTID/reverse_primers.txt
         echo "${row[3]}" >> $PROJECTID/reverse_primers.txt
 
         echo "LENGTH_$marker_value=${row[12]}" >> $PROJECTID/metabarcode_loci_min_merge_length.txt
     else
-        echo "Unique marker '$marker_value' and its corresponding primers do not appear in eDNAExplorerPrimers.csv"
+        echo "Unique marker '$marker_value' and its corresponding primers do not appear in InputMetadata.csv"
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
@@ -95,10 +95,11 @@ aws s3 cp $PROJECTID/reverse_primers.txt s3://ednaexplorer/projects/${PROJECTID}
 aws s3 cp $PROJECTID/metabarcode_loci_min_merge_length.txt s3://ednaexplorer/projects/${PROJECTID}/QC/metabarcode_loci_min_merge_length.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # add QC ben jobs
+#TODO: switch from crux to qc image
 while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
-        ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job crux /mnt/qc.sh -i $PROJECTID -p $marker_value" $job -o $OUTPUT
+        ben add -s $BENSERVER -c "cd crux/tronko/assign; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job qc /mnt/qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign" $job -o $OUTPUT
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
