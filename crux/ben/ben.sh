@@ -46,7 +46,7 @@ sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
 rm $CLIENT_CONFIG
 
-if [ $START > 0 ]; then
+if [ $START -gt 0 ]; then
     hostnames=$(cat tmphost)
 else
     hostnames=$(cat $HOSTNAME)

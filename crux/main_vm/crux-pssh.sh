@@ -1,6 +1,7 @@
 #! /bin/bash
 
-while getopts "h:c:p:u:" opt; do
+QC=""
+while getopts "h:c:p:u:q" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -9,6 +10,8 @@ while getopts "h:c:p:u:" opt; do
         p) PRIMERS="$OPTARG"
         ;;
         u) USER="$OPTARG"
+        ;;
+        q) QC="TRUE"
         ;;
     esac
 done
@@ -19,4 +22,9 @@ parallel-scp -h $HOSTNAME $CONFIG /home/$USER/crux/crux/vars/
 
 parallel-scp -h $HOSTNAME $PRIMERS /home/$USER/crux/crux/vars/
 
-parallel-ssh -i -t 0 -h $HOSTNAME "cd crux; docker build -q -t crux ."
+if [ "${QC}" = "TRUE" ]
+then
+    parallel-ssh -i -t 0 -h $HOSTNAME "cd crux/tronko/assign; docker build -q -t qc ."
+else
+    parallel-ssh -i -t 0 -h $HOSTNAME "cd crux; docker build -q -t crux ."
+fi

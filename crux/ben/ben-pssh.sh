@@ -26,7 +26,7 @@ parallel-ssh -i -t 0 -h $HOSTNAME "tar -xf ben-$BEN_VERSION.tar.gz"
 
 parallel-ssh -i -t 0 -h $HOSTNAME "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
 
-parallel-scp -h $HOSTNAME ~/.ssh/$PKEY ~/.ssh/$PKEY
+parallel-scp -h $HOSTNAME $PKEY ~/.ssh/$PKEY
 
 parallel-scp -h $HOSTNAME $CONFIG ~/.ssh/$CONFIG
 

@@ -35,8 +35,8 @@ fi
 mkdir -p $JOB/$FILTER
 touch $JOB/$FILTER/${FASTA}_tmp
 touch $JOB/logs
-# creates accid taxid file. --output=fasta & accidtaxid file={output fasta}.taxid
-python3 create_taxa.py --input $JOB/$FASTA --output $JOB/$FILTER/${FASTA}_tmp --log $JOB/logs
+# creates accid taxid file
+python3 create_taxa.py --input $JOB/$FASTA --output $JOB/$FILTER/${FASTA}.taxid --log $JOB/logs
 mv $JOB/$FILTER/${FASTA}_tmp $JOB/$FILTER/$FASTA
 # create taxa
 python3 taxid2taxonpath/taxid2taxonpath.py -d taxdump/nodes.dmp -m taxdump/names.dmp -e taxdump/merged.dmp -l taxdump/delnodes.dmp -i $JOB/$FILTER/${FASTA}_tmp.taxid -o $JOB/$FILTER/$FASTA.tax.tsv -c 2 -r 1

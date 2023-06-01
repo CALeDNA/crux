@@ -26,8 +26,8 @@ done
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 ./grafana-pssh.sh -h tmphost -u $USER
 
-counter=$START
-if [ $START > 0 ]; then
+counter=0
+if [ $START -gt 0 ]; then
     # use tmphost file
     hostnames=$(cat tmphost)
     for line in $hostnames
@@ -44,6 +44,7 @@ if [ $START > 0 ]; then
         counter=$(( 10#$counter + 1 ))
     done
     sudo cat $datasources >> $DATASOURCE
+    rm $datasources
 else
     hostnames=$(cat $HOSTNAME)
     echo "apiVersion: 1" >> $datasources
@@ -64,7 +65,7 @@ else
     sudo mv $datasources $DATASOURCE
 fi
 
-rm tmphost
+rm tmphost $datasources
 
 #update dashboard panels reflecting datasources.yaml changes
 sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
