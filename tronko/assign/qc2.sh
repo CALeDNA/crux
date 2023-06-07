@@ -16,12 +16,12 @@ while getopts "i:p:b:" opt; do
 done
 
 # download $PROJECTID/QC and samples
-#TODO: sync only input files (top level)
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # download Anacapa
 #TODO switch from s3 to git clone
+git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
 # should already be dl from Dockerfile
 # aws s3 sync s3://ednaexplorer/Anacapa Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
@@ -29,12 +29,8 @@ aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER
 
 # EDIT THESE
 BASEDIR="~/Anacapa"
-# BASEDIR="/home/ubuntu/crux/tronko/assign/Anacapa" # change to folder you want shared into container
-# DB="/home/ubuntu/crux/tronko/assign/Anacapa/Anacapa_db" # change to full path to Anacapa_db
 DB="$BASEDIR/Anacapa_db"
-# DATA="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/samples" # change to input data folder (default 12S_test_data inside Anacapa_db)
 DATA="~/$PROJECTID-$PRIMER/samples"
-# OUT="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/${PROJECTID}QC" # change to output data folder
 OUT="~/$PROJECTID-$PRIMER/${PROJECTID}QC"
 
 # OPTIONAL
@@ -63,6 +59,9 @@ cd
 aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/paired/filtered s3://ednaexplorer/projects/$PROJECTID/QC/OUT/$PRIMER/paired --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_F/filtered s3://ednaexplorer/projects/$PROJECTID/QC/OUT/$PRIMER/unpaired_F --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/unpaired_R/filtered s3://ednaexplorer/projects/$PROJECTID/QC/OUT/$PRIMER/unpaired_R --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+# upload QC logs
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://ednaexplorer/projects/$PROJECTID/QC/Run_info --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
 # add ben tronko-assign jobs
