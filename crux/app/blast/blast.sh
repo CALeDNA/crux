@@ -35,6 +35,7 @@ for f in $JOB/ecopcr/*
 do
     touch $JOB/ecopcr/$PRIMER.fasta
     cat $f >> $JOB/ecopcr/$PRIMER.fasta
+    rm $f
 done
 
 # download missing nt files
@@ -62,6 +63,7 @@ then
     blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$NTCHUNK.fasta
     # break ecopcr fasta into small chunks
     awk -v job="$JOB" -v primer="$PRIMER" '/^>/ && ++splitCount % 100000 == 1 { close(file); file = sprintf("%s/ecopcr/%s_%d.split", job, primer, splitCount) } { print > file }' $JOB/ecopcr/$input
+    rm $JOB/ecopcr/$input
     # run blast in small chunks
     find "$JOB/ecopcr/" -name "$PRIMER_*.split" -print0 | parallel -0 -P $BLAST_THREADS "time blastn -query {} -out $JOB/{%}_${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt '6 saccver staxid sseq' -num_threads 1 -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND | \ 
     if [ -s $JOB/{%}_${output}_$NTCHUNK ]; then ./taxfilter.sh -f {%}_${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB; cat $JOB/$FILTER/{%}_${output}_$NTCHUNK >> $JOB/$PRIMER.fasta; rm $JOB/$FILTER/{%}_${output}_$NTCHUNK $JOB/{%}_${output}_$NTCHUNK"

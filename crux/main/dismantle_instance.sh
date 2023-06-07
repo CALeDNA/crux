@@ -1,5 +1,7 @@
 #!/bin/bash
+
 set -x
+set -o allexport
 
 OS_USERNAME=""
 APIKEY=""
@@ -35,14 +37,14 @@ fi
 
 source ${JSCRED}
 
+# get volume id
+volumeid=$(openstack server show $NAME -f json | jq .volumes_attached[].id | tr -d '"')
 # get corresponding ip address
 ip_address=$(grep -A 5 $NAME $CONFIG | grep "HostName" | awk '{print $2}')
 # remove IP from instance
 openstack server remove floating ip ${VMNAME}${chunk} ${ip_address}
 # delete IP
 openstack floating ip delete ${ip_address}
-# get volume id
-volumeid=$(openstack server show $NAME -f json | jq .volumes_attached[].id | tr -d '"')
 # delete instance
 openstack server delete $NAME --wait
 # delete volume
