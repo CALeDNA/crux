@@ -11,15 +11,19 @@ NODES=4
 NAME="chunk"
 CLIENT_CONFIG="config"
 BENSERVER=/tmp/ben-ubuntu
-while getopts "h:s:n:m:b:p:" opt; do
+while getopts "h:c:s:n:m:u:b:p:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
+        ;;
+        c) CONFIG="$OPTARG"
         ;;
         s) START="$OPTARG"
         ;;
         n) NODES="$OPTARG"
         ;;
         m) NAME="$OPTARG"
+        ;;
+        u) USER="$OPTARG"
         ;;
         b) BENSERVER="$OPTARG"
         ;;
@@ -44,8 +48,6 @@ sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 # setup ben in client VMs
 ./ben-pssh.sh -h tmphost -p $PKEY -c $CLIENT_CONFIG
 
-rm $CLIENT_CONFIG
-
 if [ $START -gt 0 ]; then
     hostnames=$(cat tmphost)
 else
@@ -61,4 +63,4 @@ do
     counter=$(( 10#$counter + 1 ))
 done
 
-rm tmphost
+rm tmphost $CLIENT_CONFIG

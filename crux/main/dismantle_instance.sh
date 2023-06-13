@@ -54,14 +54,21 @@ then
 fi
 
 #remove $NAME from $HOSTNAME
-grep -i -v $NAME $HOSTNAME > tmp && mv tmp $HOSTNAME
+# check if hostnames length > 1
+line_count=$(wc -l < "$HOSTNAME")
+if [ "$line_count" -gt 1 ]; then
+    grep -i -v $NAME $HOSTNAME > tmp
+    mv tmp $HOSTNAME
+else
+    rm $HOSTNAME
+fi
 
 # remove $NAME entry from $CONFIG
 linenumber=$(grep -n $NAME $CONFIG | cut -d":" -f1)
 endnumber=$(( $linenumber + 7 ))
 sed -i "${linenumber},${endnumber}d" $CONFIG
 
-# remove $NAME from datasource
+# remove $NAME from $DATASOURCE
 linenumber=$(grep -n "name: $NAME" $DATASOURCE | cut -d":" -f1)
 endnumber=$(( $linenumber + 6 ))
 sudo sed -i "${linenumber},${endnumber}d" $DATASOURCE

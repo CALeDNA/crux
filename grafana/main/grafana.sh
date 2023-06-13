@@ -24,7 +24,7 @@ while getopts "h:p:u:s:n:" opt; do
 done
 
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
-./grafana-pssh.sh -h tmphost -u $USER
+./crux/grafana/main/grafana-pssh.sh -h tmphost -u $USER
 
 counter=0
 if [ $START -gt 0 ]; then

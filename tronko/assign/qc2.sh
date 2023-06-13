@@ -20,10 +20,7 @@ aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --e
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # download Anacapa
-#TODO switch from s3 to git clone
 git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
-# should already be dl from Dockerfile
-# aws s3 sync s3://ednaexplorer/Anacapa Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
 
@@ -37,9 +34,6 @@ OUT="./$PROJECTID-$PRIMER/${PROJECTID}QC"
 FORWARD="./$PROJECTID-$PRIMER/forward_primers.txt"
 REVERSE="./$PROJECTID-$PRIMER/reverse_primers.txt"
 LENGTH="./$PROJECTID-$PRIMER/metabarcode_loci_min_merge_length.txt"
-# FORWARD="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/forward_primers.txt"
-# REVERSE="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/reverse_primers.txt"
-# LENGTH="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/metabarcode_loci_min_merge_length.txt"
 
 
 # modifiy forward/reverse to only include $PRIMER information
@@ -60,7 +54,7 @@ aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://ednaexplorer/project
 
 
 # add ben tronko-assign jobs
-# run tronko assign paired/unpaired_F/R on $PRIMER and sample file
+# add tronko assign paired/unpaired_F/R on $PRIMER and sample file
 cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered || exit
 find . -type f -name '*_F_filt.fastq.gz' | sed 's/\.\///g' | sed 's/_F_filt\.fastq.gz//g' | while read -r filename; do
     if [[ -e "../paired/${filename}_F_filt.fastq.gz" ]]; then
