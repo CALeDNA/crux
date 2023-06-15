@@ -88,7 +88,7 @@ cd $BASEDIR/grafana/main
 mv $PRIVATEKEY hostnames $BASEDIR/ben
 cd $BASEDIR/ben
 # 4) setup ben
-./ben/ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -b $BENSERVER -p $PRIVATEKEY
+./ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -b $BENSERVER -p $PRIVATEKEY
 
 # move files back to basedir
 mv $PRIVATEKEY hostnames $BASEDIR
