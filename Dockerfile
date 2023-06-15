@@ -12,7 +12,7 @@ RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential
     bash "/tmp/Miniconda3-py38_4.12.0-Linux-x86_64.sh" -b -p /usr/local/miniconda
 
 COPY env.yml /app/env.yml
-ADD crux/bin /usr/local/crux_bin
+ADD bin /usr/local/crux_bin
 
 RUN git clone https://github.com/stamatak/standard-RAxML.git && \
     cd standard-RAxML && make -f Makefile.gcc && make -f Makefile.AVX2.gcc && \
