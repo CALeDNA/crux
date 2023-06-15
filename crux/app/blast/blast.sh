@@ -45,6 +45,13 @@ if [ ! -d "nt-missing-files" ] ; then
     rm nt-missing-files.tar.gz
 fi
 
+
+for d in ecopcr/*/
+do
+    # saves a master fasta per primer in ~/ecopcr
+    cat ${d}*.fasta > "${d%/}".fasta
+done
+
 #blast input output files
 output=$PRIMER-blast.fasta
 input=$PRIMER.fasta
@@ -102,6 +109,15 @@ python3 get-largest.py --input $JOB/$PRIMER.fasta --output $JOB/${PRIMER}_${NTCH
 aws s3 cp $JOB/${PRIMER}_${NTCHUNK}.fasta s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/${PRIMER}_${NTCHUNK}.fasta --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 # aws s3 cp $JOB/$FILTER/${FASTA}.tax.tsv s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA.tax.tsv --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 aws s3 cp $JOB/logs s3://ednaexplorer/crux/$RUNID/logs/blast_${PRIMER}_${NTCHUNK}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+=======
+        # run blast
+        time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
+        # clean blast output for tronko
+        ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
+        # output files uploaded in taxfilter script
+    fi
+fi
+
 
 # free up storage for new jobs
 rm -rf $JOB
