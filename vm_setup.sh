@@ -65,7 +65,7 @@ else
 fi
 
 
-mv $PRIVATEKEY hostnames $BASEDIR/crux/main/
+mv $PRIVATEKEY hostnames $JSCRED $BASEDIR/crux/main/
 cd ./crux/main
 # 1) run setup instance
 if [[ ! -z ${VOLUME} ]]; then
@@ -79,6 +79,7 @@ fi
 ./crux-pssh.sh -h hostnames -c $CONFIG -p $PRIMERS -u $USER -s $START -q $QC
 
 mv $PRIVATEKEY hostnames $BASEDIR/grafana/main
+mv $JSCRED $BASEDIR
 cd $BASEDIR/grafana/main
 # 3) setup grafana
 # updates datasources.yaml and grafana overview dashboard with new VMs
@@ -88,3 +89,6 @@ mv $PRIVATEKEY hostnames $BASEDIR/ben
 cd $BASEDIR/ben
 # 4) setup ben
 ./ben/ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -b $BENSERVER -p $PRIVATEKEY
+
+# move files back to basedir
+mv $PRIVATEKEY hostnames $BASEDIR
