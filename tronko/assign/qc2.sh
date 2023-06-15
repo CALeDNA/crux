@@ -63,18 +63,18 @@ find . -type f -name '*_F_filt.fastq.gz' | sed 's/\.\///g' | sed 's/_F_filt\.fas
         parameters="-2"
     fi;
     
-    ben add -s /tmp/ben-assign -c "cd crux; docker run --rm -t -v /home/ubuntu/crux/tronko/assign:/mnt -v /home/ubuntu/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-$PRIMER-assign-$filename crux /mnt/assign.sh -f $filename -i $PROJECTID -p $PRIMER $parameters" $PROJECTID-$PRIMER-assign-$filename -o /etc/ben/output;
+    /etc/ben/ben add -s /tmp/ben-assign -c "cd crux; docker run --rm -t -v /home/ubuntu/crux/tronko/assign:/mnt -v /home/ubuntu/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER-$filename crux /mnt/assign.sh -f $filename -i $PROJECTID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER-$filename -f main -o $OUTPUT;
 done
 
 # add unpaired_R files missed
 cd ../../unpaired_R/filtered || exit
 find . -type f -name '*_R_filt.fastq.gz' | sed 's/\.\///g' | sed 's/_R_filt\.fastq.gz//g' | while read -r filename; do
     if [[ ! -e "../paired/${filename}_R_filt.fastq.gz" ]]; then
-        ben add -s /tmp/ben-assign -c "cd crux; docker run --rm -t -v /home/ubuntu/crux/tronko/assign:/mnt -v /home/ubuntu/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-$PRIMER-assign-$filename crux /mnt/assign.sh -f $filename -i $PROJECTID -p $PRIMER -3" $PROJECTID-$PRIMER-assign-$filename -o /etc/ben/output;
+        /etc/ben/ben add -s /tmp/ben-assign -c "cd crux; docker run --rm -t -v /home/ubuntu/crux/tronko/assign:/mnt -v /home/ubuntu/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER-$filename crux /mnt/assign.sh -f $filename -i $PROJECTID -p $PRIMER -3" $PROJECTID-assign-$PRIMER-$filename -f main -o $OUTPUT;
     else
         echo "Skipping $filename - already in queue.";   
     fi
 done
 
 # clean up
-rm -r $PROJECTID-$PRIMER
+rm -r /mnt/$PROJECTID-$PRIMER /mnt/Anacapa
