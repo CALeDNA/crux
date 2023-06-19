@@ -16,15 +16,17 @@ while getopts "i:p:b:" opt; do
 done
 
 # download $PROJECTID/QC and samples
-aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-# download anacapa
-aws s3 sync s3://ednaexplorer/Anacapa-nexterafix Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+git clone -b cruxrachel https://github.com/CALeDNA/Anacapa.git
+# # download anacapa
+# aws s3 sync s3://ednaexplorer/Anacapa-nexterafix Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
 
 # EDIT THESE
 BASEDIR="/home/ubuntu/crux/tronko/assign/Anacapa" # change to folder you want shared into container
-CONTAINER="/home/ubuntu/crux/tronko/assign/Anacapa/anacapa-1.5.0.img" # change to full container .img path
+CONTAINER="/home/ubuntu/crux/tronko/assign/anacapa-1.5.0.img" # change to full container .img path
 DB="/home/ubuntu/crux/tronko/assign/Anacapa/Anacapa_db" # change to full path to Anacapa_db
 DATA="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/samples" # change to input data folder (default 12S_test_data inside Anacapa_db)
 OUT="/home/ubuntu/crux/tronko/assign/$PROJECTID-$PRIMER/${PROJECTID}QC" # change to output data folder
@@ -43,7 +45,7 @@ grep -A 1 ">$PRIMER" "$REVERSE" > tmp && mv tmp "$REVERSE"
 cd $BASEDIR || exit
 
 # If you need additional folders shared into the container, add additional -B arguments below
-chmod +x $BASEDIR/singularity/bin/* $BASEDIR/singularity/libexec/singularity/bin/* $DB/anacapa_QC_dada2.sh
+chmod +x ./singularity/bin/* $BASEDIR/singularity/libexec/singularity/bin/* $DB/anacapa_QC_dada2.sh
 time $BASEDIR/singularity/bin/singularity exec -B $BASEDIR $CONTAINER /bin/bash -c "$DB/anacapa_QC_dada2.sh -i $DATA -o $OUT -d $DB -f $FORWARD -r $REVERSE -e $LENGTH -a nextera -t MiSeq -l -g"
 
 cd || exit

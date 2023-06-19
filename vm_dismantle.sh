@@ -22,15 +22,22 @@ while getopts "j:h:m:c:d:" opt; do
     esac
 done
 
-# 1) run dismantle_instance.sh
-./crux/main/dismantle_instance.sh -j $JSCRED -h $HOSTNAME -m $NAME -c $CONFIG -d $DATASOURCE
+BASEDIR=$(pwd)
 
+mv $JSCRED $HOSTNAME $BASEDIR/crux/main
+cd $BASEDIR/crux/main
+# 1) run dismantle_instance.sh
+./dismantle_instance.sh -j $JSCRED -h $HOSTNAME -m $NAME -c $CONFIG -d $DATASOURCE
+
+
+mv $JSCRED $HOSTNAME $BASEDIR
+cd $BASEDIR/grafana/main
 # 2) update grafana dashboard
-sudo ./grafana/main/dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
+sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
 sudo systemctl restart grafana-server.service
 
 # 3) update ben panels in grafana
-sudo ./grafana/main/ben-dashboard-mod.py --dashboard $DASHBOARD
+sudo ./ben-dashboard-mod.py --dashboard $DASHBOARD
 
 
 

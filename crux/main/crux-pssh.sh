@@ -20,7 +20,7 @@ done
 
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
-parallel-ssh -i -t 0 -h tmphost "git clone -b crux-hector https://github.com/CALeDNA/crux.git"
+parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
 
 parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
 

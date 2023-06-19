@@ -2,6 +2,8 @@
 set -x
 
 OUTPUT="/etc/ben/output"
+INPUT_METADATA="METABARCODING.csv"
+BENPATH="/etc/ben/ben"
 while getopts "p:b:k:s:r:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
@@ -30,12 +32,17 @@ touch $PROJECTID/reverse_primers.txt
 touch $PROJECTID/metabarcode_loci_min_merge_length.txt
 
 # download metadata file
-aws s3 cp s3://ednaexplorer/projects/${PROJECTID}/InputMetadata.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://ednaexplorer/projects/${PROJECTID}/$INPUT_METADATA ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # download primer master sheet
 aws s3 cp s3://ednaexplorer/CruxV2/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
+# find header row
+line_number=$(grep -n "Sample Type" "$PROJECTID/$INPUT_METADATA" | cut -d ":" -f 1)
+# Remove all lines before the line containing "Sample Type"
+sed -i "1,$((line_number-1))d" "$PROJECTID/$INPUT_METADATA"
+
 # Read the header row and split it into an array
-IFS="," read -ra headers < "$PROJECTID/InputMetadata.csv"
+IFS="," read -ra headers < "$PROJECTID/$INPUT_METADATA"
 
 # Loop through the headers and find the positions of columns matching the pattern "Marker_N"
 marker_positions=()
@@ -60,7 +67,7 @@ while IFS="," read -ra row; do
             fi
         fi
     done
-done < <(tail -n +2 "$PROJECTID/InputMetadata.csv" | tr -d '\r')
+done < <(tail -n +2 "$PROJECTID/$INPUT_METADATA" | tr -d '\r')
 
 # Print the unique Markers and their corresponding FP and RP columns
 for value in "${!unique_values[@]}"; do
@@ -73,7 +80,7 @@ done
 while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
-        echo "Unique marker '$marker_value' and its corresponding primers appear in InputMetadata.csv"
+        echo "Unique marker '$marker_value' and its corresponding primers appear in $INPUT_METADATA"
 
         # Add Primer for QC
         echo ">$marker_value" >> $PROJECTID/forward_primers.txt
@@ -84,7 +91,7 @@ while IFS="," read -ra row; do
 
         echo "LENGTH_$marker_value=${row[12]}" >> $PROJECTID/metabarcode_loci_min_merge_length.txt
     else
-        echo "Unique marker '$marker_value' and its corresponding primers do not appear in InputMetadata.csv"
+        echo "Unique marker '$marker_value' and its corresponding primers do not appear in $INPUT_METADATA"
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
@@ -100,6 +107,9 @@ while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
-        ben add -s $BENSERVER -c "cd crux/tronko/assign; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job qc /mnt/qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign" $job -o $OUTPUT
+        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job qc /mnt/qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign" $job -o $OUTPUT
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
+
+# cleanup
+rm -r $PROJECTID
