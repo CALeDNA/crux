@@ -14,7 +14,7 @@ sudo mkdir -p /etc/ben/jobs
 sudo mv ben/ben /etc/ben/ben
 
 sudo cp node_util.py error_counter.sh /etc/ben/
-sudo cp ben-jobs.service ben-logs.service ben-logs.timer /etc/systemd/system
+sudo cp ben-jobs.service ben-jobs.timer ben-logs.service ben-logs.timer /etc/systemd/system
 
 # start ben
 /etc/ben/ben server -s /tmp/ben-ecopcr -d
@@ -24,8 +24,14 @@ sudo cp ben-jobs.service ben-logs.service ben-logs.timer /etc/systemd/system
 /etc/ben/ben server -s /tmp/ben-qc -d
 /etc/ben/ben server -s /tmp/ben-assign -d
 
+sudo systemctl enable ben-logs.service
+sudo systemctl enable ben-jobs.service
+sudo systemctl enable ben-logs.timer
+sudo systemctl enable ben-jobs.timer
 sudo systemctl start ben-logs.service
 sudo systemctl start ben-jobs.service
+sudo systemctl start ben-logs.timer
+sudo systemctl start ben-jobs.timer
 
 sudo systemctl status ben-logs --no-pager
 sudo systemctl status ben-jobs --no-pager
