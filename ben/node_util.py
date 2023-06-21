@@ -3,6 +3,7 @@ import glob
 import http.server
 from prometheus_client import start_http_server,Gauge,Info,CollectorRegistry
 from typing import Iterable
+import os
 
 REGISTRY = CollectorRegistry()
 
@@ -36,7 +37,7 @@ def benlist():
   isFinished = 0
   benServers=glob.glob("/tmp/ben-*")
   for server in benServers:
-    if(subprocess.run(["/etc/ben/ben", "list", "-s", server]).returncode == 0):
+    if(subprocess.run(["/etc/ben/ben", "list", "-s", server], capture_output=False).returncode == 0):
       result = subprocess.run(["/etc/ben/ben", "-s", server, "list"], capture_output=True)
       result = result.stdout.decode().strip().splitlines()
       for row in result:
@@ -48,13 +49,18 @@ def benlist():
               isFinished += 1
           else:
             isQueued += 1
+      # save `ben list` to a file to view
+      basename=os.path.basename(server)
+      print(f"/etc/ben/{server}.txt")
+      with open(os.path.join("/etc/ben/jobs", f"{basename}.txt"), "w") as file:
+        file.write("\n".join(result))
   totalJobs = isRunning + isQueued + isFinished
   return isFinished, isRunning, isQueued, totalJobs
 
 def bennodes():
   benServers=glob.glob("/tmp/ben-*")
   for server in benServers:
-    if(subprocess.run(["/etc/ben/ben", "list", "-s", server]).returncode == 0):
+    if(subprocess.run(["/etc/ben/ben", "list", "-s", server], capture_output=False).returncode == 0):
       result = subprocess.run(["/etc/ben/ben", "-s", server, "nodes"], capture_output=True)
       result = result.stdout.decode().strip().splitlines()
       for i in result:

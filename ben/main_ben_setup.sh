@@ -10,6 +10,7 @@ cd ben && make && cd ..
 
 sudo mkdir -p /etc/ben
 sudo mkdir -p /etc/ben/output
+sudo mkdir -p /etc/ben/jobs
 sudo mv ben/ben /etc/ben/ben
 
 sudo cp node_util.py error_counter.sh /etc/ben/

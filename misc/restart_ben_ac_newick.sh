@@ -2,7 +2,7 @@
 set -x
 
 # restart ben after a crash / resize
-output="/home/ubuntu/ben/output/"
+output="/etc/ben/output/"
 cutoff_length=25000
 folders=$(aws s3 ls s3://ednaexplorer/tronko/2022-12-27/ --endpoint-url https://js2.jetstream-cloud.org:8001/)
 
