@@ -40,16 +40,16 @@ then
     # Count rows with values less than 5 in the 4th and 5th columns in v1 of paired
     count_1=0
     for file in $PROJECTID-$FILE/*.txt; do
-        count_1=$((count_1 + $(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$file"))
+        count_1=$((count_1 + $(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$file")))
     done
 
     # run tronko assign paired v2 (rc)
-    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -p -z -w -q -1 -2 $PROJECTID-$FILE/${FILE}_R_filt.fastq.gz -2 $PROJECTID-$FILE${FILE}_F_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE-rc/$FILE.txt
+    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -p -z -w -q -2 $PROJECTID-$FILE/${FILE}_F_filt.fastq.gz -1 $PROJECTID-$FILE/${FILE}_R_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE-rc/$FILE.txt
 
     # Count rows with values less than 5 in the 4th and 5th columns in v2 (rc) of paired
     count_2=0
     for file in "$PROJECTID-$FILE-rc"/*.txt; do
-        count_2=$((count_2 + $(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$file"))
+        count_2=$((count_2 + $(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$file")))
     done
 
     # Compare counts and upload folder with the highest count
@@ -81,7 +81,7 @@ then
     # Count rows with values less than 5 in the 4th column in v1 of unpaired_F
     count_1=0
     for file in $PROJECTID-$FILE/*.txt; do
-        count_1=$((count_1 + $(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$file"))
+        count_1=$((count_1 + $(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$file")))
     done
 
     # run tronko assign unpaired_F v2 (rc)
@@ -90,7 +90,7 @@ then
     # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
     count_2=0
     for file in "$PROJECTID-$FILE-rc"/*.txt; do
-        count_2=$((count_1 + $(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$file"))
+        count_2=$((count_1 + $(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$file")))
     done
 
     # Compare counts and upload folder with the highest count
@@ -122,16 +122,16 @@ then
     # Count rows with values less than 5 in the 5th column in v1 of unpaired_R
     count_1=0
     for file in $PROJECTID-$FILE/*.txt; do
-        count_1=$((count_1 + $(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$file"))
+        count_1=$((count_1 + $(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$file")))
     done
 
     # run tronko assign unpaired_R v2 (rc)
-    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$FILE/${FILE}_R_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE/$FILE.txt
+    tronko-assign -r -f $PROJECTID-$FILE/tronkodb/reference_tree.txt.gz -a $PROJECTID-$FILE/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$FILE/${FILE}_R_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$FILE-rc/$FILE.txt
 
     # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
     count_2=0
     for file in "$PROJECTID-$FILE-rc"/*.txt; do
-        count_2=$((count_1 + $(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$file"))
+        count_2=$((count_1 + $(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$file")))
     done
 
 

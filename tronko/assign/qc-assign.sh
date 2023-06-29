@@ -107,7 +107,7 @@ while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
-        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job qc /mnt/qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign" $job -o $OUTPUT
+        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; ./qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION" $job -o $OUTPUT
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
