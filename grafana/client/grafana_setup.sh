@@ -2,8 +2,6 @@
 
 PROM_VERSION='2.42.0'
 NODE_VERSION='1.5.0'
-# PUSHGATEWAY_VERSION='1.5.1'
-# ALERTMANAGER_VERSION='0.25.0'
 
 # prometheus setup
 sudo useradd     --system     --no-create-home     --shell /bin/false prometheus

@@ -16,6 +16,7 @@ QC="" # -> is this setup for QC pipeline?
 START=0
 NODES=0
 BENSERVER=""
+VARS="/home/ubuntu/crux/crux/vars/crux_vars.sh"
 while getopts "u:f:i:k:j:n:m:b:s:w:v:c:p:qo:e:" opt; do
     case $opt in
         u) USER="$OPTARG"
@@ -76,7 +77,11 @@ fi
 
 # 2) run docker build
 # -q: should run docker for crux or qc pipeline
-./crux-pssh.sh -h hostnames -c $CONFIG -p $PRIMERS -u $USER -s $START -q $QC
+if [ "${QC}" = "TRUE" ]; then
+    ./crux-pssh.sh -h hostnames -c $VARS -p $PRIMERS -u $USER -s $START -q $QC
+else
+    ./crux-pssh.sh -h hostnames -c $VARS -p $PRIMERS -u $USER -s $START
+fi
 
 mv $PRIVATEKEY hostnames $BASEDIR/grafana/main
 mv $JSCRED $BASEDIR
