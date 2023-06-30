@@ -11,7 +11,8 @@ NODES=4
 NAME="chunk"
 CLIENT_CONFIG="config"
 BENSERVER=/tmp/ben-ubuntu
-while getopts "h:c:s:n:m:u:b:p:" opt; do
+VMNUMBER=0
+while getopts "h:c:s:n:m:u:e:p:b:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -25,9 +26,11 @@ while getopts "h:c:s:n:m:u:b:p:" opt; do
         ;;
         u) USER="$OPTARG"
         ;;
-        b) BENSERVER="$OPTARG"
+        e) BENSERVER="$OPTARG"
         ;;
-        p) PKEY="$OPTARG"
+        p) PKEY="$OPTARG" # assumes file name, not path
+        ;;
+        b) VMNUMBER="$OPTARG"
         ;;
     esac
 done
@@ -37,7 +40,7 @@ echo "Host main" >> $CLIENT_CONFIG
 echo "HostName $(curl ifconfig.me)" >> $CLIENT_CONFIG
 echo "User $USER" >> $CLIENT_CONFIG
 echo "PubKeyAuthentication yes" >> $CLIENT_CONFIG
-echo "IdentityFile $PKEY" >> $CLIENT_CONFIG
+echo "IdentityFile /home/$USER/.ssh/$PKEY" >> $CLIENT_CONFIG
 echo "IdentitiesOnly yes" >> $CLIENT_CONFIG
 echo "StrictHostKeyChecking accept-new" >> $CLIENT_CONFIG
 echo "" >> $CLIENT_CONFIG
@@ -54,7 +57,7 @@ else
     hostnames=$(cat $HOSTNAME)
 fi
 
-counter=0
+counter=$VMNUMBER
 for line in $hostnames
 do
     counter=$(printf '%02d' $counter)

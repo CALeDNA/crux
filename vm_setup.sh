@@ -88,12 +88,12 @@ mv $JSCRED $BASEDIR
 cd $BASEDIR/grafana/main
 # 3) setup grafana
 # updates datasources.yaml and grafana overview dashboard with new VMs
-./grafana.sh -h hostnames -p $PRIVATEKEY -u $USER -s $START -n $VMNAME
+./grafana.sh -h hostnames -p $PRIVATEKEY -u $USER -s $START -n $VMNAME -b $VMNUMBER
 
 mv $PRIVATEKEY hostnames $BASEDIR/ben
 cd $BASEDIR/ben
 # 4) setup ben
-./ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -b $BENSERVER -p $PRIVATEKEY
+./ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -e $BENSERVER -p $PRIVATEKEY -b $VMNUMBER
 
 # move files back to basedir
 mv $PRIVATEKEY hostnames $BASEDIR

@@ -8,7 +8,8 @@ DATASOURCE=/etc/grafana/provisioning/datasources/datasources.yaml
 USER=ubuntu
 START=0
 NAME="chunk"
-while getopts "h:p:u:s:n:" opt; do
+VMNUMBER=0
+while getopts "h:p:u:s:n:b:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -20,13 +21,15 @@ while getopts "h:p:u:s:n:" opt; do
         ;;
         n) NAME="$OPTARG"
         ;;
+        b) VMNUMBER="$OPTARG"
+        ;;
     esac
 done
 
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 ./grafana-pssh.sh -h tmphost -u $USER
 
-counter=0
+counter=$VMNUMBER
 if [ $START -gt 0 ]; then
     # use tmphost file
     hostnames=$(cat tmphost)
