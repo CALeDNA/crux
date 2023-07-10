@@ -16,7 +16,7 @@ while getopts "i:p:b:k:s:r:" opt; do
         ;;
         r) AWS_DEFAULT_REGION="$OPTARG"
         ;;
-        *) echo "usage: $0 [-i] [-p] [-b]" >&2
+        *) echo "usage: $0 [-i] [-p] [-b] [-k] [-s] [-r]" >&2
             exit 1 ;;
     esac
 done
@@ -69,6 +69,9 @@ cd ~/crux/tronko/assign || exit
 aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+# upload QC logs
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # add ben tronko-assign jobs
 

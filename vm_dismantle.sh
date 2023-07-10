@@ -37,7 +37,7 @@ sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
 sudo systemctl restart grafana-server.service
 
 # 3) update ben panels in grafana
-sudo ./ben-dashboard-mod.py --dashboard $DASHBOARD
+sudo python3 ben-dashboard-mod.py --dashboard $DASHBOARD
 
 
 

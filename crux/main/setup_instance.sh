@@ -120,7 +120,7 @@ do
     echo "HostName $ip_address" >> $CONFIG
     echo "User $OS_USERNAME" >> $CONFIG
     echo "PubKeyAuthentication yes" >> $CONFIG
-    echo "IdentityFile $PRIVATEKEY" >> $CONFIG
+    echo "IdentityFile /home/ubuntu/.ssh/$PRIVATEKEY" >> $CONFIG
     echo "IdentitiesOnly yes" >> $CONFIG
     echo "StrictHostKeyChecking accept-new" >> $CONFIG
     echo "" >> $CONFIG
