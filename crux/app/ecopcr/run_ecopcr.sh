@@ -4,7 +4,7 @@ set -x
 
 CONFIG=""
 VARS="/vars"
-while getopts "c:h:v:" opt; do
+while getopts "c:h:v:p:f:r:l:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
@@ -12,45 +12,40 @@ while getopts "c:h:v:" opt; do
         ;;
         v) VARS="$OPTARG"
         ;;
+        p) PRIMER="$OPTARG"
+        ;;
+        f) FORWARD="$OPTARG"
+        ;;
+        r) REVERSE="$OPTARG"
+        ;;
+        l) LINKS="$OPTARG" # chunk file name
+        ;;
     esac
 done
 
-cd /mnt
 cp ${VARS}/* .
-# activate conda env
-export PATH="/usr/local/miniconda/bin:$PATH";
 
 source ${CONFIG}
 
-# conda init bash;
-
-# . /root/.bashrc
-
-# conda activate base;
-OUTPUT="fasta_output"
-mkdir ${OUTPUT}
+OUTPUT="$PRIMER-$LINKS/OUTPUT"
+mkdir $PRIMER-$LINKS
+mkdir $OUTPUT
 
 # download link files
-aws s3 sync s3://ednaexplorer/crux/${RUNID}/urls/chunk${HOSTNAME}/ ./chunk${HOSTNAME} --endpoint-url https://js2.jetstream-cloud.org:8001/
-# gocmd get -c ${CYVERSE} ${CYVERSE_BASE}/${RUNID}/urls/chunk${HOSTNAME}/ .
+aws s3 cp s3://ednaexplorer/CruxV2/ecopcr_links/$LINKS $PRIMER-$LINKS/$LINKS --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-# run obi_ecopcr.sh on every links file
-find chunk${HOSTNAME}/* | parallel -I% --tag --max-args 1 -P ${THREADS} ./obi_ecopcr.sh -g % -p ${PRIMERS} -o ${OUTPUT} -b % -e ${ERROR} -c ${CONFIG} >> logs 2>&1
+# run obi_ecopcr.sh on every URL in $PRIMER-$LINKS/$LINKS
+parallel -I% --tag --max-args 1 -P ${THREADS} ./obi_ecopcr.sh -l % -p $PRIMER -f $FORWARD -r $REVERSE -d $PRIMER-$LINKS -b % -e $ERROR -c $CONFIG ::: $PRIMER-$LINKS/$LINKS
 
-aws s3 cp logs s3://ednaexplorer/crux/${RUNID}/logs/ecopcr_chunk${HOSTNAME}.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
-# gocmd put -c ${CYVERSE} logs ${CYVERSE_BASE}/${RUNID}/logs/ecopcr_chunk${HOSTNAME}.txt
 # combine primer fasta files into one
-for primer in $(cat $PRIMERS)
-do
-    PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 )
-    find ${OUTPUT}/ -type f -name "*${PRIMERNAME}.fasta" | xargs -I{} cat {} >> ${PRIMERNAME}_${HOSTNAME}.fasta
+# PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 )
+find $OUTPUT/ -type f -name "*$PRIMER.fasta" | xargs -I{} cat {} >> $PRIMER-$LINKS.fasta
 
-    # upload combined fasta file to cyverse
-    aws s3 cp ${PRIMERNAME}_${HOSTNAME}.fasta s3://ednaexplorer/crux/${RUNID}/ecopcr/${PRIMERNAME}/chunk${HOSTNAME}.fasta --endpoint-url https://js2.jetstream-cloud.org:8001/
-    # gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/ecopcr/${PRIMERNAME}
-    # for i in {1..5}; do gocmd put -c ${CYVERSE} ${PRIMERNAME}_${HOSTNAME}.fasta ${CYVERSE_BASE}/${RUNID}/ecopcr/${PRIMERNAME}/chunk${HOSTNAME}.fasta && echo "Successful gocmd upload" && break || sleep 15; done
-    rm ${PRIMERNAME}_${HOSTNAME}.fasta
-done
+# upload combined fasta file
+aws s3 cp $PRIMER-$LINKS.fasta s3://ednaexplorer/CruxV2/$RUNID/ecopcr/$PRIMER/$LINKS.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+# gocmd -c ${CYVERSE} mkdir ${CYVERSE_BASE}/${RUNID}/ecopcr/${PRIMERNAME}
+# for i in {1..5}; do gocmd put -c ${CYVERSE} ${PRIMERNAME}_${HOSTNAME}.fasta ${CYVERSE_BASE}/${RUNID}/ecopcr/${PRIMERNAME}/chunk${HOSTNAME}.fasta && echo "Successful gocmd upload" && break || sleep 15; done
+rm ${PRIMERNAME}_${HOSTNAME}.fasta
 
 # cleanup
 rm ${OUTPUT}/*
