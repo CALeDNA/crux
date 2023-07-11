@@ -25,8 +25,6 @@ OUTPUT="$PRIMER-$LINKS/OUTPUT"
 mkdir $PRIMER-$LINKS
 mkdir $OUTPUT
 
-apt-get install unzip
-
 # download taxdump
 # wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
 mkdir taxdump
