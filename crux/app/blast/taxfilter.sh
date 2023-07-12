@@ -32,7 +32,6 @@ if [ ! -d "taxid2taxonpath" ] ; then
     git clone https://github.com/CALeDNA/taxid2taxonpath.git taxid2taxonpath
 fi
 
-# aws s3 cp s3://ednaexplorer/crux/$RUNID/blast/$FASTA $JOB/$BLASTDIR --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
 mkdir -p $JOB/$BLASTDIR
 touch $JOB/$BLASTDIR/${FASTA}_tmp
 touch $JOB/logs
@@ -49,13 +48,8 @@ sed -i 's/-//g' $JOB/$BLASTDIR/${FASTA}_tmp
 # get largest seq per nt accession id
 rm $JOB/$BLASTDIR/${FASTA}; touch $JOB/$BLASTDIR/${FASTA}
 python3 get-largest.py --input $JOB/$BLASTDIR/${FASTA}_tmp --output $JOB/$BLASTDIR/${FASTA} --log $JOB/logs
-# mv $JOB/$BLASTDIR/${FASTA}_tmp $JOB/$BLASTDIR/${FASTA}
-
-
-# # remove orig fasta file and temp tax
-# rm ${BLASTDIR}/${primer}/${primer}_blast_${NUM_ALIGNMENTS}_${PERC_IDENTITY}_${primer}.fasta_${chunk}*
 
 # upload to js2 bucket
-aws s3 cp $JOB/$BLASTDIR/${FASTA} s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
-aws s3 cp $JOB/$BLASTDIR/${FASTA}.tax.tsv s3://ednaexplorer/crux/$RUNID/fa-taxid/$PRIMER/$FASTA.tax.tsv --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
-aws s3 cp $JOB/logs s3://ednaexplorer/crux/$RUNID/logs/fa-taxid_$FASTA.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ --no-progress
+aws s3 cp $JOB/$BLASTDIR/$FASTA s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp $JOB/logs s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/logs/$FASTA.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/

@@ -3,7 +3,7 @@
 set -x
 
 CONFIG=""
-while getopts "c:v:p:f:r:l:" opt; do
+while getopts "c:v:p:f:r:l:b:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
@@ -14,6 +14,8 @@ while getopts "c:v:p:f:r:l:" opt; do
         r) REVERSE="$OPTARG"
         ;;
         l) LINKS="$OPTARG" # chunk file name
+        ;;
+        b) BENSERVER="$OPTARG"
         ;;
     esac
 done
@@ -45,6 +47,12 @@ find $OUTPUT/ -type f -name "*$PRIMER.fasta" | xargs -I{} cat {} >> $PRIMER-$LIN
 aws s3 cp $PRIMER-$LINKS.fasta s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ecopcr/$LINKS.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 rm $PRIMER-$LINKS.fasta
+
+# add ben blast job for each NT chunk
+for ((nt=0; nt<=81; nt++)); do
+    nt=$(printf '%02d' $nt)
+    /etc/ben/ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/crux/app/blast:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PRIMER-$RUNID-blast-$LINKS crux /mnt/blast.sh -c /vars/crux_vars.sh -j $PRIMER-$RUNID-blast-$LINKS -i $RUNID -p $PRIMER -n $nt -e $LINKS.fasta" $PRIMER-$RUNID-blast-$LINKS -o /etc/ben/output
+done
 
 # cleanup
 rm $PRIMER-$LINKS/*
