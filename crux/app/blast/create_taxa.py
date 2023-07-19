@@ -11,7 +11,7 @@ args = parser.parse_args()
 filepath = args.input
 output = args.output
 logs=args.log
-taxid = f"{output}.tax.tsv"
+taxid = f"{output}.taxid"
 
 with open(output, 'a') as out:
     with open(filepath, 'r') as input:

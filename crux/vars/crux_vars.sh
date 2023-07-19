@@ -36,7 +36,7 @@ NETWORK=ef65cd35-08de-4d4c-a664-e9b1aed32793
 VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 
 # accession ID file/folder names
-LINKS="wgsgbsize"
+#LINKS="wgsgbsize"
 URLS="urls"
 NTOTAL=81 # number of nt chunks
 NTFILE="nt-ftp"

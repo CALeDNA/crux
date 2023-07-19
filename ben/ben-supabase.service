@@ -1,0 +1,13 @@
+[Unit]
+Description=Ben Supabase Service
+After=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/etc/ben/supabase
+ExecStart=/bin/bash -c 'source /usr/local/miniconda/bin/activate supabase && /etc/ben/supabase/supabase_ben.sh'
+Type=simple
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

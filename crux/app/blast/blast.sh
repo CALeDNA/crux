@@ -4,7 +4,7 @@ set -x
 set -o allexport
 
 
-while getopts "c:j:i:p:n:" opt; do
+while getopts "c:j:i:p:n:e:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
         ;;
@@ -16,36 +16,35 @@ while getopts "c:j:i:p:n:" opt; do
         ;;
         n) NTCHUNK="$OPTARG" # nt chunk number
         ;;
+        e) ECOPCRCHUNK="$OPTARG"
+        ;;
     esac
 done
 
-source ${CONFIG}
+source $CONFIG
 
 cd /mnt
-mkdir ${JOB}
 
-# download all ecopcr fasta files and combine them. 
-aws s3 sync s3://ednaexplorer/crux/$RUNID/ecopcr ./ecopcr --endpoint-url https://js2.jetstream-cloud.org:8001/
+# delete $JOB in case it exists locally from unfinished run
+rm -rf $JOB 2>/dev/null
+
+mkdir $JOB
+
+# download ecopcr fasta file
+aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ecopcr/$ECOPCRCHUNK ./ecopcr/$ECOPCRCHUNK --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # download missing nt files
 if [ ! -d "nt-missing-files" ] ; then
-    aws s3 cp s3://ednaexplorer/crux/nt-missing-files.tar.gz . --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://ednaexplorer/CruxV2/nt-missing-files.tar.gz . --no-progress  --endpoint-url https://js2.jetstream-cloud.org:8001/
     tar --skip-old-files -xf nt-missing-files.tar.gz
     rm nt-missing-files.tar.gz
 fi
 
-for d in ecopcr/*/
-do
-    # saves a master fasta per primer in ~/ecopcr
-    cat ${d}*.fasta > "${d%/}".fasta
-done
-
 #blast input output files
-output=$PRIMER-blast.fasta
-input=$PRIMER.fasta
+output=$PRIMER-blast-$ECOPCRCHUNK
 
 # check if blast already ran this (primer,nt) pair
-not_exists=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/fa-taxid/$PRIMER/$PRIMER-blast.fasta_$NTCHUNK --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
+not_exists=$(aws s3api head-object --bucket ednaexplorer --key CruxV2/$RUNID/$PRIMER/blast/$output-$NTCHUNK --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
 if [ $not_exists == 255 ];
 then
     # file does not exist on aws
@@ -59,34 +58,40 @@ then
 
     blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$NTCHUNK.fasta
     # run blast
-    time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
-    # clean blast output for tronko
-    ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB -k $AWS_ACCESS_KEY_ID
+    time blastn -query ./ecopcr/$ECOPCRCHUNK -out $JOB/$output-$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
+    # run taxfilter if blastn output is not empty
+    if [ -s $JOB/$output-$NTCHUNK ]; then
+        # clean blast output for tronko
+        ./taxfilter.sh -f $output-$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
+    else
+        echo "Output file is empty. Skipping taxfilter.sh step."
+    fi
 else
     # file exists. checking if empty"
-    length=$(aws s3api head-object --bucket ednaexplorer --key crux/${RUNID}/fa-taxid/$PRIMER/$PRIMER-blast.fasta_$NTCHUNK --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
+    length=$(aws s3api head-object --bucket ednaexplorer --key CruxV2/$RUNID/$PRIMER/blast/$output-$NTCHUNK --endpoint-url https://js2.jetstream-cloud.org:8001/ | jq ".ContentLength")
     if (( $length > 0 )); 
     then
-            echo "skipping $file"
+            echo "skipping $output-$NTCHUNK"
     else
         # empty file exists. rerun blast just in case
-        # delete $JOB in case it exists locally from unfinished run
-        rm -rf $JOB
-        mkdir $JOB
         # download nt file
         wget -q --retry-connrefused --timeout=300 --tries=inf --continue -P $JOB/nt$NTCHUNK ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.$NTCHUNK.tar.gz
         tar -xf $JOB/nt$NTCHUNK/nt.$NTCHUNK.tar.gz -C $JOB/nt$NTCHUNK
+        cp nt-missing-files/* $JOB/nt$NTCHUNK/
         sed -i "s/^DBLIST.*/DBLIST nt.$NTCHUNK /" $JOB/nt$NTCHUNK/nt.nal
 
-        blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$chunk.fasta
+        blastdbcmd -entry all -db $JOB/nt$NTCHUNK/nt -out $JOB/nt$NTCHUNK.fasta
         # run blast
-        time blastn -query ecopcr/$input -out $JOB/${output}_$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
-        # clean blast output for tronko
-        ./taxfilter.sh -f ${output}_$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
-        # output files uploaded in taxfilter script
+        time blastn -query ./ecopcr/$ECOPCRCHUNK -out $JOB/$output-$NTCHUNK -db $JOB/nt$NTCHUNK/nt -outfmt "6 saccver staxid sseq" -num_threads $BLAST_THREADS -evalue $eVALUE -perc_identity $PERC_IDENTITY -num_alignments $NUM_ALIGNMENTS -gapopen $GAP_OPEN -gapextend $GAP_EXTEND
+        # run taxfilter if blastn output is not empty
+        if [ -s $JOB/$output-$NTCHUNK ]; then
+            # clean blast output for tronko
+            ./taxfilter.sh -f $output-$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
+        else
+            echo "Output file is empty. Skipping taxfilter.sh step."
+        fi
     fi
 fi
 
-
-# free up storage for new jobs
+# cleanup
 rm -rf $JOB
