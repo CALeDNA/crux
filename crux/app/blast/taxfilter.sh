@@ -22,7 +22,7 @@ source ${CONFIG}
 
 # download taxdump and taxid2taxonpath script
 if [ ! -d "taxdump" ] ; then
-    wget -nc ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+    wget -q -nc ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
     mkdir -p taxdump
     tar -xf taxdump.tar.gz -C taxdump
     rm taxdump.tar.gz
