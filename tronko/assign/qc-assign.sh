@@ -36,11 +36,6 @@ aws s3 cp s3://ednaexplorer/projects/${PROJECTID}/$INPUT_METADATA ${PROJECTID}/ 
 # download primer master sheet
 aws s3 cp s3://ednaexplorer/CruxV2/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-# find header row
-line_number=$(grep -n "Sample Type" "$PROJECTID/$INPUT_METADATA" | cut -d ":" -f 1)
-# Remove all lines before the line containing "Sample Type"
-sed -i "1,$((line_number-1))d" "$PROJECTID/$INPUT_METADATA"
-
 # Read the header row and split it into an array
 IFS="," read -ra headers < "$PROJECTID/$INPUT_METADATA"
 
@@ -52,7 +47,7 @@ for i in "${!headers[@]}"; do
     fi
 done
 
-echo "Positions of columns matching 'Marker_N': ${marker_positions[@]}"
+echo "Positions of columns matching 'Marker N': ${marker_positions[@]}"
 
 # Create an associative array (hash map) to store unique Marker and their corresponding FP and RP columns
 declare -A unique_values

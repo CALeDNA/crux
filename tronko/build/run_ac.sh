@@ -44,7 +44,7 @@ if (( $len > $cutoff_length ))
 then
     # run ancestral clust
     bin_size=$(( ($len + $max_length - 1) / $max_length ))
-    time ./bin/ancestralclust -i ${fasta} -t ${taxa} -d ${JOB} -f -r 1000 -b ${bin_size} -c 4 -p 75
+    time ./bin/ancestralclust -i ${fasta} -t ${taxa} -d ${JOB} -f -u -r 1000 -b ${bin_size} -c 4 -p 75
 else
     cp ${fasta} ${JOB}/0.fasta
     cp ${taxa} ${JOB}/0_taxonomy.txt

@@ -61,7 +61,7 @@ cd $BASEDIR || exit
 
 # If you need additional folders shared into the container, add additional -B arguments below
 chmod +x $BASEDIR/singularity/bin/* $BASEDIR/singularity/libexec/singularity/bin/* $DB/anacapa_QC_dada2.sh
-time $BASEDIR/singularity/bin/singularity exec -B $BASEDIR $CONTAINER /bin/bash -c "$DB/anacapa_QC_dada2.sh -i $DATA -o $OUT -d $DB -f $FORWARD -r $REVERSE -e $LENGTH -a nextera -t MiSeq -l -g"
+time $BASEDIR/singularity/bin/singularity exec -B $BASEDIR $CONTAINER /bin/bash -c "$DB/anacapa_QC_dada2.sh -i $DATA -o $OUT -d $DB -f $FORWARD -r $REVERSE -e $LENGTH -a nextera -t MiSeq -l"
 
 cd ~/crux/tronko/assign || exit
 

@@ -29,12 +29,12 @@ if [ "${PAIRED}" = "TRUE" ]
 then
     # check if tronko assign already ran on paired
     not_exists=$(aws s3api head-object --bucket ednaexplorer --key projects/$PROJECTID/assign/$PRIMER/paired/$FILE.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
-    if [ "$((not_exists))" -ne 255 ]; then
+    if [ "$((not_exists))" -eq 0 ]; then
         # tronko assign paired file exists on js2
         echo "Skipping tronko assign paired for: $FILE"
     else
         # tronko assign paired does not exist on js2, run
-        echo "run paired: $FILE"
+        echo "File does not exist on s3 - running paired: $FILE"
         # download tronko database
         aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         
@@ -79,12 +79,12 @@ if [ "${UNPAIRED_F}" = "TRUE" ]
 then
     # check if tronko assign already ran on unpaired_f
     not_exists=$(aws s3api head-object --bucket ednaexplorer --key projects/$PROJECTID/assign/$PRIMER/unpaired_F/$FILE.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
-    if [ "$((not_exists))" -ne 255 ]; then
+    if [ "$((not_exists))" -eq 0 ]; then
         # tronko assign unpaired_f file exists on js2
         echo "Skipping tronko assign unpaired_f for: $FILE"
     else
         # tronko assign unpaired_f does not exist on js2, run
-        echo "run unpaired_f: $FILE"
+        echo "File does not exist on s3 - run unpaired_f: $FILE"
         # download tronko database
         aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         
@@ -129,12 +129,12 @@ if [ "${UNPAIRED_R}" = "TRUE" ]
 then
     # check if tronko assign already ran on unpaired_r
     not_exists=$(aws s3api head-object --bucket ednaexplorer --key projects/$PROJECTID/assign/$PRIMER/unpaired_R/$FILE.txt --endpoint-url https://js2.jetstream-cloud.org:8001/ >/dev/null 2>1; echo $?)
-    if [ "$((not_exists))" -ne 255 ]; then
+    if [ "$((not_exists))" -eq 0 ]; then
         # tronko assign unpaired_r file exists on js2
         echo "Skipping tronko assign unpaired_r for: $FILE"
     else
         # tronko assign unpaired_r does not exist on js2, run
-        echo "run unpaired_r: $FILE"
+        echo "File does not exist on s3 - run unpaired_r: $FILE"
         # download tronko database
         aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$FILE/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         
