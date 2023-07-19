@@ -19,6 +19,7 @@ sudo cp ben-jobs.service ben-jobs.timer ben-logs.service ben-logs.timer /etc/sys
 # start ben
 /etc/ben/ben server -s /tmp/ben-ecopcr -d
 /etc/ben/ben server -s /tmp/ben-blast -d
+/etc/ben/ben server -s /tmp/ben-ac -d
 /etc/ben/ben server -s /tmp/ben-newick -d
 /etc/ben/ben server -s /tmp/ben-tronko -d
 /etc/ben/ben server -s /tmp/ben-qc -d
