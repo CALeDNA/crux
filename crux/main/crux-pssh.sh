@@ -26,6 +26,8 @@ parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
 
 parallel-scp -h tmphost $PRIMERS /home/$USER/crux/crux/vars/
 
+parallel-ssh -i -t 0 -h tmphost "sudo apt install awscli -y"
+
 if [ "${QC}" = "TRUE" ]
 then
     parallel-ssh -i -t 0 -h tmphost "cd crux/tronko/assign; docker build -q -t qc ."
