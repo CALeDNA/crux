@@ -39,7 +39,7 @@ aws s3 cp s3://ednaexplorer/CruxV2/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-pr
 # Read the header row and split it into an array
 IFS="," read -ra headers < "$PROJECTID/$INPUT_METADATA"
 
-# Loop through the headers and find the positions of columns matching the pattern "Marker_N"
+# Loop through the headers and find the positions of columns matching the pattern "Marker N"
 marker_positions=()
 for i in "${!headers[@]}"; do
     if [[ "${headers[$i]}" =~ ^Marker\ [0-9]+$ ]]; then
@@ -74,20 +74,27 @@ done
 # Loop through eDNAExplorerPrimers file and check if the Marker ID and FP/RP columns appear in the same row
 while IFS="," read -ra row; do
     marker_value="${row[1]}"
-    if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
-        echo "Unique marker '$marker_value' and its corresponding primers appear in $INPUT_METADATA"
+    FP="${row[2]}"
+    RP="${row[3]}"
+    for key in "${!unique_values[@]}"; do
+        if [[ "${unique_values[$key]}" == "$FP $RP" ]]; then
+            echo "Unique marker '$marker_value' and its corresponding primers appear in $INPUT_METADATA"
 
-        # Add Primer for QC
-        echo ">$marker_value" >> $PROJECTID/forward_primers.txt
-        echo "${row[2]}" >> $PROJECTID/forward_primers.txt
+            # Add Primer for QC
+            echo ">$marker_value" >> $PROJECTID/forward_primers.txt
+            echo "${row[2]}" >> $PROJECTID/forward_primers.txt
 
-        echo ">$marker_value" >> $PROJECTID/reverse_primers.txt
-        echo "${row[3]}" >> $PROJECTID/reverse_primers.txt
+            echo ">$marker_value" >> $PROJECTID/reverse_primers.txt
+            echo "${row[3]}" >> $PROJECTID/reverse_primers.txt
 
-        echo "LENGTH_$marker_value=${row[12]}" >> $PROJECTID/metabarcode_loci_min_merge_length.txt
-    else
-        echo "Unique marker '$marker_value' and its corresponding primers do not appear in $INPUT_METADATA"
-    fi
+            echo "LENGTH_$marker_value=${row[12]}" >> $PROJECTID/metabarcode_loci_min_merge_length.txt
+
+            # Update $unique_values key with standard marker value
+            old_value="${unique_values[$key]}"
+            unset "unique_values[$key]"
+            unique_values[$marker_value]=$old_value
+        fi
+    done
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
 
