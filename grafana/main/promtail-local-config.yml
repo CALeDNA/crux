@@ -20,34 +20,34 @@ scrape_configs:
       - localhost
     labels:
         job: ben_qc
-        __path__: /etc/ben/jobs/ben-qc.txt
+        __path__: /etc/ben/jobs/ben-qc_*.txt
   - targets:
       - localhost
     labels:
         job: ben_assign
-        __path__: /etc/ben/jobs/ben-assign.txt
+        __path__: /etc/ben/jobs/ben-assign_*.txt
   - targets:
       - localhost
     labels:
         job: ben_ecopcr
-        __path__: /etc/ben/jobs/ben-ecopcr.txt
+        __path__: /etc/ben/jobs/ben-ecopcr_*.txt
   - targets:
       - localhost
     labels:
         job: ben_blast
-        __path__: /etc/ben/jobs/ben-blast.txt
+        __path__: /etc/ben/jobs/ben-blast_*.txt
   - targets:
       - localhost
     labels:
         job: ben_ac
-        __path__: /etc/ben/jobs/ben-ac.txt
+        __path__: /etc/ben/jobs/ben-ac_*.txt
   - targets:
       - localhost
     labels:
         job: ben_newick
-        __path__: /etc/ben/jobs/ben-newick.txt
+        __path__: /etc/ben/jobs/ben-newick_*.txt
   - targets:
       - localhost
     labels:
         job: ben_tronko
-        __path__: /etc/ben/jobs/ben-tronko.txt
+        __path__: /etc/ben/jobs/ben-tronko_*.txt

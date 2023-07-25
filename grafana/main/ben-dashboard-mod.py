@@ -1,6 +1,7 @@
 import json
 import ast
 import argparse
+import requests
 import urllib.request
 import copy
 
@@ -15,19 +16,26 @@ args = parser.parse_args()
 
 dashbrd = args.dashboard
 
-uf = urllib.request.urlopen("http://localhost:8000")
-metrics = uf.read().decode()
+def fetch_metrics():
+    try:
+        url = "http://localhost:8000"  # Replace with the correct URL for your Grafana server
+        response = requests.get(url)
+        response.raise_for_status()  # Raises an exception if the request was not successful (e.g., 4xx or 5xx response)
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print("Error while fetching metrics:", e)
+        return None
+
+metrics = fetch_metrics()
 
 with open(dashbrd, "r") as jsonFile:
     dashboard = json.load(jsonFile)
 
 nodes=[]
 for line in metrics.split("\n"):
-    if line.startswith("#") or line.startswith("ben") or line == "":
+    if line == "":
         continue
     nodes.append(line.split()[0])
-    # print(line)
-
 
 for panel in dashboard["panels"]:
     try:

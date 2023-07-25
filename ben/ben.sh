@@ -38,9 +38,9 @@ done
 # create client config file
 echo "Host main" >> $CLIENT_CONFIG
 echo "HostName $(curl ifconfig.me)" >> $CLIENT_CONFIG
-echo "User $USER" >> $CLIENT_CONFIG
+echo "User root" >> $CLIENT_CONFIG
 echo "PubKeyAuthentication yes" >> $CLIENT_CONFIG
-echo "IdentityFile /home/$USER/.ssh/$PKEY" >> $CLIENT_CONFIG
+echo "IdentityFile /root/.ssh/$PKEY" >> $CLIENT_CONFIG
 echo "IdentitiesOnly yes" >> $CLIENT_CONFIG
 echo "StrictHostKeyChecking accept-new" >> $CLIENT_CONFIG
 echo "" >> $CLIENT_CONFIG
