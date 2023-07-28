@@ -34,10 +34,8 @@ mv $JSCRED $HOSTNAME $BASEDIR
 cd $BASEDIR/grafana/main
 # 2) update grafana dashboard
 sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
-sudo systemctl restart grafana-server.service
 
 # 3) update ben panels in grafana
 sudo python3 ben-dashboard-mod.py --dashboard $DASHBOARD
 
-
-
+sudo systemctl restart grafana-server.service

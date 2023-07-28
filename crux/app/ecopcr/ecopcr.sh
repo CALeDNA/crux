@@ -51,7 +51,7 @@ rm $PRIMER-$LINKS.fasta
 # add ben blast job for each NT chunk
 for ((nt=0; nt<=81; nt++)); do
     nt=$(printf '%02d' $nt)
-    /etc/ben/ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/crux/app/blast:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PRIMER-blast-$LINKS-$nt-$RUNID crux /mnt/blast.sh -c /vars/crux_vars.sh -j $PRIMER-blast-$LINKS-$nt-$RUNID -i $RUNID -p $PRIMER -n $nt -e $LINKS.fasta" $PRIMER-blast-$LINKS-$nt-$RUNID -o /etc/ben/output
+    /etc/ben/ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/crux/app/blast:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PRIMER-blast-$LINKS-$nt-$RUNID crux /mnt/blast.sh -c /vars/crux_vars.sh -j $PRIMER-blast-$LINKS-$nt-$RUNID -i $RUNID -p $PRIMER -n $nt -e $LINKS.fasta" $PRIMER-blast-$LINKS-$nt-$RUNID -f main -o /etc/ben/output
     nt=$(echo $nt | sed 's/^0*//')  # Remove leading zeros
 done
 

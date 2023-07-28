@@ -43,11 +43,17 @@ supabase() {
                       fi
                       PROJECTID=$(echo "${columns[2]}" | egrep -o ".*(-assign-|-QC-)" | sed 's/-assign-//; s/-QC-//')
                       PRIMER=${columns[2]#$PROJECTID-assign-}
-                      PRIMER=$(echo "$PRIMER" | rev | cut -d'_' -f2- | rev)
+                      # PRIMER=$(echo "$PRIMER" | rev | cut -d'_' -f2- | rev)
                       aws s3 cp $log s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
                       aws s3 cp $out s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
                   elif [[ "$job_type" == "ac" || "$job_type" == "newick" || "$job_type" == "tronko" ]]; then
-                      echo "placeholder" #TODO
+                      RUNID=$(echo "${columns[2]}" | rev | cut -d'-' -f1-3 | rev) # parse date
+                      PRIMER=$(echo "${columns[2]}" | sed "s/\(.*\)-$job_type.*/\1/")
+                      if [[ "$job_type" == "ac" ]]; then
+                        job_type="ancestralclust"
+                      fi
+                      aws s3 cp $log s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                      aws s3 cp $out s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
                   fi
                   # remove logs
                   rm $log $out
