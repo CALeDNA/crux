@@ -50,7 +50,7 @@ with open(output, 'a') as out:
                             taxid = linespl[1]
                             tax_file.writelines(ntid + '\t' + taxid + '\n')
                             out.writelines('>' + ntid + '\n')
-                            out.writelines(line.rstrip() + '\n')
+                            out.writelines(linespl[2].rstrip() + '\n')
                     else:
                         with open(logs, 'a+') as logfile:
                             logfile.writelines(ntid + '\n')

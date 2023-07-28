@@ -51,5 +51,5 @@ python3 get-largest.py --input $JOB/$BLASTDIR/${FASTA}_tmp --output $JOB/$BLASTD
 
 # upload to js2 bucket
 aws s3 cp $JOB/$BLASTDIR/$FASTA s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+# aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 cp $JOB/logs s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/logs/$FASTA.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/

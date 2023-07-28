@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
 
 RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential software-properties-common \ 
-    apt-transport-https libz-dev npm cmake parallel python3-openstackclient jq awscli unzip \ 
+    apt-transport-https libz-dev npm cmake parallel python3-openstackclient jq awscli unzip pandoc \ 
     curl wget git libssl-dev libcurl4-openssl-dev libxml2-dev -y && \
     npm i nugget -g && \
     wget -P /tmp/ "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh" && \
@@ -13,6 +13,10 @@ RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential
 
 COPY env.yml /app/env.yml
 ADD bin /usr/local/crux_bin
+
+RUN wget https://www.poirrier.ca/ben/ben-2.12.tar.gz && \
+    tar -xf ben-2.12.tar.gz && \
+    cd ben && make && mv ben /usr/local/crux_bin
 
 RUN git clone https://github.com/stamatak/standard-RAxML.git && \
     cd standard-RAxML && make -f Makefile.gcc && make -f Makefile.AVX2.gcc && \
@@ -22,6 +26,10 @@ RUN git clone https://github.com/stamatak/standard-RAxML.git && \
 
 RUN git clone https://github.com/lpipes/AncestralClust.git && \
     cd AncestralClust && make && mv ancestralclust /usr/local/crux_bin
+
+RUN git clone https://github.com/refresh-bio/FAMSA && \
+    cd FAMSA && make && \
+    mv famsa /usr/local/crux_bin
 
 RUN git clone https://github.com/lpipes/tronko.git && \
     cd tronko/tronko-build && make && mv tronko-build /usr/local/crux_bin && \
