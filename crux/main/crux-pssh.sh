@@ -1,7 +1,6 @@
 #! /bin/bash
 
-QC=""
-while getopts "h:c:p:u:s:q" opt; do
+while getopts "h:c:p:u:s:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -13,25 +12,32 @@ while getopts "h:c:p:u:s:q" opt; do
         ;;
         s) START="$OPTARG"
         ;;
-        q) QC="TRUE"
-        ;;
     esac
 done
 
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
-parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
+if [ "$(wc -l < tmphost)" -eq 1 ]; then
+    host=$(cat tmphost)
 
-parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
+    ssh "$host" "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
 
-parallel-scp -h tmphost $PRIMERS /home/$USER/crux/crux/vars/
+    scp "$CONFIG" "$host:/home/$USER/crux/crux/vars/"
 
-parallel-ssh -i -t 0 -h tmphost "sudo apt install awscli -y"
+    scp "$PRIMERS" "$host:/home/$USER/crux/crux/vars/"
 
-if [ "${QC}" = "TRUE" ]
-then
-    parallel-ssh -i -t 0 -h tmphost "cd crux/tronko/assign; docker build -q -t qc ."
+    ssh "$host" "sudo apt install awscli -y"
+    
+    ssh "$host" "cd crux; docker build -q -t crux ."
 else
+    parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
+
+    parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
+
+    parallel-scp -h tmphost $PRIMERS /home/$USER/crux/crux/vars/
+
+    parallel-ssh -i -t 0 -h tmphost "sudo apt install awscli -y"
+
     parallel-ssh -i -t 0 -h tmphost "cd crux; docker build -q -t crux ."
 fi
 

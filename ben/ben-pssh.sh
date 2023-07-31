@@ -26,10 +26,19 @@ parallel-ssh -i -t 0 -h $HOSTNAME "tar -xf ben-$BEN_VERSION.tar.gz"
 
 parallel-ssh -i -t 0 -h $HOSTNAME "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
 
-parallel-scp -h $HOSTNAME $PKEY ~/.ssh/$PKEY
+# Handling single host
+if [ "$(wc -l <<< "$HOSTNAME")" -eq 1 ]; then
+    host=$(cat "$HOSTNAME")
 
-parallel-scp -h $HOSTNAME $CONFIG ~/.ssh/$CONFIG
+    scp "$PKEY" ~/.ssh/"$PKEY"
 
-parallel-ssh -i -t 0 -h $HOSTNAME "chmod 700 ~/.ssh && chmod 600 ~/.ssh/*"
+    scp "$CONFIG" ~/.ssh/"$CONFIG"
 
-parallel-ssh -i -t 0 -h $HOSTNAME "sudo chown -R ubuntu:ubuntu /etc/ben"
+    ssh -t "$host" "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben && exit"
+else
+    parallel-scp -h "$HOSTNAME" "$PKEY" ~/.ssh/"$PKEY"
+
+    parallel-scp -h "$HOSTNAME" "$CONFIG" ~/.ssh/"$CONFIG"
+    
+    parallel-ssh -i -t 0 -h "$HOSTNAME" "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben"
+fi
