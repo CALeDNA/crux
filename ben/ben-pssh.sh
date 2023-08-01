@@ -16,29 +16,30 @@ while getopts "h:u:b:p:c:" opt; do
     esac
 done
 
-# parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt-get update -y && sudo apt-get upgrade -y"
+parallel-scp -h $HOSTNAME $PKEY ~/.ssh/$PKEY
 
-parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt install pandoc -y"
+parallel-scp -h $HOSTNAME $CONFIG ~/.ssh/$CONFIG
 
-parallel-ssh -i -t 0 -h $HOSTNAME "wget https://www.poirrier.ca/ben/ben-$BEN_VERSION.tar.gz"
+if [ "$(wc -l < $HOSTNAME)" -eq 1 ]; then
+    host=$(cat $HOSTNAME)
 
-parallel-ssh -i -t 0 -h $HOSTNAME "tar -xf ben-$BEN_VERSION.tar.gz"
+    ssh "$host" "sudo apt install pandoc -y"
 
-parallel-ssh -i -t 0 -h $HOSTNAME "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
+    ssh "$host" "wget https://www.poirrier.ca/ben/ben-$BEN_VERSION.tar.gz"
 
-# Handling single host
-if [ "$(wc -l <<< "$HOSTNAME")" -eq 1 ]; then
-    host=$(cat "$HOSTNAME")
+    ssh "$host" "tar -xf ben-$BEN_VERSION.tar.gz"
 
-    scp "$PKEY" ~/.ssh/"$PKEY"
+    ssh "$host" "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
 
-    scp "$CONFIG" ~/.ssh/"$CONFIG"
-
-    ssh -t "$host" "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben && exit"
+    ssh "$host" "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben"
 else
-    parallel-scp -h "$HOSTNAME" "$PKEY" ~/.ssh/"$PKEY"
+    parallel-ssh -i -t 0 -h $HOSTNAME "sudo apt install pandoc -y"
 
-    parallel-scp -h "$HOSTNAME" "$CONFIG" ~/.ssh/"$CONFIG"
-    
-    parallel-ssh -i -t 0 -h "$HOSTNAME" "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben"
+    parallel-ssh -i -t 0 -h $HOSTNAME "wget https://www.poirrier.ca/ben/ben-$BEN_VERSION.tar.gz"
+
+    parallel-ssh -i -t 0 -h $HOSTNAME "tar -xf ben-$BEN_VERSION.tar.gz"
+
+    parallel-ssh -i -t 0 -h $HOSTNAME "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
+
+    parallel-ssh -i -t 0 -h $HOSTNAME "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben"
 fi

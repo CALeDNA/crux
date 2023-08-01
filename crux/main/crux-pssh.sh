@@ -28,7 +28,7 @@ if [ "$(wc -l < tmphost)" -eq 1 ]; then
 
     ssh "$host" "sudo apt install awscli -y"
     
-    ssh "$host" "cd crux; docker build -q -t crux ."
+    ssh -i "$host" "cd crux; docker build -q -t crux ."
 else
     parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
 
