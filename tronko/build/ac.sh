@@ -65,7 +65,7 @@ do
         job=$(printf '%02d' "$job") # add leading zero
         job="$folder$job" # -> ex: 12S_MiFish_U-ac-001203
 
-        /etc/ben/ben add -s $ACSERVER -c "cd crux/tronko/build; ./ac.sh --name $job-$RUNID crux /mnt/run_ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION " $job-$RUNID -f main -o $OUTPUT  
+        /etc/ben/ben add -s $ACSERVER -c "cd crux/tronko/build; ./ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION " $job-$RUNID -f main -o $OUTPUT  
     fi
 done
 

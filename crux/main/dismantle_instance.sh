@@ -38,19 +38,19 @@ fi
 source ${JSCRED}
 
 # get volume id
-volumeid=$(openstack server show $NAME -f json | jq .volumes_attached[].id | tr -d '"')
+volume_id=$(openstack server show $NAME -c volumes_attached -f json | jq -r .volumes_attached | cut -d"=" -f2 | tr -d "'")
 # get corresponding ip address
 ip_address=$(grep -A 5 $NAME $CONFIG | grep "HostName" | awk '{print $2}')
 # remove IP from instance
-openstack server remove floating ip ${VMNAME}${chunk} ${ip_address}
+openstack server remove floating ip $NAME $ip_address
 # delete IP
-openstack floating ip delete ${ip_address}
+openstack floating ip delete $ip_address
 # delete instance
 openstack server delete $NAME --wait
 # delete volume
-if [[  ${volumeid} != "null" ]]
+if [[  $volume_id != "null" ]]
 then
-    openstack volume delete $volumeid
+    openstack volume delete $volume_id
 fi
 
 #remove $NAME from $HOSTNAME

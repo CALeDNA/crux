@@ -72,6 +72,8 @@ split() {
 
 if [ "${PAIRED}" = "TRUE" ]
 then
+    count_1=0
+    count_2=0
     # check if tronko assign already ran on paired
     dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
     if [ "$dir_exists" -gt 0 ]; then
@@ -128,6 +130,8 @@ fi
 
 if [ "${UNPAIRED_F}" = "TRUE" ]
 then
+    count_1=0
+    count_2=0
     # check if tronko assign already ran on unpaired_f
     dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
     if [ "$dir_exists" -gt 0 ]; then
@@ -157,7 +161,7 @@ then
         time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F_filt.fastq.gz -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt
 
         # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
-        count_2=$((count_1 + $(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")))
+        count_2=$((count_2 + $(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")))
 
         # Compare counts and upload folder with the highest count
         if [ "$count_1" -gt "$count_2" ]; then
@@ -181,6 +185,8 @@ fi
 
 if [ "${UNPAIRED_R}" = "TRUE" ]
 then
+    count_1=0
+    count_2=0
     # check if tronko assign already ran on unpaired_r files
     dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
     if [ "$dir_exists" -gt 0 ]; then
@@ -210,7 +216,7 @@ then
         time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -q -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R_filt.fastq.gz -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt
 
         # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
-        count_2=$((count_1 + $(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")))
+        count_2=$((count_2 + $(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")))
 
         # Compare counts and upload folder with the highest count
         if [ "$count_1" -gt "$count_2" ]; then

@@ -12,12 +12,11 @@ VOLUME=""
 VMNAME="chunk"
 VMNUMBER=0
 PRIMERS=""
-QC="" # -> is this setup for QC pipeline?
 START=0
 NODES=0
 BENSERVER=""
 VARS="/home/ubuntu/crux/crux/vars/crux_vars.sh"
-while getopts "u:f:i:k:j:n:m:b:s:w:v:c:p:qo:e:" opt; do
+while getopts "u:f:i:k:j:n:m:b:s:w:v:c:p:o:e:" opt; do
     case $opt in
         u) USER="$OPTARG"
         ;;
@@ -44,8 +43,6 @@ while getopts "u:f:i:k:j:n:m:b:s:w:v:c:p:qo:e:" opt; do
         c) CONFIG="$OPTARG" # SSH config file: /home/ubuntu/.ssh/config
         ;;
         p) PRIMERS="$OPTARG"
-        ;;
-        q) QC="TRUE"
         ;;
         o) NODES="$OPTARG"
         ;;
@@ -76,12 +73,7 @@ else
 fi
 
 # 2) run docker build
-# -q: should run docker for crux or qc pipeline
-if [ "${QC}" = "TRUE" ]; then
-    ./crux-pssh.sh -h hostnames -c $VARS -p $PRIMERS -u $USER -s $START -q $QC
-else
-    ./crux-pssh.sh -h hostnames -c $VARS -p $PRIMERS -u $USER -s $START
-fi
+./crux-pssh.sh -h hostnames -c $VARS -p $PRIMERS -u $USER -s $START
 
 mv $PRIVATEKEY hostnames $BASEDIR/grafana/main
 mv $JSCRED $BASEDIR
