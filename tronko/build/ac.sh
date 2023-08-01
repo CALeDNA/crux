@@ -78,12 +78,12 @@ then
 fi
 
 # delete local files
-rm -r $JOB/*
+sudo rm -r $JOB/*
 
 # delete recursed file from bucket
 if [ "${FIRST}" != "TRUE" ]; then
-    aws s3 rm s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 rm s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 rm s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 rm s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA --endpoint-url https://js2.jetstream-cloud.org:8001/
 fi
 
 # check if parent bucket is newick ready
