@@ -25,50 +25,6 @@ done
 # source /vars/crux_vars.sh # get tronko db $RUNID
 mkdir $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc
 
-
-# split() {
-#     local assign=$1 # tronko assign output file
-#     local dir=$2 #QC files folder
-#     local suffix=$3 # QC files suffix
-#     declare -A hashmap
-
-#     # creating hashmap - key: ReadName, value: file name
-#     for file in $dir/*$suffix; do
-#         value=$(basename "$file")
-#         value="${value%%$suffix}.txt"
-
-#         # check if file is gzipped
-#         if file -b "$file" | grep -q 'gzip compressed data'; then
-#             echo "$file is gzipped."
-#             gunzip -c "$file" > tmp
-#             mv tmp $file
-#         fi
-#         while IFS= read -r line; do
-#             if [[ $line == @* ]]; then
-#                 key="${line#@}"   #remove @ char
-#                 key="${key// /_}" #replace space with underscore
-#                 hashmap["$key"]="$value"
-#             fi
-#         done < "$file"
-#     done
-
-#     IFS=$'\t' # Set IFS to tab before the second while loop
-#     # splitting assign output
-#     while IFS=$'\t' read -ra columns; do
-#         readName="${columns[0]}" # ReadName
-#         echo "$readName"
-#         echo "${hashmap["$readName"]}"
-#         if [[ ${hashmap["$readName"]} ]]; then
-#             value="${hashmap["$readName"]}"
-#             # If the file does not exist yet, add the header text
-#             if [[ ! -f "$dir/$value" ]]; then
-#                 echo -e "Readname\tTaxonomic_Path\tScore\tForward_Mismatch\tReverse_Mismatch\tTree_Number\tNode_Number" > "$dir/$value"
-#             fi
-#             echo "${columns[*]}" >> $dir/$value
-#         fi
-#     done < "$assign"
-# }
-
 if [ "${PAIRED}" = "TRUE" ]
 then
     count_1=0
@@ -86,14 +42,6 @@ then
         
         # download QC sample paired files
         aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-
-        # # cat all QC sample files into master file
-        # for file in $PROJECTID-$PRIMER/paired/*F_filt.fastq.gz; do
-        #     cat "$file" >> $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filt.fastq.gz
-        # done
-        # for file in $PROJECTID-$PRIMER/paired/*R_filt.fastq.gz; do
-        #     cat "$file" >> $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filt.fastq.gz
-        # done
 
         # create ASV files
         python3 asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
@@ -113,17 +61,11 @@ then
         # Compare counts and upload folder with the highest count
         if [ "$count_1" -gt "$count_2" ]; then
             echo "v1 has the highest count: $count_1"
-            # # split assign output
-            # split $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER/paired "_F_filt.fastq.gz"
-            # upload to aws
-            # aws s3 sync $PROJECTID-$PRIMER/paired s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired --exclude "*" --include "*.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+            # split assign output
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         else
             echo "v2 (rc) has the highest count: $count_2"
             # split assign output
-            # split $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER/paired "_R_filt.fastq.gz"
-            # # upload to aws
-            # aws s3 sync $PROJECTID-$PRIMER/paired s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired --exclude "*" --include "*.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/$PROJECTID-$PRIMER-paired.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         fi
@@ -151,11 +93,6 @@ then
         # download QC sample unpaired_F files
         aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-        # # cat all QC sample files into master file
-        # for file in $PROJECTID-$PRIMER/unpaired_F/*F_filt.fastq.gz; do
-        #     cat "$file" >> $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F_filt.fastq.gz
-        # done
-
         # create ASV files
         python3 asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
 
@@ -175,16 +112,10 @@ then
         if [ "$count_1" -gt "$count_2" ]; then
             echo "v1 has the highest count: $count_1"
             # split assign output
-            # split $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt $PROJECTID-$PRIMER/unpaired_F "_F_filt.fastq.gz"
-            # # upload to aws
-            # aws s3 sync $PROJECTID-$PRIMER/unpaired_F s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "*.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         else
             echo "v2 (rc) has the highest count: $count_2"
             # split assign output
-            # split $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt $PROJECTID-$PRIMER/unpaired_F "_F_filt.fastq.gz"
-            # # upload to aws
-            # aws s3 sync $PROJECTID-$PRIMER/unpaired_F s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "*.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         fi
@@ -212,11 +143,6 @@ then
         # download QC sample unpaired_R
         aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-        # # cat all QC sample files into master file
-        # for file in $PROJECTID-$PRIMER/unpaired_R/*R_filt.fastq.gz; do
-        #     cat "$file" >> $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R_filt.fastq.gz
-        # done
-
         # create ASV files
         python3 asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
 
@@ -236,16 +162,10 @@ then
         if [ "$count_1" -gt "$count_2" ]; then
             echo "v1 has the highest count: $count_1"
             # split assign output
-            # split $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt $PROJECTID-$PRIMER/unpaired_R "_R_filt.fastq.gz"
-            # # upload to aws
-            # aws s3 sync $PROJECTID-$PRIMER/unpaired_R s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "*.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         else
             echo "v2 (rc) has the highest count: $count_2"
             # split assign output
-            # split $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt $PROJECTID-$PRIMER/unpaired_R "_R_filt.fastq.gz"
-            # # upload to aws
-            # aws s3 sync $PROJECTID-$PRIMER/unpaired_R s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "*.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
             aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         fi
