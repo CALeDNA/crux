@@ -40,7 +40,7 @@ aws s3 cp s3://ednaexplorer/CruxV2/ecopcr_links/$LINKS $PRIMER-$LINKS/$LINKS --n
 parallel -I% --tag --max-args 1 -P ${THREADS} ./obi_ecopcr.sh -l % -p $PRIMER -f $FORWARD -r $REVERSE -d $PRIMER-$LINKS -m 1000 -n 30 -b % -e $ERROR -c $CONFIG :::: $PRIMER-$LINKS/$LINKS
 
 # combine primer fasta files into one
-# PRIMERNAME=$( echo ${primer} | cut -d ',' -f3 )
+touch $PRIMER-$LINKS.fasta # in case $OUTPUT is empty
 find $OUTPUT/ -type f -name "*$PRIMER.fasta" | xargs -I{} cat {} >> $PRIMER-$LINKS.fasta
 
 # upload combined fasta file
