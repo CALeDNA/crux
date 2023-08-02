@@ -83,9 +83,11 @@ unpaired_R_files=$(ls -A "$PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_so
 parameters=""
 if [ "$paired_files" -gt 0 ]; then
     parameters+="-1"
-elif [ "$unpaired_F_files" -gt 0 ]; then
+fi
+if [ "$unpaired_F_files" -gt 0 ]; then
     parameters+=" -2"
-elif [ "$unpaired_R_files" -gt 0 ]; then
+fi
+if [ "$unpaired_R_files" -gt 0 ]; then
     parameters+=" -3"
 fi
 
