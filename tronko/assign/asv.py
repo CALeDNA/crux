@@ -144,6 +144,8 @@ def create_asv(directory_path, output_file, primer, suffix, type, seqDict, isPai
         output_filer=""
         fasta_filer=""
         fasta_filer=""
+        typef=type
+        typer=type.replace("F","R")
         if "paired_R" in output_file:
             output_filer = output_file
             fasta_filer = fasta_file
@@ -174,10 +176,10 @@ def create_asv(directory_path, output_file, primer, suffix, type, seqDict, isPai
                     for key, value in seqDict.items():
                         rowf=[]
                         rowr=[]
-                        rowf.append(f"{primer}_{type}_{counter}")
-                        rowr.append(f"{primer}_{type}_{counter}")
-                        fasta_outputf.write(f">{primer}_{type}_{counter}\n")
-                        fasta_outputr.write(f">{primer}_{type}_{counter}\n")
+                        rowf.append(f"{primer}_{typef}_{counter}")
+                        rowr.append(f"{primer}_{typer}_{counter}")
+                        fasta_outputf.write(f">{primer}_{typef}_{counter}\n")
+                        fasta_outputr.write(f">{primer}_{typer}_{counter}\n")
                         rowf.append(key.split(",")[0])
                         rowr.append(key.split(",")[1])
                         for elem in value:
