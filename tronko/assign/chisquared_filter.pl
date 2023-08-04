@@ -42,8 +42,14 @@ while(<REVERSE>){
 	chomp($line);
 	if ($line =~ /^\>/){
 		my @spl = split(/\>/,$line);
-		@spl = split(/paired_R/,$spl[1]);
-		$read = $spl[0] . "paired_F" . $spl[1];
+		if ($spl[1] =~ /paired_R/) {
+			@spl = split(/paired_R/, $spl[1]);
+			$read = $spl[0] . "paired_F" . $spl[1];
+		}
+		elsif ($spl[1] =~ /paired_F/) {
+			@spl = split(/paired_F/, $spl[1]);
+			$read = $spl[0] . "paired_R" . $spl[1];
+		}
 
 	}else{
 		my @spl = split(//,$line);
