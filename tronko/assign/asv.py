@@ -18,6 +18,7 @@ def process_arguments():
     parser.add_argument('--out', type=str, help='Filepath to output file')
     parser.add_argument('--primer', type=str, help='Primer name')
     parser.add_argument('--paired', action='store_true', help='If directory is for paired files')
+    parser.add_argument('--rc', action='store_true', help='If reverse complement. Only applies if --paired is also true')
     parser.add_argument('--unpairedf', action='store_true', help='If directory is for unpaired_F files')
     parser.add_argument('--unpairedr', action='store_true', help='If directory is for unpaired_R files')
 
@@ -85,7 +86,7 @@ def create_seq_dict_keys(size, filenamef, filenamer=None,):
         os.remove(filenamef)
     return seqDict
 
-def create_seq_dict_values(directory_path, seqDict, suffix, isPaired=False):
+def create_seq_dict_values(directory_path, seqDict, suffix, isPaired=False, isRC=False):
     index=0
     if isPaired:
         for filename in sorted(os.listdir(directory_path)):
@@ -96,6 +97,8 @@ def create_seq_dict_values(directory_path, seqDict, suffix, isPaired=False):
                     file_path = file_path[:-len(suffix)]
                     # Get all files that begin with the modified 'file_path'
                     paired_files = [os.path.join(directory_path, filename) for filename in sorted(os.listdir(directory_path)) if os.path.basename(file_path) in filename]
+                    if(isRC): # reverse file should be first in reverse complement
+                        paired_files[0], paired_files[1] = paired_files[1], paired_files[0]
                     with open(paired_files[0], 'r') as filef, open(paired_files[1], 'r') as filer:
                         previous_linef = ""  # Initialize an empty string to store the previous line
                         previous_liner = ""  # Initialize an empty string to store the previous line
@@ -221,6 +224,7 @@ if __name__ == "__main__":
     out = args.out
     primer = args.primer
     isPaired = args.paired
+    isRC = args.rc
     isUnpairedF = args.unpairedf
     isUnpairedR = args.unpairedr
 
@@ -230,8 +234,12 @@ if __name__ == "__main__":
         suffix="_R_filt.fastq.gz"
         fileCount = concatenate_files(dir, f"{out}_tmpr", suffix)
         
-        seqDict = create_seq_dict_keys(fileCount, f"{out}_tmpf", filenamer=f"{out}_tmpr")
-        seqDict = create_seq_dict_values(dir, seqDict, suffix, isPaired=True)
+        if(isRC):
+            seqDict = create_seq_dict_keys(fileCount, filenamer=f"{out}_tmpf", filenamef=f"{out}_tmpr")
+            seqDict = create_seq_dict_values(dir, seqDict, suffix, isPaired=True, isRC=True)
+        else:
+            seqDict = create_seq_dict_keys(fileCount, filenamef=f"{out}_tmpf", filenamer=f"{out}_tmpr")
+            seqDict = create_seq_dict_values(dir, seqDict, suffix, isPaired=True)
         create_asv(dir, out, primer, suffix, "paired_F", seqDict, isPaired=True)
     elif isUnpairedF:
         suffix="_F_filt.fastq.gz"
