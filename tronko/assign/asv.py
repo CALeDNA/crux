@@ -62,8 +62,10 @@ def create_seq_dict_keys(size, filenamef, filenamer=None,):
                     if(current_linef == "" or current_liner == ""):
                         continue
 
-                    if previous_linef.startswith("@") and previous_liner.startswith("@"):
+                    if previous_linef.startswith("@") and previous_liner.startswith("@") and not ((current_linef.startswith("@") and current_liner.startswith("@")) or (len(current_linef) == 0 and len(current_liner) == 0)):
                         seqDict.setdefault(f"{current_linef},{current_liner}", [0 for _ in range(size)])
+                        if(len(f"{current_linef},{current_liner}") == 1):
+                            print(filenamef, filenamer)
                     
                     previous_linef = current_linef
                     previous_liner = current_liner
@@ -76,9 +78,12 @@ def create_seq_dict_keys(size, filenamef, filenamer=None,):
             for current_line in file:
                 current_line = current_line.strip()  # Remove leading/trailing whitespace, if needed
 
-                if previous_line.startswith("@"):
+                if previous_line.startswith("@") and not (current_line.startswith("@") or len(current_line) == 0):
                     # Add sequence to dictionary
                     seqDict.setdefault(current_line, [0 for _ in range(size)]) 
+                    if(len(current_line) == 0):
+                        print(filenamef)
+                        print(previous_line)
 
                 # Update the previous_line variable with the current line for the next iteration
                 previous_line = current_line
@@ -97,7 +102,7 @@ def create_seq_dict_values(directory_path, seqDict, suffix, isPaired=False, isRC
                     file_path = file_path[:-len(suffix)]
                     # Get all files that begin with the modified 'file_path'
                     paired_files = [os.path.join(directory_path, filename) for filename in sorted(os.listdir(directory_path)) if os.path.basename(file_path) in filename]
-                    if(isRC): # reverse file should be first in reverse complement
+                    if(isRC): # reverse file should be first elem in reverse complement
                         paired_files[0], paired_files[1] = paired_files[1], paired_files[0]
                     with open(paired_files[0], 'r') as filef, open(paired_files[1], 'r') as filer:
                         previous_linef = ""  # Initialize an empty string to store the previous line
@@ -106,9 +111,8 @@ def create_seq_dict_values(directory_path, seqDict, suffix, isPaired=False, isRC
                         for current_linef, current_liner in zip(filef, filer):
                             current_linef = current_linef.strip()
                             current_liner = current_liner.strip()
-                            if(current_linef == "" or current_liner == ""):
-                                continue
-                            if previous_linef.startswith("@") and previous_liner.startswith("@"):
+
+                            if previous_linef.startswith("@") and previous_liner.startswith("@") and not ((current_linef.startswith("@") and current_liner.startswith("@")) or (len(current_linef) == 0 and len(current_liner) == 0)):
                                 seqDict[f"{current_linef},{current_liner}"][index] += 1
                             previous_linef = current_linef
                             previous_liner = current_liner
@@ -124,7 +128,7 @@ def create_seq_dict_values(directory_path, seqDict, suffix, isPaired=False, isRC
 
                         for current_line in file:
                             current_line = current_line.strip()  # Remove leading/trailing whitespace, if needed
-                            if previous_line.startswith("@"):
+                            if previous_line.startswith("@") and not (current_line.startswith("@") or len(current_line) == 0):
                                 # increase count in seqDict
                                 seqDict[current_line][index] += 1 # add one to number of occurences
 
