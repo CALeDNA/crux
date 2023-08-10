@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM jammy:focal
 
 ARG DEBIAN_FRONTEND=noninteractive
 
