@@ -38,7 +38,8 @@ VOLUME=0 # volume backed storage for virtual machines. 0 for default size
 # accession ID file/folder names
 #LINKS="wgsgbsize"
 URLS="urls"
-NTOTAL=81 # number of nt chunks
+ECOPCRLINKS=142 # number of wgs/gb links files
+NTOTAL=108 # number of nt chunks
 NTFILE="nt-ftp"
 
 

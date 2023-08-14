@@ -89,9 +89,21 @@ else
             ./taxfilter.sh -f $output-$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB
         else
             echo "Output file is empty. Skipping taxfilter.sh step."
+            ./taxfilter.sh -f $output-$NTCHUNK -p $PRIMER -c $CONFIG -i $RUNID -j $JOB -s
         fi
     fi
 fi
 
 # cleanup
 rm -rf $JOB
+
+#TODO: check if blast folder has (142*108) files
+total=$((ECOPCRLINKS * NTOTAL))
+actual=$(aws s3 ls s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast --recursive --endpoint-url https://js2.jetstream-cloud.org:8001/ | grep -v -e "CruxV2/$RUNID/$PRIMER/blast/logs" -e ".*tax.tsv" | wc -l)
+if [ "$total" -eq "$actual" ]; then
+    #start dereplicate step
+    cd /mnt/dereplicate
+    ./dereplicate.sh -j $PRIMER-dereplicate -i $RUNID -p $PRIMER -b /tmp/ben-ac -B /tmp/ben-newick
+else
+    echo "Blast still running in other machines for primer $PRIMER."
+fi
