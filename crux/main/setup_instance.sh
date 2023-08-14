@@ -122,7 +122,7 @@ do
     echo "PubKeyAuthentication yes" >> $CONFIG
     echo "IdentityFile /home/ubuntu/.ssh/$PRIVATEKEY" >> $CONFIG
     echo "IdentitiesOnly yes" >> $CONFIG
-    echo "StrictHostKeyChecking accept-new" >> $CONFIG
+    echo "StrictHostKeyChecking no" >> $CONFIG
     echo "" >> $CONFIG
 
     echo $VMNAME$chunk >> hostnames

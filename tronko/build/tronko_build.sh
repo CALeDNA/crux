@@ -3,7 +3,7 @@ set -x
 set -o allexport
 
 PARTITION_NUMBER=0
-while getopts "i:p:k:s:r:b:" opt; do
+while getopts "i:p:b:" opt; do
     case $opt in
         i) RUNID="$OPTARG"
         ;;
@@ -14,6 +14,7 @@ while getopts "i:p:k:s:r:b:" opt; do
     esac
 done
 
+cd /mnt
 
 mkdir ${PRIMER}
 # create merged newick folder
