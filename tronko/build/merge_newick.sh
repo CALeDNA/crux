@@ -30,6 +30,7 @@ do
         prefix=$(basename $dir | xargs -I{} sh -c 'echo ${1%_RAxML}' -- {})
         # move and rename necessary files with that prefix to "merged_${FOLDER}"
         # and update counter
+        nw_reroot $folder/${prefix}_RAxML/RAxML_bestTree.1 > $folder/RAxML_bestTree.${prefix}.reroot
         cp $folder/RAxML_bestTree.${prefix}.reroot ${outdir}/RAxML_bestTree.${counter}.reroot
         cp $folder/${prefix}_MSA.fasta ${outdir}/${counter}_MSA.fasta
         cp $folder/${prefix}_taxonomy.txt ${outdir}/${counter}_taxonomy.txt

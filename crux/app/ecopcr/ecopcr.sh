@@ -20,7 +20,7 @@ while getopts "c:v:p:f:r:l:b:" opt; do
     esac
 done
 
-cd /mnt 
+cd /mnt
 source ${CONFIG}
 
 OUTPUT="$PRIMER-$LINKS/OUTPUT"
@@ -31,7 +31,7 @@ mkdir $OUTPUT
 # wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
 mkdir taxdump
 wget -P taxdump https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2023-06-01.zip
-unzip taxdump/taxdmp_2023-06-01.zip -d taxdump; rm taxdump/taxdmp_2023-06-01.zip
+unzip -o taxdump/taxdmp_2023-06-01.zip -d taxdump; rm taxdump/taxdmp_2023-06-01.zip
 
 # download link files
 aws s3 cp s3://ednaexplorer/CruxV2/ecopcr_links/$LINKS $PRIMER-$LINKS/$LINKS --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/

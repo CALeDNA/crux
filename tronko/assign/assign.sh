@@ -52,7 +52,7 @@ then
 
         # Count rows with values less than 5 in the 4th and 5th columns in v1 of paired
         count_1=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt")
-        if [[ -n "$count_1" ]]; then
+        if [[ -z "$count_1" ]]; then
             count_1=0
         fi
         # create rc ASV files
@@ -66,7 +66,7 @@ then
 
         # Count rows with values less than 5 in the 4th and 5th columns in v2 (rc) of paired
         count_2=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt")
-        if [[ -n "$count_2" ]]; then
+        if [[ -z "$count_2" ]]; then
             count_2=0
         fi
         # Compare counts and upload folder with the highest count
@@ -109,7 +109,7 @@ then
 
         # Count rows with values less than 5 in the 4th column in v1 of unpaired_F
         count_1=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt")
-        if [[ -n "$count_1" ]]; then
+        if [[ -z "$count_1" ]]; then
             count_1=0
         fi
         # run tronko assign unpaired_F v2 (rc)
@@ -117,7 +117,7 @@ then
 
         # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
         count_2=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")
-        if [[ -n "$count_2" ]]; then
+        if [[ -z "$count_2" ]]; then
             count_2=0
         fi
         # Compare counts and upload folder with the highest count
@@ -161,7 +161,7 @@ then
 
         # Count rows with values less than 5 in the 5th column in v1 of unpaired_R
         count_1=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt")
-        if [[ -n "$count_1" ]]; then
+        if [[ -z "$count_1" ]]; then
             count_1=0
         fi
         # run tronko assign unpaired_R v2 (rc)
@@ -169,7 +169,7 @@ then
 
         # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
         count_2=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")
-        if [[ -n "$count_2" ]]; then
+        if [[ -z "$count_2" ]]; then
             count_2=0
         fi
         # Compare counts and upload folder with the highest count
