@@ -22,6 +22,8 @@ while getopts "i:p:r:123" opt; do
     esac
 done
 
+source /vars/crux_vars.sh # gets $RUNID and $IPADDRESS
+
 # source /vars/crux_vars.sh # get tronko db $RUNID
 mkdir $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc
 
@@ -188,6 +190,13 @@ then
         rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
     fi
 fi
+
+# Trigger taxonomy initializer script
+curl -X POST http://$IPADDRESS:8004/initializer \
+     -H "Content-Type: application/json" \
+     -d "{
+           \"ProjectID\": \"$PROJECTID\",
+         }"
 
 
 

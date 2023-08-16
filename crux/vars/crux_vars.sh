@@ -42,6 +42,8 @@ ECOPCRLINKS=142 # number of wgs/gb links files
 NTOTAL=108 # number of nt chunks
 NTFILE="nt-ftp"
 
+IPADDRESS="0.0.0.0"
+
 
 # parallel.py docker commands
 # DOCKER_BUILD="cd crux/crux; docker build -q -t crux ."
