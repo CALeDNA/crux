@@ -74,11 +74,24 @@ then
         # Compare counts and upload folder with the highest count
         if [ "$count_1" -ge "$count_2" ]; then
             echo "v1 has the highest count: $count_1"
-            # split assign output
+            # rename filtered files
+            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
+            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
+            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filtered.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
+            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filtered.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta
+            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filtered.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta
+            # upload output
             aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         else
             echo "v2 (rc) has the highest count: $count_2"
-            # split assign output
+            # rename filtered files
+            # rename filtered files
+            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
+            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
+            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta
+            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R_filtered.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta
+            # upload output
             aws s3 sync $PROJECTID-$PRIMER-rc/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         fi
 
