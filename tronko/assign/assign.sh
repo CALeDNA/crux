@@ -208,7 +208,7 @@ fi
 curl -X POST http://$IPADDRESS:8004/initializer \
      -H "Content-Type: application/json" \
      -d "{
-           \"ProjectID\": \"$PROJECTID\",
+           \"ProjectID\": \"$PROJECTID\"
          }"
 
 
