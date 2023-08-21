@@ -2,7 +2,7 @@ import subprocess
 import glob
 import http.server
 from prometheus_client import start_http_server,Gauge,Info,CollectorRegistry
-from flask import Flask, request, Response
+# from flask import Flask, request, Response
 from typing import Iterable
 import os
 import time
@@ -19,9 +19,15 @@ REGISTRY.register(RUNNINGJOBS)
 REGISTRY.register(QUEUEDJOBS)
 REGISTRY.register(FINISHEDJOBS)
 
-app = Flask(__name__)
+# app = Flask(__name__)
+class ServerHandler(http.server.BaseHTTPRequestHandler):
+  def do_GET(self):
+    self.send_response(200)
+    self.end_headers()
+    self.wfile.write(b"Hello World!")
+    ben()
 
-@app.route('/', methods=['GET'])
+
 def ben():
 
   metric_data = bennodes()
@@ -33,7 +39,6 @@ def ben():
   QUEUEDJOBS.set(isQueued)
   FINISHEDJOBS.set(isFinished)
 
-  return Response(metric_data, content_type='text/plain')
 
 def benlist():
   isRunning = 0
@@ -100,6 +105,9 @@ def bennodes():
   return metric_data
 
 
-          
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+  start_http_server(8000,registry=REGISTRY)
+  server = http.server.HTTPServer(('', 8001), ServerHandler)
+  print("Prometheus metrics available on port 8000 /metrics")
+  print("HTTP server available on port 8001")
+  server.serve_forever()
