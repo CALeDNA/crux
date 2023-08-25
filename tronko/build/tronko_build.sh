@@ -27,6 +27,9 @@ mkdir ${outdir}
 
 partitions=$(ls ${newick}/*txt | wc -l)
 
+# sync down tronko output
+aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $outdir --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
 
 if (( $partitions > 1 ))
 then
