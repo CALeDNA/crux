@@ -34,7 +34,7 @@ cd $BASEDIR/crux/main
 /etc/ben/ben kill $NAME -s $BENSERVER
 
 # remove host from known_hosts
-ssh-keygen -r $NAME
+ssh-keygen -R $NAME
 
 # delete VM
 ./dismantle_instance.sh -j $JSCRED -h $HOSTNAME -m $NAME -c $CONFIG -d $DATASOURCE
