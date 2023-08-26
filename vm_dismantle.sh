@@ -7,13 +7,15 @@ APIKEY=""
 JSCRED=""
 HOSTNAME=""
 NAME=""
-while getopts "j:h:m:c:d:" opt; do
+while getopts "j:h:m:e:c:d:" opt; do
     case $opt in
         j) JSCRED="$OPTARG"
         ;;
         h) HOSTNAME="$OPTARG"
         ;;
         m) NAME="$OPTARG"
+        ;;
+        e) BENSERVER="$OPTARG"
         ;;
         c) CONFIG="$OPTARG" # SSH config file: /home/ubuntu/.ssh/config
         ;;
@@ -26,16 +28,24 @@ BASEDIR=$(pwd)
 
 mv $JSCRED $HOSTNAME $BASEDIR/crux/main
 cd $BASEDIR/crux/main
-# 1) run dismantle_instance.sh
+
+# remove VM from ben server
+/etc/ben/ben scale -n 0 $NAME --retire -s $BENSERVER # just in case
+/etc/ben/ben kill $NAME -s $BENSERVER
+
+# remove host from known_hosts
+ssh-keygen -R $NAME
+
+# delete VM
 ./dismantle_instance.sh -j $JSCRED -h $HOSTNAME -m $NAME -c $CONFIG -d $DATASOURCE
 
 
 mv $JSCRED $HOSTNAME $BASEDIR
 cd $BASEDIR/grafana/main
-# 2) update grafana dashboard
+# update grafana dashboard
 sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
 
-# 3) update ben panels in grafana
+# update ben panels in grafana
 sudo python3 ben-dashboard-mod.py --dashboard $DASHBOARD
 
 sudo systemctl restart grafana-server.service

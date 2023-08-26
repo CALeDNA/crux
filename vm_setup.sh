@@ -16,6 +16,7 @@ START=0
 NODES=0
 BENSERVER=""
 VARS="/home/ubuntu/crux/crux/vars/crux_vars.sh"
+DASHBOARD=/var/lib/grafana/dashboards/overview.json
 while getopts "u:f:i:k:j:n:m:b:s:w:v:c:p:o:e:" opt; do
     case $opt in
         u) USER="$OPTARG"
@@ -89,3 +90,7 @@ cd $BASEDIR/ben
 
 # move files back to basedir
 mv $PRIVATEKEY hostnames $BASEDIR
+
+cd $BASEDIR/grafana/main
+# update ben panels in grafana
+sudo python3 ben-dashboard-mod.py --dashboard $DASHBOARD

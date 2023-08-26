@@ -20,7 +20,7 @@ while getopts "c:v:p:f:r:l:b:" opt; do
     esac
 done
 
-cd /mnt 
+cd /mnt
 source ${CONFIG}
 
 OUTPUT="$PRIMER-$LINKS/OUTPUT"
@@ -31,7 +31,7 @@ mkdir $OUTPUT
 # wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
 mkdir taxdump
 wget -P taxdump https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2023-06-01.zip
-unzip taxdump/taxdmp_2023-06-01.zip -d taxdump; rm taxdump/taxdmp_2023-06-01.zip
+unzip -o taxdump/taxdmp_2023-06-01.zip -d taxdump; rm taxdump/taxdmp_2023-06-01.zip
 
 # download link files
 aws s3 cp s3://ednaexplorer/CruxV2/ecopcr_links/$LINKS $PRIMER-$LINKS/$LINKS --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
@@ -49,8 +49,8 @@ aws s3 cp $PRIMER-$LINKS.fasta s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ecopcr/$L
 rm $PRIMER-$LINKS.fasta
 
 # add ben blast job for each NT chunk
-for ((nt=0; nt<=81; nt++)); do
-    nt=$(printf '%02d' $nt)
+for ((nt=0; nt<$NTOTAL; nt++)); do
+    nt=$(printf '%03d' $nt)
     /etc/ben/ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/crux/app/blast:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PRIMER-blast-$LINKS-$nt-$RUNID crux /mnt/blast.sh -c /vars/crux_vars.sh -j $PRIMER-blast-$LINKS-$nt-$RUNID -i $RUNID -p $PRIMER -n $nt -e $LINKS.fasta" $PRIMER-blast-$LINKS-$nt-$RUNID -f main -o /etc/ben/output
     nt=$(echo $nt | sed 's/^0*//')  # Remove leading zeros
 done

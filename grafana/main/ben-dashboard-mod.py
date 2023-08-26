@@ -16,8 +16,19 @@ args = parser.parse_args()
 
 dashbrd = args.dashboard
 
+def trigger_node_util():
+    try:
+        url = "http://localhost:8001"
+        response = requests.get(url)
+        response.raise_for_status()  # Raises an exception if the request was not successful (e.g., 4xx or 5xx response)
+        print("Triggered URL:", url)
+    except requests.exceptions.RequestException as e:
+        print("Error while triggering URL:", e)
+
+
 def fetch_metrics():
     try:
+        trigger_node_util() # update node_util metrics
         url = "http://localhost:8000"  # Replace with the correct URL for your Grafana server
         response = requests.get(url)
         response.raise_for_status()  # Raises an exception if the request was not successful (e.g., 4xx or 5xx response)
@@ -33,7 +44,7 @@ with open(dashbrd, "r") as jsonFile:
 
 nodes=[]
 for line in metrics.split("\n"):
-    if line == "":
+    if line == "" or line.startswith('#') or line.startswith("ben"):
         continue
     nodes.append(line.split()[0])
 

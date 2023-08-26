@@ -7,7 +7,7 @@ Requires=grafana-server.service
 User=ubuntu
 WorkingDirectory=/etc/ben/jobs
 Environment="PATH=/usr/local/bin:/usr/bin:/bin:/home/ubuntu/.conda/envs/webhook/bin"
-ExecStart=/bin/bash -c 'source /usr/local/miniconda/bin/activate webhook && gunicorn --workers 1 --bind unix:/etc/ben/jobs/node_util.sock -m 777 node_util:app'
+ExecStart=/usr/local/miniconda/bin/python3 node_util.py
 Restart=always
 RestartSec=5s
 

@@ -3,7 +3,7 @@ set -x
 set -o allexport
 
 PARTITION_NUMBER=0
-while getopts "i:p:k:s:r:b:" opt; do
+while getopts "i:p:b:" opt; do
     case $opt in
         i) RUNID="$OPTARG"
         ;;
@@ -14,6 +14,7 @@ while getopts "i:p:k:s:r:b:" opt; do
     esac
 done
 
+cd /mnt
 
 mkdir ${PRIMER}
 # create merged newick folder
@@ -25,6 +26,9 @@ outdir=$(pwd)/${PRIMER}/tronko_${PRIMER}
 mkdir ${outdir}
 
 partitions=$(ls ${newick}/*txt | wc -l)
+
+# sync down tronko output
+aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $outdir --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
 if (( $partitions > 1 ))
