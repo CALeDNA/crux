@@ -42,7 +42,7 @@ RUN git clone https://github.com/lpipes/tronko.git && \
 
 RUN wget https://www.poirrier.ca/ben/ben-2.14.tar.gz && \
     tar -xf ben-2.14.tar.gz && \
-    cd ben && make && sudo mkdir -p /etc/ben && mv ben /etc/ben/ben
+    cd ben && make && mkdir -p /etc/ben && mv ben /etc/ben/ben
 
 ENV PATH="/usr/local/crux_bin:$PATH"
 ENV PATH="/usr/local/miniconda/bin:$PATH"
