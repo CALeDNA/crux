@@ -4,6 +4,7 @@ set -x
 OUTPUT="/etc/ben/output"
 INPUT_METADATA="METABARCODING.csv"
 BENPATH="/etc/ben/ben"
+ADAPTER="nextera"
 while getopts "p:b:a:k:s:r:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
