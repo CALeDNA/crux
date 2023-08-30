@@ -62,8 +62,7 @@ for panel in dashboard["panels"]:
                 query["refId"]=currRefId
                 currRefId=chr(ord(currRefId)+1)
                 newTargets.append(copy.deepcopy(query))
-            # print(newTargets)
-            panel["targets"]=newTargets
+                panel["targets"]=newTargets
     except:
         continue
 

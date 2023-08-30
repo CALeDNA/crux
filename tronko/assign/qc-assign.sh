@@ -4,11 +4,14 @@ set -x
 OUTPUT="/etc/ben/output"
 INPUT_METADATA="METABARCODING.csv"
 BENPATH="/etc/ben/ben"
-while getopts "p:b:k:s:r:" opt; do
+ADAPTER="nextera"
+while getopts "p:b:a:k:s:r:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
         ;;
         b) BENSERVER="$OPTARG"
+        ;;
+        a) ADAPTER="$OPTARG"
         ;;
         k) AWS_ACCESS_KEY_ID="$OPTARG"
         ;;
@@ -41,9 +44,12 @@ IFS="," read -ra headers < "$PROJECTID/$INPUT_METADATA"
 
 # Loop through the headers and find the positions of columns matching the pattern "Marker N"
 marker_positions=()
+adapter_position="-1"
 for i in "${!headers[@]}"; do
     if [[ "${headers[$i]}" =~ ^Marker\ [0-9]+$ ]]; then
         marker_positions+=("$i")
+    elif [[ "${headers[$i]}" =~ "Adapter type" ]]; then
+        adapter_position=$i
     fi
 done
 
@@ -62,6 +68,10 @@ while IFS="," read -ra row; do
             fi
         fi
     done
+    if [ "$adapter_position" != "-1" ]; then
+        ADAPTER="${row[$adapter_position]}"
+        ADAPTER="${ADAPTER,,}" # convert to lower case
+    fi # else using "nextera" as default
 done < <(tail -n +2 "$PROJECTID/$INPUT_METADATA" | tr -d '\r')
 
 # Print the unique Markers and their corresponding FP and RP columns
@@ -109,7 +119,7 @@ while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
-        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; ./qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION" $job -o $OUTPUT
+        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; ./qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign -a $ADAPTER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION" $job -o $OUTPUT
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
