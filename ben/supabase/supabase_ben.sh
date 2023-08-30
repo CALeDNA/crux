@@ -3,76 +3,93 @@
 # - get job queues txt file
 # - run supabase_ben.py
 # - upload logs & cleanup ben list
-SERVERS=("/tmp/ben-ecopcr" "/tmp/ben-blast" "/tmp/ben-ac" "/tmp/ben-newick" "/tmp/ben-tronko" "/tmp/ben-qc" "/tmp/ben-assign") 
+QUEUES=("/etc/ben/queue/ecopcr.ini" "/etc/ben/queue/blast.ini" "/etc/ben/queue/ac.ini" "/etc/ben/queue/newick.ini" "/etc/ben/queue/tronko.ini" "/etc/ben/queue/qc.ini" "/etc/ben/queue/assign.ini")
 
 supabase() {
-    local server=$1 # /tmp/ben-ecopcr
+    local queue=$1 # /etc/ben/queue/ecopcr.ini
+    local server=$2
     local BEN=/etc/ben/ben
 
-    if $BEN list -s $server > tmp; then
-      # update supabase SchedulerJobs
-      python3 supabase_ben.py tmp $server
-      # on finished jobs: upload logs and rm from ben list
-      job_type=$(echo "$server" | awk -F- '{print $NF}') # "/tmp/ben-qc" -> "qc"
-      header_skipped=false
-      while IFS= read -r line
-      do
-          # skip header
-          if ! $header_skipped; then
-              header_skipped=true
-              continue
-          fi
-          read -ra columns <<< "$line"
-          num_columns=${#columns[@]}
-          echo "$num_columns"
-          if ((num_columns >= 4)); then
-              status="${columns[3]}"
-              echo "Status: $status"
-              if [ "$status" = "." ]; then
-                  # upload log
-                  log="${columns[1]}/${columns[2]}.log"
-                  out="${columns[1]}/${columns[2]}.out"
-                  if [[ "$job_type" == "ecopcr" || "$job_type" == "blast" ]]; then
-                      RUNID=$(echo "${columns[2]}" | rev | cut -d'-' -f1-3 | rev) # parse date
-                      PRIMER=$(echo "${columns[2]}" | cut -d'-' -f1)
-                      aws s3 cp $log s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                      aws s3 cp $out s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                  elif [[ "$job_type" == "assign" || "$job_type" == "qc" ]]; then
-                      if [[ "$job_type" == "qc" ]]; then
-                        job_type="QC"
-                      fi
-                      PROJECTID=$(echo "${columns[2]}" | egrep -o ".*(-assign-|-QC-)" | sed 's/-assign-//; s/-QC-//')
-                      PRIMER=${columns[2]#$PROJECTID-assign-}
-                      # PRIMER=$(echo "$PRIMER" | rev | cut -d'_' -f2- | rev)
-                      aws s3 cp $log s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                      aws s3 cp $out s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                  elif [[ "$job_type" == "ac" || "$job_type" == "newick" || "$job_type" == "tronko" ]]; then
-                      RUNID=$(echo "${columns[2]}" | rev | cut -d'-' -f1-3 | rev) # parse date
-                      PRIMER=$(echo "${columns[2]}" | sed "s/\(.*\)-$job_type.*/\1/")
-                      if [[ "$job_type" == "ac" ]]; then
-                        job_type="ancestralclust"
-                      fi
-                      aws s3 cp $log s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                      aws s3 cp $out s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                  fi
-                  # remove logs
-                  rm $log $out
-                  # remove finished job from ben queue
-                  $BEN rm "${columns[0]}" -s $server
-              fi
-          else
-              # queued jobs. exit
-              break
-          fi
-      done < tmp
-      # cleanup
-      rm tmp
-    else
-      echo "Error occurred while executing: $BEN list -s $server > tmp"
-    fi
+    # update supabase SchedulerJobs
+    python3 supabase_ben.py $queue $server
+    # on finished jobs: upload logs and rm from ben list
+    job_type=$(echo "$server" | awk -F- '{print $NF}') # "/tmp/ben-qc" -> "qc"
+    while IFS= read -r line
+    do
+        # Check if the line contains "type =" or "id ="
+        if [[ "$line" == *"type ="* ]]; then
+            current_type=$(echo "$line" | awk -F " = " '{print $2}')
+        elif [[ "$line" == *"id ="* && "$line" != *"_id ="* ]]; then
+            current_id=$(echo "$line" | awk -F " = " '{print $2}')
+        elif [[ "$line" == *"name ="* && "$line" != *"_name ="* ]]; then
+            current_job=$(echo "$line" | awk -F " = " '{print $2}')
+        elif [[ "$line" == *"stdout_path ="* ]]; then
+            current_log_path=$(echo "$line" | awk -F " = " '{print $2}')
+            if [ "$current_type" = "done" ]; then
+                # delete finished job for queue
+                $BEN rm $current_id -s $server
+                # upload log to aws s3 bucket
+                out=$current_log_path
+                log=$(echo "$out" | sed 's/\.out$/.log/')
+                if [[ "$job_type" == "ecopcr" || "$job_type" == "blast" ]]; then
+                    RUNID=$(echo "$current_job" | rev | cut -d'-' -f1-3 | rev) # parse date
+                    PRIMER=$(echo "$current_job" | cut -d'-' -f1)
+                    aws s3 cp $log s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                    aws s3 cp $out s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                elif [[ "$job_type" == "assign" || "$job_type" == "qc" ]]; then
+                    if [[ "$job_type" == "qc" ]]; then
+                      job_type="QC"
+                      PROJECTID=$(echo "$current_job" | egrep -o ".*(-assign-|-QC-)" | sed 's/-assign-//; s/-QC-//')
+                      PRIMER="${current_job#*-QC-}"
+                    else
+                      PROJECTID=$(echo "$current_job" | egrep -o ".*(-assign-|-QC-)" | sed 's/-assign-//; s/-QC-//')
+                      PRIMER="${current_job#*-assign-}"
+                    fi
+                    echo $current_job
+                    echo $PROJECTID
+                    echo $PRIMER
+                    echo $job_type
+                    # aws s3 cp $log s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                    # aws s3 cp $out s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                elif [[ "$job_type" == "ac" || "$job_type" == "newick" || "$job_type" == "tronko" ]]; then
+                    RUNID=$(echo "$current_job" | rev | cut -d'-' -f1-3 | rev) # parse date
+                    PRIMER=$(echo "$current_job" | sed "s/\(.*\)-$job_type.*/\1/")
+                    if [[ "$job_type" == "ac" ]]; then
+                      job_type="ancestralclust"
+                    fi
+                    aws s3 cp $log s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                    aws s3 cp $out s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/$job_type/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                fi
+                # remove logs
+                rm $log $out
+                # reset variables
+                current_type=""
+                current_id=""
+                current_job=""
+                current_log_path=""
+
+            else
+                # queued jobs. exit
+                break
+            fi
+        fi
+    done < $queue
 }
 
-# Iterate over $SERVERS list
-for server in "${SERVERS[@]}"; do
-  supabase "$server"
+# Iterate over $QUEUES list
+for queue in "${QUEUES[@]}"; do
+  # run if queue exists
+  if [ -f "$queue" ]; then
+    # get server socket file
+    base_path="${queue##*/}"
+    # Remove everything after and including the last dot
+    base_name="${base_path%.*}"
+    # Replace slashes with dashes
+    # new_path="${queue//\//-}"
+    # Combine base name and modified path
+    server="/tmp/ben-${base_name}"
+
+
+    supabase "$queue" "$server"
+  fi
 done

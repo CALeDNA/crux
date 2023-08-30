@@ -1,5 +1,6 @@
 import psycopg2
 import sys
+from datetime import datetime
 from configparser import ConfigParser
 
 
@@ -33,37 +34,76 @@ def update_job_queue(queue,socket):
 		
         # create a cursor
         cur = conn.cursor()
-        
-	    # # execute a statement
-        # print('PostgreSQL database version:')
-        # cur.execute('SELECT * FROM "SchedulerJobs";')
+
+        result=[]
+        current_entry={}
         with open(queue, 'r') as file:
-            next(file) # skip header line
             for line in file:
                 line = line.strip()
-                values = line.split()
 
-                job_data = {
-                    'job_id': '',
-                    'output_dir': '',
-                    'job_name': '',
-                    'status': 'w',
-                    'node_id': '-1',
-                    'server': 'WAITING',
-                    'duration': '-1',
-                    'node_name': 'WAITING',
-                    'socket': socket,
-                }
+                if line == '[job]':
+                    if current_entry:
+                        result.append(current_entry)
+                    current_entry = {}
+                else:
+                    key, value = line.split('=', 1)
+                    current_entry[key.strip()] = value.strip(' "')
+            
+            # Append the last entry after the loop
+            if current_entry:
+                result.append(current_entry)
+            
+            # print(result[0])
 
-                for i in range(min(len(values), len(job_data))):
-                    column_name = list(job_data.keys())[i]
-                    column_value = values[i]
-                    job_data[column_name] = column_value
+            for entry in result:
+                if(entry["type"] == "done"):
+                    start_time = datetime.strptime(entry["start_time"], '%Y-%m-%d %H:%M:%S')
+                    stop_time = datetime.strptime(entry["stop_time"], '%Y-%m-%d %H:%M:%S')
+                    time_difference = stop_time - start_time
+
+                    job_data = {
+                        'job_id': entry["id"],
+                        'output_dir': entry["stdout_path"],
+                        'job_name': entry["name"],
+                        'status': entry["type"],
+                        'node_id': entry["ran_id"],
+                        'server': entry["ran_name"],
+                        'duration': time_difference,
+                        'node_name': entry["ran_name"],
+                        'socket': socket,
+                        'command': entry["command"]
+                    }
+                elif(entry["type"] == "running"):
+                    job_data = {
+                        'job_id': entry["id"],
+                        'output_dir': entry["stdout_path"],
+                        'job_name': entry["name"],
+                        'status': entry["type"],
+                        'node_id': entry["running_id"],
+                        'server': entry["running_name"],
+                        'duration': "-1",
+                        'node_name': entry["ran_name"],
+                        'socket': socket,
+                        'command': entry["command"]
+                    }
+                else:
+                    job_data = {
+                        'job_id': entry["id"],
+                        'output_dir': entry["stdout_path"],
+                        'job_name': entry["name"],
+                        'status': entry["type"],
+                        'node_id': "-1",
+                        'server': "WAITING",
+                        'duration': "-1",
+                        'node_name': "WAITING",
+                        'socket': socket,
+                        'command': entry["command"]
+                    }
 
                 try:
                     insert_query = '''
-                        INSERT INTO "SchedulerJobs" (job_id, output_dir, job_name, status, node_id, server, node_name, duration, socket)
-                        VALUES (%(job_id)s, %(output_dir)s, %(job_name)s, %(status)s, %(node_id)s, %(server)s, %(node_name)s, %(duration)s, %(socket)s)
+                        INSERT INTO "SchedulerJobs" (job_id, output_dir, job_name, status, node_id, server, node_name, duration, socket, command)
+                        VALUES (%(job_id)s, %(output_dir)s, %(job_name)s, %(status)s, %(node_id)s, %(server)s, %(node_name)s, %(duration)s, %(socket)s, %(command)s)
                         ON CONFLICT (job_name) DO UPDATE
                         SET
                             output_dir = EXCLUDED.output_dir,
@@ -72,7 +112,8 @@ def update_job_queue(queue,socket):
                             server = EXCLUDED.server,
                             node_name = EXCLUDED.node_name,
                             duration = EXCLUDED.duration,
-                            socket = EXCLUDED.socket
+                            socket = EXCLUDED.socket,
+                            command = EXCLUDED.command
                         WHERE "SchedulerJobs".status <> EXCLUDED.status;
                         '''
                     cur.execute(insert_query, job_data)
