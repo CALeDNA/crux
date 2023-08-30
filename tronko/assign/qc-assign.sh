@@ -44,9 +44,12 @@ IFS="," read -ra headers < "$PROJECTID/$INPUT_METADATA"
 
 # Loop through the headers and find the positions of columns matching the pattern "Marker N"
 marker_positions=()
+adapter_position="-1"
 for i in "${!headers[@]}"; do
     if [[ "${headers[$i]}" =~ ^Marker\ [0-9]+$ ]]; then
         marker_positions+=("$i")
+    elif [[ "${headers[$i]}" =~ "Adapter type" ]]; then
+        adapter_position=$i
     fi
 done
 
@@ -65,6 +68,10 @@ while IFS="," read -ra row; do
             fi
         fi
     done
+    if [ "$adapter_position" != "-1" ]; then
+        ADAPTER="${row[$adapter_position]}"
+        ADAPTER="${ADAPTER,,}" # convert to lower case
+    fi # else using "nextera" as default
 done < <(tail -n +2 "$PROJECTID/$INPUT_METADATA" | tr -d '\r')
 
 # Print the unique Markers and their corresponding FP and RP columns

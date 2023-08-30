@@ -3,7 +3,6 @@ set -x
 
 OUTPUT="/etc/ben/output"
 RUNID="2023-04-07"
-ADAPTER="nextera"
 while getopts "i:p:b:a:k:s:r:" opt; do
     case $opt in
         i) PROJECTID="$OPTARG"
