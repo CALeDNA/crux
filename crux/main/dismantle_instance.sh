@@ -4,7 +4,6 @@ set -x
 set -o allexport
 
 OS_USERNAME=""
-APIKEY=""
 JSCRED=""
 HOSTNAME=""
 NAME=""

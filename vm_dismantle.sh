@@ -3,7 +3,6 @@ set -x
 
 DASHBOARD=/var/lib/grafana/dashboards/overview.json
 OS_USERNAME=""
-APIKEY=""
 JSCRED=""
 HOSTNAME=""
 NAME=""
