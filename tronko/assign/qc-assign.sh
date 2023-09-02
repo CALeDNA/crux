@@ -5,13 +5,11 @@ OUTPUT="/etc/ben/output"
 INPUT_METADATA="METABARCODING.csv"
 BENPATH="/etc/ben/ben"
 ADAPTER="nextera"
-while getopts "p:b:a:k:s:r:" opt; do
+while getopts "p:b:k:s:r:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
         ;;
         b) BENSERVER="$OPTARG"
-        ;;
-        a) ADAPTER="$OPTARG"
         ;;
         k) AWS_ACCESS_KEY_ID="$OPTARG"
         ;;

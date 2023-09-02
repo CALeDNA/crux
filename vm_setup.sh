@@ -1,5 +1,4 @@
 #! /bin/bash
-set -x
 
 USER=""
 FLAVOR=""
@@ -74,7 +73,7 @@ else
 fi
 
 # 2) run docker build
-./crux-pssh.sh -h hostnames -c $VARS -p $PRIMERS -u $USER -s $START
+./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START
 
 mv $PRIVATEKEY hostnames $BASEDIR/grafana/main
 mv $JSCRED $BASEDIR

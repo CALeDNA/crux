@@ -49,8 +49,8 @@ supabase() {
                     echo $PROJECTID
                     echo $PRIMER
                     echo $job_type
-                    # aws s3 cp $log s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-                    # aws s3 cp $out s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                    aws s3 cp $log s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $log) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+                    aws s3 cp $out s3://ednaexplorer/projects/$PROJECTID/$job_type/$PRIMER/logs/$(basename $out) --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
                 elif [[ "$job_type" == "ac" || "$job_type" == "newick" || "$job_type" == "tronko" ]]; then
                     RUNID=$(echo "$current_job" | rev | cut -d'-' -f1-3 | rev) # parse date
                     PRIMER=$(echo "$current_job" | sed "s/\(.*\)-$job_type.*/\1/")
