@@ -6,6 +6,7 @@ OS_USERNAME=""
 JSCRED=""
 HOSTNAME=""
 NAME=""
+USER="ubuntu"
 while getopts "j:h:m:e:c:d:" opt; do
     case $opt in
         j) JSCRED="$OPTARG"
@@ -29,11 +30,12 @@ mv $JSCRED $HOSTNAME $BASEDIR/crux/main
 cd $BASEDIR/crux/main
 
 # remove VM from ben server
-/etc/ben/ben scale -n 0 $NAME --retire -s $BENSERVER # just in case
+/etc/ben/ben scale -n 0 $NAME -s $BENSERVER # just in case
 /etc/ben/ben kill $NAME -s $BENSERVER
 
 # remove host from known_hosts
-ssh-keygen -R $NAME
+address=$(ssh -G "$NAME" | awk '/^hostname / {print $2}')
+ssh-keygen -f "/home/$USER/.ssh/known_hosts" -R "$address"
 
 # delete VM
 ./dismantle_instance.sh -j $JSCRED -h $HOSTNAME -m $NAME -c $CONFIG -d $DATASOURCE

@@ -19,21 +19,21 @@ GAP_OPEN="1"
 GAP_EXTEND="1"
 
 # Jetstream2 variables and credentials
-OS_USERNAME="ubuntu"
+USER="ubuntu"
 FLAVOR="m3.large"
-IMAGE="Featured-Ubuntu20"
+IMAGE="Featured-Ubuntu22"
 # create the ssh key
-#ssh-keygen -b 2048 -t rsa -f ${APIKEY}
+#ssh-keygen -b 2048 -t rsa -f ${SSHKEY}
 # upload to OpenStack
-#openstack keypair create --public-key ${APIKEY}.pub ${APIKEY}
-APIKEY="hbaez-private-key"
+#openstack keypair create --public-key ${SSHKEY}.pub ${SSHKEY}
+SSHKEY="hbaez-private-key"
 # include your Jetstream credentials openrc file
 # https://github.com/jetstream-cloud/js2docs/blob/main/docs/ui/cli/openrc.md
 JSCRED="app-cred-docker-cli-auth-openrc.sh"
 NUMINSTANCES=10 # number of virtual machines
 SECURITY="exosphere"
 NETWORK=ef65cd35-08de-4d4c-a664-e9b1aed32793
-VOLUME=0 # volume backed storage for virtual machines. 0 for default size
+VOLUME=1000 # volume backed storage for virtual machines. 0 for default size
 
 # accession ID file/folder names
 #LINKS="wgsgbsize"
@@ -43,6 +43,21 @@ NTOTAL=108 # number of nt chunks
 NTFILE="nt-ftp"
 
 IPADDRESS="0.0.0.0"
+HOSTNAME="hostnames"
+SSHCONFIG="/home/$USER/.ssh/config"
+
+#GRAFANA
+DATASOURCE="/etc/grafana/provisioning/datasources/datasources.yaml"
+
+#AUTOSCALING
+MAX_ECOPCR=5
+MAX_BLAST=5
+MAX_AC=5
+MAX_NEWICK=5
+MAX_TRONKO=5
+MAX_QC=2
+MAX_ASSIGN=5
+
 
 
 # parallel.py docker commands
