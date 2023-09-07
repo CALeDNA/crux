@@ -44,6 +44,9 @@ gzip $outdir/reference_tree.txt
 cat $newick/*fasta >> $outdir/$PRIMER.fasta
 cat $newick/*_taxonomy.txt >> $outdir/${PRIMER}_taxonomy.txt
 
+# make bwa index
+bwa index $outdir/$PRIMER.fasta
+
 # upload
 aws s3 sync $outdir s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 

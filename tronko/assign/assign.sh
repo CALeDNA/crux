@@ -38,7 +38,8 @@ then
         # tronko assign paired does not exist on js2, run
         echo "File does not exist on s3 - running paired on $PRIMER"
         # download tronko database
-        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$PRIMER/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         
         # download QC sample paired files
         aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
@@ -111,7 +112,8 @@ then
         # tronko assign unpaired_f does not exist on js2, run
         echo "File does not exist on s3 - run unpaired_f: $PROJECTID-$PRIMER"
         # download tronko database
-        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$PRIMER/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         
         # download QC sample unpaired_F files
         aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
@@ -163,7 +165,8 @@ then
         # tronko assign unpaired_r does not exist on js2, run
         echo "File does not exist on s3 - run unpaired_r: $PROJECTID-$PRIMER"
         # download tronko database
-        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $PROJECTID-$PRIMER/tronkodb/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         
         # download QC sample unpaired_R
         aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
