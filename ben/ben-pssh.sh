@@ -39,7 +39,7 @@ else
 
     parallel-ssh -i -t 0 -h $HOSTNAME "tar -xf ben-$BEN_VERSION.tar.gz"
 
-    parallel-ssh -i -t 0 -h $HOSTNAME "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
+    parallel-ssh -i -t 0 -h $HOSTNAME "cd ben && make && sudo mkdir -p /etc/ben && sudo cp ben /usr/local/bin && sudo mv ben /etc/ben/ben"
 
     parallel-ssh -i -t 0 -h $HOSTNAME "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben"
 fi
