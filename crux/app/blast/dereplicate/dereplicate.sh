@@ -9,6 +9,8 @@
 set -x
 set -o allexport
 
+export AWS_MAX_ATTEMPTS=3
+
 OUTPUT="/etc/ben/output"
 while getopts "j:i:p:b:B:" opt; do
     case $opt in

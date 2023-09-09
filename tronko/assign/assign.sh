@@ -1,6 +1,8 @@
 #! /bin/bash
 set -x
 
+export AWS_MAX_ATTEMPTS=3
+
 OUTPUT="/etc/ben/output"
 PAIRED=""
 UNPAIRED_F=""

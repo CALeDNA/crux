@@ -1,6 +1,8 @@
 #!/bin/bash
 set -o xtrace
 
+export AWS_MAX_ATTEMPTS=3
+
 while getopts "d:p:i:" opt; do
     case $opt in
         d) FOLDER="$OPTARG"

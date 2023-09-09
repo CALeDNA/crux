@@ -2,6 +2,8 @@
 
 set -x
 
+export AWS_MAX_ATTEMPTS=3
+
 CONFIG=""
 while getopts "c:v:p:f:r:l:" opt; do
     case $opt in

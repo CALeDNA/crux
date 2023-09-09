@@ -1,6 +1,8 @@
 #! /bin/bash
 set -x
 
+export AWS_MAX_ATTEMPTS=3
+
 OUTPUT="/etc/ben/output"
 INPUT_METADATA="METABARCODING.csv"
 BENPATH="/etc/ben/ben"

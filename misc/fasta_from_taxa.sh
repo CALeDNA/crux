@@ -1,5 +1,7 @@
 #! /bin/bash
 
+export AWS_MAX_ATTEMPTS=3
+
 while getopts "d:t:f:i:k:s:r:" opt; do
     case $opt in
         d) FOLDER="$OPTARG" # folder of last run

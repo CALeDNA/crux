@@ -2,6 +2,7 @@
 set -x
 set -o allexport
 
+export AWS_MAX_ATTEMPTS=3
 
 max_length=20000
 cutoff_length=25000

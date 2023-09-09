@@ -2,6 +2,8 @@
 set -x
 set -o allexport
 
+export AWS_MAX_ATTEMPTS=3
+
 PARTITION_NUMBER=0
 while getopts "i:p:b:" opt; do
     case $opt in

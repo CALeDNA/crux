@@ -2,6 +2,8 @@
 set -x
 set -o allexport
 
+export AWS_MAX_ATTEMPTS=3
+
 INPUT="." # folder containing {1..n}.fasta
 OUTPUT="." # folder to output results
 

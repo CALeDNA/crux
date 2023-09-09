@@ -3,7 +3,7 @@
 set -x
 set -o allexport
 
-
+export AWS_MAX_ATTEMPTS=3
 while getopts "c:j:i:p:n:e:" opt; do
     case $opt in
         c) CONFIG="$OPTARG"
