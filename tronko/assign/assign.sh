@@ -224,10 +224,11 @@ for dir in "$PROJECTID"/*; do
   fi
 done
 # zip
-zip -r ${PROJECTID}_processed_tronko.zip ${PROJECTID}_processed_tronko
+tar -czvf ${PROJECTID}_processed_tronko.tar.gz ${PROJECTID}_processed_tronko
 # upload
-aws s3 cp ${PROJECTID}_processed_tronko.zip s3://ednaexplorer/projects/$PROJECTID/${PROJECTID}_processed_tronko.zip --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://ednaexplorer/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
+rm -r ${PROJECTID}*
 
 # # Trigger taxonomy initializer script
 # curl -X POST http://$IPADDRESS:8004/initializer \
@@ -250,4 +251,4 @@ aws s3 cp ${PROJECTID}_processed_tronko.zip s3://ednaexplorer/projects/$PROJECTI
 # v2: run without -v
 
 # cleanup
-rm -r $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc $PROJECTID
+rm -r $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc 
