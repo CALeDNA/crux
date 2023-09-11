@@ -209,6 +209,26 @@ then
     fi
 fi
 
+mkdir ${PROJECTID}_processed_tronko
+# dl all assign folders for $PROJECTID
+aws s3 sync s3://ednaexplorer/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+# run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
+mismatches=(1 5 10 30 50 100)
+for dir in "$PROJECTID"/*; do
+  if [ -d "$dir" ]; then
+    primer=$(basename $dir)
+    mkdir ${PROJECTID}_processed_tronko/$primer
+    for mismatch in "${mismatches[@]}"; do
+        python3 process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
+    done
+  fi
+done
+# zip
+zip -r ${PROJECTID}_processed_tronko.zip ${PROJECTID}_processed_tronko
+# upload
+aws s3 cp ${PROJECTID}_processed_tronko.zip s3://ednaexplorer/projects/$PROJECTID/${PROJECTID}_processed_tronko.zip --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+
 # # Trigger taxonomy initializer script
 # curl -X POST http://$IPADDRESS:8004/initializer \
 #      -H "Content-Type: application/json" \
@@ -230,4 +250,4 @@ fi
 # v2: run without -v
 
 # cleanup
-rm -r $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc
+rm -r $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc $PROJECTID
