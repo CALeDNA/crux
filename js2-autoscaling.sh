@@ -64,10 +64,6 @@ getB() {
 # 4) delete server with vm_dismantle.sh
 
 
-
-
-
-
 # 5) get triggered by node_util if queued > 0 and ben nodes is empty
 # 6) check here that it's true just in case
 # 7) run vm_setup.sh to setup a server (should test with max 1 server)
@@ -79,7 +75,7 @@ if [ "$SCALE_DOWN" = "TRUE" ]; then
     queuedCount=$((queuedCount - 1)) # remove header
     if [ "$queuedCount" -eq "0" ]; then
         # loop through ben nodes and dismantle unused servers
-        nodes=$(ben nodes -s $BENSERVER | tail -n +2 | head -n -1)
+        nodes=$($BENPATH nodes -s $BENSERVER | tail -n +2 | head -n -1)
         while IFS=$' ' read -r -a fields; do
             if [ "${#fields[@]}" -ge 3 ]; then # sanity check
                 name="${fields[1]}"
