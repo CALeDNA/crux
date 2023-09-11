@@ -1,0 +1,10 @@
+[Unit]
+Description=js2-autoscale Service Timer
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
