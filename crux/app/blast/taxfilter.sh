@@ -2,6 +2,7 @@
 
 set -x
 
+export AWS_MAX_ATTEMPTS=3
 BLASTDIR="blast-output"
 EMPTY="FALSE"
 while getopts "f:p:c:i:j:s" opt; do

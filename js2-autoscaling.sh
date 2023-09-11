@@ -106,8 +106,16 @@ else # Scale Up
             # calculate b value
             b=$(getB $VMNAME $HOSTNAME)
             n=$((MAXVM - benServerLineCount))
+            
+            if [ "$queuedCount" -lt "$n" ]; then
+                n="$queuedCount"
+            fi
 
-            ./vm_setup.sh -u $USER -f m3.large -i $IMAGE -k $SSHKEY -j $JSCRED -n $n -m $VMNAME -b $b -v $VOLUME -s $SECURITY -w $NETWORK -c $SSHCONFIG -o 1 -e $BENSERVER
+            if [[ $BENSERVER == *assign* ]]; then
+                FLAVOR="m3.xl" # need more RAM for tronko assign
+            fi
+
+            ./vm_setup.sh -u $USER -f $FLAVOR -i $IMAGE -k $SSHKEY -j $JSCRED -n $n -m $VMNAME -b $b -v $VOLUME -s $SECURITY -w $NETWORK -c $SSHCONFIG -o 1 -e $BENSERVER
         else
             echo "Skipping. $BENSERVER has an empty queue."
         fi

@@ -1,6 +1,8 @@
 #! /bin/bash
 set -x
 
+export AWS_MAX_ATTEMPTS=3
+
 OUTPUT="/etc/ben/output"
 INPUT_METADATA="METABARCODING.csv"
 BENPATH="/etc/ben/ben"
@@ -46,7 +48,7 @@ adapter_position="-1"
 for i in "${!headers[@]}"; do
     if [[ "${headers[$i]}" =~ ^Marker\ [0-9]+$ ]]; then
         marker_positions+=("$i")
-    elif [[ "${headers[$i]}" =~ "Adapter type" ]]; then
+    elif [[ "${headers[$i]}" =~ "Adapter Type" ]]; then
         adapter_position=$i
     fi
 done

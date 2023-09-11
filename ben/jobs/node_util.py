@@ -59,16 +59,6 @@ def benlist():
               isFinished += 1
           else:
             isQueued += 1
-      # save `ben list` to a file to view
-      basename=os.path.basename(server)
-      print(f"/etc/ben/{server}.txt")
-      # Delete previous file(s) with the same basename
-      existing_file = glob.glob(f"/etc/ben/jobs/{basename}" + "*")
-      if existing_file:
-        for file in existing_file:
-            os.remove(file)
-      with open(os.path.join("/etc/ben/jobs", f"{basename}_{current_time}.txt"), "w") as file:
-        file.write("\n".join(result))
   totalJobs = isRunning + isQueued + isFinished
   return isFinished, isRunning, isQueued, totalJobs
 

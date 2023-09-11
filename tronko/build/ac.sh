@@ -2,6 +2,7 @@
 set -x
 set -o allexport
 
+export AWS_MAX_ATTEMPTS=3
 
 max_length=20000
 cutoff_length=25000
@@ -65,7 +66,7 @@ do
         job=$(printf '%02d' "$job") # add leading zero
         job="$folder$job" # -> ex: 12S_MiFish_U-ac-001203
 
-        /etc/ben/ben add -s $ACSERVER -c "cd crux/tronko/build; ./ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION " $job-$RUNID -f main -o $OUTPUT  
+        ben add -s $ACSERVER -c "cd crux/tronko/build; ./ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION " $job-$RUNID -f main -o $OUTPUT  
     fi
 done
 
@@ -74,7 +75,7 @@ if [ "$added_job" = "FALSE" ]
 then
     suffix=$( echo $JOB | rev | cut -d'-' -f1 | rev | tr -dc '0-9' )
     job="$PRIMER-newick$suffix"
-    /etc/ben/ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $JOB -j $job -i $RUNID -p $PRIMER" $job-$RUNID -f main -o $OUTPUT
+    ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $JOB -j $job -i $RUNID -p $PRIMER" $job-$RUNID -f main -o $OUTPUT
 fi
 
 # delete local files
@@ -112,6 +113,6 @@ then
         echo "parent folder is root ancestralclust folder"
     else
         job="$PRIMER-newick$suffix"
-        /etc/ben/ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $FOLDER -j $job -i $RUNID -p $PRIMER" $job-$RUNID -f main -o $OUTPUT
+        ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $FOLDER -j $job -i $RUNID -p $PRIMER" $job-$RUNID -f main -o $OUTPUT
     fi
 fi

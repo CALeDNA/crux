@@ -2,6 +2,8 @@
 set -x
 set -o allexport
 
+export AWS_MAX_ATTEMPTS=3
+
 PARTITION_NUMBER=0
 while getopts "i:p:b:" opt; do
     case $opt in
@@ -43,6 +45,9 @@ gzip $outdir/reference_tree.txt
 # make fasta and taxa
 cat $newick/*fasta >> $outdir/$PRIMER.fasta
 cat $newick/*_taxonomy.txt >> $outdir/${PRIMER}_taxonomy.txt
+
+# make bwa index
+bwa index $outdir/$PRIMER.fasta
 
 # upload
 aws s3 sync $outdir s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
