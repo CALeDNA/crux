@@ -93,9 +93,10 @@ if [ "$SCALE_DOWN" = "TRUE" ]; then
 else # Scale Up
     benServerLineCount=$($BENPATH nodes -s $BENSERVER | wc -l)
     benServerLineCount=$((benServerLineCount - 2)) # account for first and last line
+    hostnameLineCount=$(wc -l $HOSTNAME)
 
     # check ben nodes is less than max and queued > 0
-    if [ "$benServerLineCount" -lt "$MAXVM" ]; then
+    if [ "$benServerLineCount" -lt "$MAXVM" ] && [ "$hostnameLineCount" -lt "$MAX_TOTAL" ]; then
         queuedCount=$($BENPATH list -t p -s $BENSERVER | wc -l)
         queuedCount=$((queuedCount - 1)) # remove header
         if [ "$queuedCount" -gt "0" ]; then
@@ -116,6 +117,6 @@ else # Scale Up
             echo "Skipping. $BENSERVER has an empty queue."
         fi
     else
-        echo "Skipping. $BENSERVER has reached the maximum number of VM's: $MAXVM"
+        echo "Skipping. $BENSERVER has reached the maximum number of VM's: $MAXVM, or JS2 VM quota reached: $MAX_TOTAL"
     fi
 fi

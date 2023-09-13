@@ -50,6 +50,7 @@ SSHCONFIG="/home/$USER/.ssh/config"
 DATASOURCE="/etc/grafana/provisioning/datasources/datasources.yaml"
 
 #AUTOSCALING
+MAX_TOTAL=22
 MAX_ECOPCR=5
 MAX_BLAST=5
 MAX_AC=5
