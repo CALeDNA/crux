@@ -29,7 +29,7 @@ if [ "$(wc -l < $HOSTNAME)" -eq 1 ]; then
 
     ssh "$host" "tar -xf ben-$BEN_VERSION.tar.gz"
 
-    ssh "$host" "cd ben && make && sudo mkdir -p /etc/ben && sudo mv ben /etc/ben/ben"
+    ssh "$host" "cd ben && make && sudo mkdir -p /etc/ben && sudo cp ben /usr/local/bin && sudo mv ben /etc/ben/ben"
 
     ssh "$host" "chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && sudo chown -R ubuntu:ubuntu /etc/ben"
 else

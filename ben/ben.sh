@@ -62,7 +62,7 @@ for line in $hostnames
 do
     counter=$(printf '%02d' $counter)
     host="$NAME$counter"
-    ben client -r $host -n $NODES --remote-path $REMOTE_PATH -s $BENSERVER -d
+    /etc/ben/ben client -r $host -n $NODES --remote-path $REMOTE_PATH -s $BENSERVER -d
     counter=$(( 10#$counter + 1 ))
 done
 
