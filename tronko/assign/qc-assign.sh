@@ -8,6 +8,7 @@ INPUT_METADATA="METABARCODING.csv"
 BENPATH="/etc/ben/ben"
 ADAPTER="nextera"
 PROJECTID_LOG="$OUTPUT/projectids.txt"
+MISSINGMARKERS="$OUTPUT/missingmarkers.json"
 while getopts "p:b:k:s:r:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
@@ -124,11 +125,23 @@ while IFS="," read -ra row; do
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
         $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; ./qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign -a $ADAPTER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION" $job -o $OUTPUT
+        # remove from hashmap
+        unset "unique_values[$marker_value]"
     fi
 done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
 # log PROJECT ID
 echo "$PROJECTID" >> $PROJECTID_LOG
+
+# create json of missing markers
+missing_markers=()
+for marker in "${!unique_values[@]}"; do
+    missing_markers+=("$marker")
+done
+
+# Convert the keys array to a JSON string
+json_data='{"missing_markers":'"$(printf '%s\n' "${missing_markers[@]}" | jq -R -s -c 'split("\n")[:-1]')"'}'
+echo "$json_data" > $MISSINGMARKERS
 
 # cleanup
 rm -r $PROJECTID
