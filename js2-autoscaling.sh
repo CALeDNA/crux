@@ -93,7 +93,7 @@ if [ "$SCALE_DOWN" = "TRUE" ]; then
 else # Scale Up
     benServerLineCount=$($BENPATH nodes -s $BENSERVER | wc -l)
     benServerLineCount=$((benServerLineCount - 2)) # account for first and last line
-    hostnameLineCount=$(wc -l $HOSTNAME)
+    hostnameLineCount=$(wc -l < $HOSTNAME)
 
     # check ben nodes is less than max and queued > 0
     if [ "$benServerLineCount" -lt "$MAXVM" ] && [ "$hostnameLineCount" -lt "$MAX_TOTAL" ]; then
@@ -103,9 +103,14 @@ else # Scale Up
             # calculate b value
             b=$(getB $VMNAME $HOSTNAME)
             n=$((MAXVM - benServerLineCount))
-            
+            availVM=$((MAX_TOTAL - hostnameLineCount))
+
             if [ "$queuedCount" -lt "$n" ]; then
                 n="$queuedCount"
+            fi
+
+            if [ "$availVM" -lt "$n" ]; then
+                n="$availVM"
             fi
 
             if [[ $BENSERVER == *assign* ]]; then
