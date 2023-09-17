@@ -35,6 +35,15 @@ while getopts "h:c:s:n:m:u:e:p:b:" opt; do
     esac
 done
 
+declare -A SERVER_MAP
+
+SERVER_MAP=(
+    ["/tmp/ben-ecopcr"]="/tmp/ben-blast"
+    ["/tmp/ben-blast"]="/tmp/ben-ac"
+    ["/tmp/ben-ac"]="/tmp/ben-newick"
+    ["/tmp/ben-newick"]="/tmp/ben-tronko"
+)
+
 # create client config file
 echo "Host main" >> $CLIENT_CONFIG
 echo "HostName $(curl ifconfig.me)" >> $CLIENT_CONFIG
@@ -62,7 +71,12 @@ for line in $hostnames
 do
     counter=$(printf '%02d' $counter)
     host="$NAME$counter"
-    /etc/ben/ben client -r $host -n $NODES --remote-path $REMOTE_PATH -s $BENSERVER -d
+    /etc/ben/ben client -r $host -n $NODES --remote-path $REMOTE_PATH -s $BENSERVER --remote-socket $BENSERVER -d
+    if [[ -v SERVER_MAP[${BENSERVER}] ]]; then
+        # add socket connection to add job after
+        BENSERVERSECOND="${SERVER_MAP[${BENSERVER}]}"
+        /etc/ben/ben client -r $host -n 0 --remote-path $REMOTE_PATH -s $BENSERVERSECOND --remote-socket $BENSERVERSECOND -d
+    fi
     counter=$(( 10#$counter + 1 ))
 done
 
