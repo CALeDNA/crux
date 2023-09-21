@@ -219,7 +219,7 @@ for dir in "$PROJECTID"/*; do
     primer=$(basename $dir)
     mkdir ${PROJECTID}_processed_tronko/$primer
     for mismatch in "${mismatches[@]}"; do
-        python3 process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
+        python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
     done
   fi
 done
