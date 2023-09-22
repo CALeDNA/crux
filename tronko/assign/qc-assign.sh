@@ -9,7 +9,7 @@ BENPATH="/etc/ben/ben"
 ADAPTER="nextera"
 PROJECTID_LOG="$OUTPUT/projectids.txt"
 MISSINGMARKERS="$OUTPUT/missingmarkers.json"
-while getopts "p:b:k:s:r:" opt; do
+while getopts "p:b:k:s:r:K:S:R:B:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
         ;;
@@ -20,6 +20,14 @@ while getopts "p:b:k:s:r:" opt; do
         s) AWS_SECRET_ACCESS_KEY="$OPTARG"
         ;;
         r) AWS_DEFAULT_REGION="$OPTARG"
+        ;;
+        K) AWS_S3_ACCESS_KEY_ID="$OPTARG"
+        ;;
+        S) AWS_S3_SECRET_ACCESS_KEY="$OPTARG"
+        ;;
+        R) AWS_S3_DEFAULT_REGION="$OPTARG"
+        ;;
+        B) AWS_S3_BUCKET="$OPTARG"
         ;;
     esac
 done
@@ -124,7 +132,7 @@ while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
-        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; ./qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign -a $ADAPTER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION" $job -o $OUTPUT
+        $BENPATH add -s $BENSERVER -c "cd crux/tronko/assign; ./qc.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign -a $ADAPTER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION -K $AWS_S3_ACCESS_KEY_ID -S $AWS_S3_SECRET_ACCESS_KEY -R $AWS_S3_DEFAULT_REGION -B $AWS_S3_BUCKET" $job -o $OUTPUT
         # remove from hashmap
         unset "unique_values[$marker_value]"
     fi

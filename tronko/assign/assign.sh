@@ -230,6 +230,13 @@ aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://ednaexplorer/projects/$PROJE
 
 rm -r ${PROJECTID}*
 
+# update s3 bucket creds
+export AWS_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY
+export AWS_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION
+export AWS_BUCKET=$AWS_S3_BUCKET
+
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # # Trigger taxonomy initializer script
 # curl -X POST http://$IPADDRESS:8004/initializer \
 #      -H "Content-Type: application/json" \

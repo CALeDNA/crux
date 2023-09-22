@@ -21,7 +21,15 @@ while getopts "i:p:b:a:k:s:r:" opt; do
         ;;
         r) AWS_DEFAULT_REGION="$OPTARG"
         ;;
-        *) echo "usage: $0 [-i] [-p] [-b] [-k] [-s] [-r]" >&2
+        K) AWS_S3_ACCESS_KEY_ID="$OPTARG"
+        ;;
+        S) AWS_S3_SECRET_ACCESS_KEY="$OPTARG"
+        ;;
+        R) AWS_S3_DEFAULT_REGION="$OPTARG"
+        ;;
+        B) AWS_S3_BUCKET="$OPTARG"
+        ;;
+        *) echo "usage: $0 [-i] [-p] [-b] [-k] [-s] [-r] [-K] [-S] [-R] [-B]" >&2
             exit 1 ;;
     esac
 done
@@ -111,7 +119,7 @@ if [ "$unpaired_R_files" -gt 0 ]; then
 fi
 
 # add tronko assign job on $PRIMER
-/etc/ben/ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -f main -o $OUTPUT
+/etc/ben/ben add -s $BENSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_S3_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID -e AWS_S3_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY -e AWS_S3_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION AWS_S3_BUCKET=$AWS_S3_BUCKET --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -f main -o $OUTPUT
 
 # clean up
 sudo rm -r $PROJECTID-$PRIMER
