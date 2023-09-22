@@ -234,7 +234,7 @@ export AWS_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY
 export AWS_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION
 export AWS_BUCKET=$AWS_S3_BUCKET
 # upload to aws s3 bucket
-aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
 
 rm -r ${PROJECTID}*
 
