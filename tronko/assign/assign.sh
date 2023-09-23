@@ -236,6 +236,10 @@ export AWS_BUCKET=$AWS_S3_BUCKET
 # upload to aws s3 bucket
 aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
 
+
+# call processing_notif.sh
+
+
 rm -r ${PROJECTID}*
 
 # download 
