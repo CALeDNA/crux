@@ -26,7 +26,7 @@ done
 
 BASEDIR=$(pwd)
 
-mv $JSCRED $HOSTNAME $BASEDIR/crux/main
+mv $HOSTNAME $BASEDIR/crux/main
 cd $BASEDIR/crux/main
 
 # remove VM from ben server
@@ -41,7 +41,7 @@ ssh-keygen -f "/home/$USER/.ssh/known_hosts" -R "$address"
 ./dismantle_instance.sh -j $JSCRED -h $HOSTNAME -m $NAME -c $CONFIG -d $DATASOURCE
 
 
-mv $JSCRED $HOSTNAME $BASEDIR
+mv $HOSTNAME $BASEDIR
 cd $BASEDIR/grafana/main
 # update grafana dashboard
 sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE

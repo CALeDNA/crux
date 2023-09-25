@@ -29,7 +29,7 @@ IMAGE="Featured-Ubuntu22"
 SSHKEY="hbaez-private-key"
 # include your Jetstream credentials openrc file
 # https://github.com/jetstream-cloud/js2docs/blob/main/docs/ui/cli/openrc.md
-JSCRED="app-cred-docker-cli-auth-openrc.sh"
+JSCRED="/path/to/app-cred-docker-cli-auth-openrc.sh"
 NUMINSTANCES=10 # number of virtual machines
 SECURITY="exosphere"
 NETWORK=ef65cd35-08de-4d4c-a664-e9b1aed32793

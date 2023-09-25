@@ -2,7 +2,7 @@
 
 set -x
 
-OS_USERNAME=""
+USER=""
 FLAVOR=""
 IMAGE=""
 PRIVATEKEY=""
@@ -14,7 +14,7 @@ VMNAME="chunk"
 VMNUMBER=0
 while getopts "u:f:i:k:j:n:m:b:s:w:v:c:" opt; do
     case $opt in
-        u) OS_USERNAME="$OPTARG"
+        u) USER="$OPTARG"
         ;;
         f) FLAVOR="$OPTARG"
         ;;
@@ -42,7 +42,7 @@ while getopts "u:f:i:k:j:n:m:b:s:w:v:c:" opt; do
 done
 
 #Check that user has all of the default flags set
-if [[ ! -z ${OS_USERNAME} && ! -z ${FLAVOR} && ! -z ${IMAGE} && ! -z ${PRIVATEKEY} && ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${SECURITY} && ! -z ${NETWORK} && ! -z ${CONFIG} ]];
+if [[ ! -z ${USER} && ! -z ${FLAVOR} && ! -z ${IMAGE} && ! -z ${PRIVATEKEY} && ! -z ${JSCRED} && ! -z ${NUMINSTANCES} && ! -z ${SECURITY} && ! -z ${NETWORK} && ! -z ${CONFIG} ]];
 then
   echo "Required Arguments Given"
   echo ""
@@ -57,11 +57,11 @@ START=$VMNUMBER
 END=$(( VMNUMBER + NUMINSTANCES))
 
 # # username
-# OS_USERNAME="ubuntu"
+# USER="ubuntu"
 # #flavor
 # FLAVOR="m3.tiny" # cli: openstack flavor list
 # IMAGE="Featured-Ubuntu20" # cli: openstack image list --limit 500
-# PRIVATEKEY="${OS_USERNAME}-private-key"
+# PRIVATEKEY="${USER}-private-key"
 
 # include your Jetstream credentials openrc file
 # https://github.com/jetstream-cloud/js2docs/blob/main/docs/ui/cli/openrc.md
@@ -118,9 +118,9 @@ do
 
     echo "Host $VMNAME$chunk" >> $CONFIG
     echo "HostName $ip_address" >> $CONFIG
-    echo "User $OS_USERNAME" >> $CONFIG
+    echo "User $USER" >> $CONFIG
     echo "PubKeyAuthentication yes" >> $CONFIG
-    echo "IdentityFile /home/ubuntu/.ssh/$PRIVATEKEY" >> $CONFIG
+    echo "IdentityFile /home/$USER/.ssh/$PRIVATEKEY" >> $CONFIG
     echo "IdentitiesOnly yes" >> $CONFIG
     echo "StrictHostKeyChecking no" >> $CONFIG
     echo "" >> $CONFIG

@@ -9,11 +9,9 @@ USER=ubuntu
 START=0
 NAME="chunk"
 VMNUMBER=0
-while getopts "h:p:u:s:n:b:" opt; do
+while getopts "h:u:s:n:b:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
-        ;;
-        p) PKEY="$OPTARG"
         ;;
         u) USER="$OPTARG"
         ;;
