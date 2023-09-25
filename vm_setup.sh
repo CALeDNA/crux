@@ -73,7 +73,11 @@ else
 fi
 
 # 2) run docker build
-./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START
+if [[ $FLAVOR == "m3.xl" ]]; then
+    ./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START -a
+else
+    ./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START
+fi
 
 mv hostnames $BASEDIR/grafana/main
 cd $BASEDIR/grafana/main
