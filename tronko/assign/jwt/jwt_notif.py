@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 parser = argparse.ArgumentParser(description='Trigger JWT notification for finished tronko processing.')
 parser.add_argument('--status', type=str, required=True, help='Project tronko status')
 parser.add_argument('--project', type=str, required=True, help='Corresponding projectID')
-parser.add_argument('--primers', type=str, required=True, help='Comma separated string of failed primers')
+parser.add_argument('--primers', type=str, required=False, help='Comma separated string of failed primers')
 args = parser.parse_args()
 
 # Load environment variables from .env file
