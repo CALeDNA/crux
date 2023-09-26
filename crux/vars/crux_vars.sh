@@ -29,7 +29,7 @@ IMAGE="Featured-Ubuntu22"
 SSHKEY="hbaez-private-key"
 # include your Jetstream credentials openrc file
 # https://github.com/jetstream-cloud/js2docs/blob/main/docs/ui/cli/openrc.md
-JSCRED="app-cred-docker-cli-auth-openrc.sh"
+JSCRED="/path/to/app-cred-docker-cli-auth-openrc.sh"
 NUMINSTANCES=10 # number of virtual machines
 SECURITY="exosphere"
 NETWORK=ef65cd35-08de-4d4c-a664-e9b1aed32793
@@ -50,14 +50,14 @@ SSHCONFIG="/home/$USER/.ssh/config"
 DATASOURCE="/etc/grafana/provisioning/datasources/datasources.yaml"
 
 #AUTOSCALING
-MAX_TOTAL=22
+MAX_TOTAL=21
 MAX_ECOPCR=5
 MAX_BLAST=5
 MAX_AC=5
 MAX_NEWICK=5
-MAX_TRONKO=5
-MAX_QC=2
-MAX_ASSIGN=5
+MAX_TRONKO=2
+MAX_QC=7
+MAX_ASSIGN=7
 
 
 

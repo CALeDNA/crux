@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x
 
 LINK="" # file containing genbank links
 PRIMER="" # primer

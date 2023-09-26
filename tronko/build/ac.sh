@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 set -o allexport
 
 export AWS_MAX_ATTEMPTS=3
@@ -26,30 +25,43 @@ while getopts "d:t:f:p:j:i:b:B:k:s:r:1?" opt; do
         ;;
         B) NEWICKSERVER="$OPTARG"
         ;;
-        k) AWS_ACCESS_KEY_ID="$OPTARG"
-        ;;
-        s) AWS_SECRET_ACCESS_KEY="$OPTARG"
-        ;;
-        r) AWS_DEFAULT_REGION="$OPTARG"
-        ;;
         1) FIRST="TRUE"
         ;;
     esac
 done
 
-export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
 
-currentdir=$(pwd)
-cd ~/crux;
-if [ "${FIRST}" = "TRUE" ]
-then
-    docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PRIMER-ac-$RUNID crux /mnt/run_ac.sh -p $PRIMER -j $JOB -i $RUNID -b $ACSERVER -B $NEWICKSERVER -1
+cd /mnt
+mkdir -p $JOB/dir
+
+# download dereplicated fasta and taxa file
+if [ "${FIRST}" = "TRUE" ]; then
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/dereplicated/$PRIMER.fasta $JOB/$PRIMER.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/dereplicated/$PRIMER.tax.tsv $JOB/${PRIMER}_taxonomy.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 else
-    docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $JOB-$RUNID crux /mnt/run_ac.sh -d $FOLDER -t $TAXA -f $FASTA -p $PRIMER -j $JOB -i $RUNID -b $ACSERVER -B $NEWICKSERVER
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA $JOB/$PRIMER.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA $JOB/${PRIMER}_taxonomy.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 fi
-cd $currentdir
+
+fasta=$JOB/$PRIMER.fasta
+taxa=$JOB/${PRIMER}_taxonomy.txt
+len=$(wc -l ${taxa} | cut -d ' ' -f1)
+
+if (( $len > $cutoff_length ))
+then
+    # run ancestral clust
+    bin_size=$(( ($len + $max_length - 1) / $max_length ))
+    time ancestralclust -i $fasta -t $taxa -d $JOB/dir -f -u -r 1000 -b $bin_size -c 4 -p 75
+else
+    cp $fasta $JOB/dir/0.fasta
+    cp $taxa $JOB/dir/0_taxonomy.txt
+fi
+
+# rm orig taxa and fasta files
+rm $taxa $fasta
+
+# upload ac
+aws s3 sync $JOB/dir s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$JOB --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # add ac jobs to queue
 added_job="FALSE"
@@ -66,7 +78,7 @@ do
         job=$(printf '%02d' "$job") # add leading zero
         job="$folder$job" # -> ex: 12S_MiFish_U-ac-001203
 
-        ben add -s $ACSERVER -c "cd crux/tronko/build; ./ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION " $job-$RUNID -f main -o $OUTPUT  
+        ben add -s $ACSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $JOB-$RUNID crux /mnt/ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER" $job-$RUNID -o $OUTPUT  
     fi
 done
 
@@ -75,7 +87,7 @@ if [ "$added_job" = "FALSE" ]
 then
     suffix=$( echo $JOB | rev | cut -d'-' -f1 | rev | tr -dc '0-9' )
     job="$PRIMER-newick$suffix"
-    ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $JOB -j $job -i $RUNID -p $PRIMER" $job-$RUNID -f main -o $OUTPUT
+    ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $JOB -j $job -i $RUNID -p $PRIMER" $job-$RUNID -o $OUTPUT
 fi
 
 # delete local files
@@ -113,6 +125,6 @@ then
         echo "parent folder is root ancestralclust folder"
     else
         job="$PRIMER-newick$suffix"
-        ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $FOLDER -j $job -i $RUNID -p $PRIMER" $job-$RUNID -f main -o $OUTPUT
+        ben add -s $NEWICKSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $job-$RUNID crux /mnt/ac2newick.sh -d $FOLDER -j $job -i $RUNID -p $PRIMER" $job-$RUNID -o $OUTPUT
     fi
 fi

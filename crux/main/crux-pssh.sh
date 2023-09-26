@@ -1,6 +1,7 @@
 #! /bin/bash
 
-while getopts "h:c:u:s:" opt; do
+ASSIGN="FALSE"
+while getopts "h:c:u:s:a" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -10,12 +11,17 @@ while getopts "h:c:u:s:" opt; do
         ;;
         s) START="$OPTARG"
         ;;
+        a) ASSIGN="TRUE"
+        ;;
     esac
 done
 
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
 if [ "$(wc -l < tmphost)" -eq 1 ]; then
+    if [ "$ASSIGN" = "TRUE" ]; then
+        scp ".env" "$host:/home/$USER/crux/tronko/assign/jwt/"
+    fi
     host=$(cat tmphost)
 
     ssh "$host" "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
@@ -26,6 +32,9 @@ if [ "$(wc -l < tmphost)" -eq 1 ]; then
     
     ssh "$host" "cd crux; docker build -q -t crux ."
 else
+    if [ "$ASSIGN" = "TRUE" ]; then
+        parallel-scp -h tmphost .env /home/$USER/crux/tronko/assign/jwt/
+    fi
     parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
 
     parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/

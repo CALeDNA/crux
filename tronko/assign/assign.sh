@@ -1,5 +1,4 @@
 #! /bin/bash
-set -x
 
 export AWS_MAX_ATTEMPTS=3
 
@@ -219,7 +218,7 @@ for dir in "$PROJECTID"/*; do
     primer=$(basename $dir)
     mkdir ${PROJECTID}_processed_tronko/$primer
     for mismatch in "${mismatches[@]}"; do
-        python3 process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
+        python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
     done
   fi
 done
@@ -228,8 +227,28 @@ tar -czvf ${PROJECTID}_processed_tronko.tar.gz ${PROJECTID}_processed_tronko
 # upload
 aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://ednaexplorer/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
+
+# download primer list for jwt step. Downloading here since we rewrite aws creds in next line.
+aws s3 cp s3://ednaexplorer/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt /mnt/jwt/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+# update s3 bucket creds
+# should be temporary until s3 bucket is the same for all steps
+export AWS_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY
+export AWS_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION
+export AWS_BUCKET=$AWS_S3_BUCKET
+
+# upload to aws s3 bucket
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
+
+
+# call processing_notif.sh
+cd /mnt/jwt
+./processing_notif.sh -i $PROJECTID
+
 rm -r ${PROJECTID}*
 
+# download 
 # # Trigger taxonomy initializer script
 # curl -X POST http://$IPADDRESS:8004/initializer \
 #      -H "Content-Type: application/json" \

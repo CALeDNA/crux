@@ -75,7 +75,7 @@ if [ "$SCALE_DOWN" = "TRUE" ]; then
     queuedCount=$((queuedCount - 1)) # remove header
     if [ "$queuedCount" -eq "0" ]; then
         # loop through ben nodes and dismantle unused servers
-        nodes=$($BENPATH nodes -s $BENSERVER | tail -n +2 | head -n -1)
+        nodes=$($BENPATH nodes -s $BENSERVER | grep $VMNAME)
         while IFS=$' ' read -r -a fields; do
             if [ "${#fields[@]}" -ge 3 ]; then # sanity check
                 name="${fields[1]}"
@@ -91,9 +91,8 @@ if [ "$SCALE_DOWN" = "TRUE" ]; then
         echo "Skipping. $BENSERVER has a pending queue."
     fi
 else # Scale Up
-    benServerLineCount=$($BENPATH nodes -s $BENSERVER | wc -l)
-    benServerLineCount=$((benServerLineCount - 2)) # account for first and last line
-    hostnameLineCount=$(wc -l $HOSTNAME)
+    benServerLineCount=$($BENPATH nodes -s $BENSERVER | grep $VMNAME | wc -l)
+    hostnameLineCount=$(wc -l < $HOSTNAME)
 
     # check ben nodes is less than max and queued > 0
     if [ "$benServerLineCount" -lt "$MAXVM" ] && [ "$hostnameLineCount" -lt "$MAX_TOTAL" ]; then
@@ -103,9 +102,14 @@ else # Scale Up
             # calculate b value
             b=$(getB $VMNAME $HOSTNAME)
             n=$((MAXVM - benServerLineCount))
-            
+            availVM=$((MAX_TOTAL - hostnameLineCount))
+
             if [ "$queuedCount" -lt "$n" ]; then
                 n="$queuedCount"
+            fi
+
+            if [ "$availVM" -lt "$n" ]; then
+                n="$availVM"
             fi
 
             if [[ $BENSERVER == *assign* ]]; then
@@ -117,6 +121,6 @@ else # Scale Up
             echo "Skipping. $BENSERVER has an empty queue."
         fi
     else
-        echo "Skipping. $BENSERVER has reached the maximum number of VM's: $MAXVM, or JS2 VM quota reached: $MAX_TOTAL"
+        echo "Skipping. $BENSERVER has reached the maximum number of allowed VM's: $MAXVM, or JS2 VM limit reached: $MAX_TOTAL"
     fi
 fi

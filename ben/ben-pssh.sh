@@ -1,24 +1,12 @@
 #! /bin/bash
 BEN_VERSION='2.14'
 
-while getopts "h:u:b:p:c:" opt; do
+while getopts "h:" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
-        u) USER="$OPTARG"
-        ;;
-        b) BENSERVER="$OPTARG"
-        ;;
-        p) PKEY="$OPTARG"
-        ;;
-        c) CONFIG="$OPTARG"
-        ;;
     esac
 done
-
-parallel-scp -h $HOSTNAME $PKEY ~/.ssh/$PKEY
-
-parallel-scp -h $HOSTNAME $CONFIG ~/.ssh/$CONFIG
 
 if [ "$(wc -l < $HOSTNAME)" -eq 1 ]; then
     host=$(cat $HOSTNAME)

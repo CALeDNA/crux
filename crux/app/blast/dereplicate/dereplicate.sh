@@ -6,7 +6,6 @@
 # 4) run taxid2taxonpath
 # 5) upload
 
-set -x
 set -o allexport
 
 export AWS_MAX_ATTEMPTS=3
@@ -58,7 +57,7 @@ aws s3 cp $JOB/$PRIMER.tax.tsv s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/dereplica
 aws s3 cp $JOB/$PRIMER.fasta.taxid s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/dereplicated/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # add ancestralclust ben job
-ben add -s $ACSERVER -c "cd crux/tronko/build; ./ac.sh -p $PRIMER -j $PRIMER-ac -i $RUNID -b $ACSERVER -B $NEWICKSERVER -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r $AWS_DEFAULT_REGION -1" $PRIMER-ac-$RUNID -o $OUTPUT
+ben add -s $ACSERVER -c "cd crux; docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PRIMER-ac-$RUNID crux /mnt/ac.sh -p $PRIMER -j $PRIMER-ac -i $RUNID -b $ACSERVER -B $NEWICKSERVER -1" $PRIMER-ac-$RUNID -o $OUTPUT
 
 # cleanup
 sudo rm -r taxdump/ taxid2taxonpath/ $JOB logs

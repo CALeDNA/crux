@@ -63,7 +63,7 @@ else
 fi
 
 
-mv $PRIVATEKEY hostnames $JSCRED $BASEDIR/crux/main/
+mv hostnames $BASEDIR/crux/main/
 cd ./crux/main
 # 1) run setup instance
 if [[ ! -z ${VOLUME} ]]; then
@@ -73,22 +73,25 @@ else
 fi
 
 # 2) run docker build
-./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START
+if [[ $FLAVOR == "m3.xl" ]]; then
+    ./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START -a
+else
+    ./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START
+fi
 
-mv $PRIVATEKEY hostnames $BASEDIR/grafana/main
-mv $JSCRED $BASEDIR
+mv hostnames $BASEDIR/grafana/main
 cd $BASEDIR/grafana/main
 # 3) setup grafana
 # updates datasources.yaml and grafana overview dashboard with new VMs
-./grafana.sh -h hostnames -p $PRIVATEKEY -u $USER -s $START -n $VMNAME -b $VMNUMBER
+./grafana.sh -h hostnames -u $USER -s $START -n $VMNAME -b $VMNUMBER
 
-mv $PRIVATEKEY hostnames $BASEDIR/ben
+mv hostnames $BASEDIR/ben
 cd $BASEDIR/ben
 # 4) setup ben
-./ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -e $BENSERVER -p $PRIVATEKEY -b $VMNUMBER
+./ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -e $BENSERVER -b $VMNUMBER
 
 # move files back to basedir
-mv $PRIVATEKEY hostnames $BASEDIR
+mv hostnames $BASEDIR
 
 cd $BASEDIR/grafana/main
 # update ben panels in grafana
