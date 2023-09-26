@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 set -o allexport
 
 export AWS_MAX_ATTEMPTS=3

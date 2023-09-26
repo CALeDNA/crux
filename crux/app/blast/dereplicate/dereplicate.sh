@@ -6,7 +6,6 @@
 # 4) run taxid2taxonpath
 # 5) upload
 
-set -x
 set -o allexport
 
 export AWS_MAX_ATTEMPTS=3

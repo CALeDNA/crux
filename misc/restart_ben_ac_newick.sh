@@ -1,5 +1,4 @@
 #! /bin/bash
-set -x
 
 # restart ben after a crash / resize
 output="/etc/ben/output/"

@@ -1,6 +1,5 @@
 #! /bin/bash
 
-set -x
 
 CONFIG="/home/ubuntu/.ssh/config"
 USER="ubuntu"

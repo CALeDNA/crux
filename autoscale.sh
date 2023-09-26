@@ -1,6 +1,5 @@
 #! /bin/bash
 
-set -x
 
 JS2AUTOSCALING="/home/ubuntu/crux/js2-autoscaling.sh"
 CONFIG="/home/ubuntu/crux/crux/vars/crux_vars.sh"

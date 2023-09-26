@@ -1,5 +1,4 @@
 #! /bin/bash
-set -x
 
 while getopts "c:i:p:f:r:b:k:s:d:" opt; do
     case $opt in

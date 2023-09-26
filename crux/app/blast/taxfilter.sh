@@ -1,6 +1,5 @@
 #! /bin/bash
 
-set -x
 
 export AWS_MAX_ATTEMPTS=3
 BLASTDIR="blast-output"

@@ -1,6 +1,5 @@
 #! /bin/bash
 
-set -x
 
 DASHBOARD=/var/lib/grafana/dashboards/overview.json
 datasources=datasources.yaml
