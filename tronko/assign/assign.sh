@@ -250,11 +250,11 @@ rm -r ${PROJECTID}*
 
 # download 
 # # Trigger taxonomy initializer script
-# curl -X POST http://$IPADDRESS:8004/initializer \
-#      -H "Content-Type: application/json" \
-#      -d "{
-#            \"ProjectID\": \"$PROJECTID\"
-#          }"
+curl -X POST http://$IPADDRESS:8004/initializer \
+     -H "Content-Type: application/json" \
+     -d "{
+           \"ProjectID\": \"$PROJECTID\"
+         }"
 
 
 
