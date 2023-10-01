@@ -19,21 +19,22 @@ done
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
 if [ "$(wc -l < tmphost)" -eq 1 ]; then
-    if [ "$ASSIGN" = "TRUE" ]; then
-        scp ".env" "$host:/home/$USER/crux/tronko/assign/jwt/"
-    fi
     host=$(cat tmphost)
 
     ssh "$host" "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
 
     scp "$CONFIG" "$host:/home/$USER/crux/crux/vars/"
 
+    if [ "$ASSIGN" = "TRUE" ]; then
+        scp "./.env" "$host:/home/$USER/crux/tronko/assign/jwt"
+    fi
+
     ssh "$host" "sudo apt install awscli -y"
-    
+
     ssh "$host" "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"
 else
     if [ "$ASSIGN" = "TRUE" ]; then
-        parallel-scp -h tmphost .env /home/$USER/crux/tronko/assign/jwt/
+        parallel-scp -h tmphost ./.env /home/$USER/crux/tronko/assign/jwt
     fi
     parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
 
