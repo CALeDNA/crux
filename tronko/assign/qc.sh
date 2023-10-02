@@ -58,7 +58,7 @@ else
     aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
     # download anacapa
-    git clone -b cruxrachel-nexterafix https://github.com/CALeDNA/Anacapa.git
+    git clone -b cruxrachel https://github.com/CALeDNA/Anacapa.git
     # download singularity & image
     aws s3 sync s3://ednaexplorer/anacapa/ Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
