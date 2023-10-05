@@ -99,7 +99,7 @@ then
 
     # cleanup
     rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
-    # fi
+fi
 
 if [ "${UNPAIRED_F}" = "TRUE" ]
 then
