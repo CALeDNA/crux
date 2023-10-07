@@ -91,7 +91,7 @@ then
 fi
 
 # delete local files
-sudo rm -r $JOB/*
+rm -r $JOB/*
 
 # delete recursed file from bucket
 if [ "${FIRST}" != "TRUE" ]; then
