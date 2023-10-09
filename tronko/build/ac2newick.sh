@@ -33,7 +33,8 @@ aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER $JOB/
 echo "running newick steps in $JOB/$FOLDER, saving in $JOB/newick"
 
 find $JOB/$FOLDER -maxdepth 1 -type f -name '*fasta' | parallel -j2 '
-    i=$(basename ${} .fasta) # 1, 2 etc
+    filepath={}
+    i=$(basename "$filepath" .fasta) # 1, 2 etc
     # check if newick already ran on ${i}_MSA.fasta
     file_exists=$(aws s3api head-object --bucket ednaexplorer --key "CruxV2/$RUNID/$PRIMER/newick/$JOB/${i}_MSA.fasta" --endpoint-url https://js2.jetstream-cloud.org:8001/ 2>/dev/null && echo "true" || echo "false")
     if [ "$file_exists" == "false" ]; then
