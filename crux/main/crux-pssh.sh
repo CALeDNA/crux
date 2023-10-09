@@ -26,7 +26,7 @@ if [ "$(wc -l < tmphost)" -eq 1 ]; then
     scp "$CONFIG" "$host:/home/$USER/crux/crux/vars/"
 
     if [ "$ASSIGN" = "TRUE" ]; then
-        scp "./.env" "$host:/home/$USER/crux/tronko/assign/jwt"
+        scp ./.env $host:/home/$USER/crux/tronko/assign/jwt
     fi
 
     ssh "$host" "sudo apt install awscli -y"
