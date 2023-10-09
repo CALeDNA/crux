@@ -21,7 +21,7 @@ sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 if [ "$(wc -l < tmphost)" -eq 1 ]; then
     host=$(cat tmphost)
 
-    ssh "$host" "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
+    ssh "$host" "git clone https://github.com/CALeDNA/crux.git"
 
     scp "$CONFIG" "$host:/home/$USER/crux/crux/vars/"
 
@@ -36,7 +36,7 @@ else
     if [ "$ASSIGN" = "TRUE" ]; then
         parallel-scp -h tmphost ./.env /home/$USER/crux/tronko/assign/jwt
     fi
-    parallel-ssh -i -t 0 -h tmphost "git clone -b crux-js2 https://github.com/CALeDNA/crux.git"
+    parallel-ssh -i -t 0 -h tmphost "git clone https://github.com/CALeDNA/crux.git"
 
     parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
 
