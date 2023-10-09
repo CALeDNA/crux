@@ -3,7 +3,6 @@
 *.ipynb_checkpoints
 *.ipynb
 test/crux_db
-ecopcr/ecopcr/.aws
 app-cred-docker-cli-auth-openrc.sh
 ben/supabase/database.ini
 crux/main/.env

@@ -31,181 +31,180 @@ mkdir $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc
 if [ "${PAIRED}" = "TRUE" ]
 then
     # check if tronko assign already ran on paired
-    dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
-    if [ "$dir_exists" -gt 0 ]; then
-        # tronko assign paired file exists on js2
-        echo "Skipping tronko assign paired for: $PROJECTID-$PRIMER"
-    else
-        # tronko assign paired does not exist on js2, run
-        echo "File does not exist on s3 - running paired on $PRIMER"
-        # download tronko database
-        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        
-        # download QC sample paired files
-        aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
+    # if [ "$dir_exists" -gt 0 ]; then
+    #     # tronko assign paired file exists on js2
+    #     echo "Skipping tronko assign paired for: $PROJECTID-$PRIMER"
+    # else
+    # tronko assign paired does not exist on js2, run
+    echo "File does not exist on s3 - running paired on $PRIMER"
+    # download tronko database
+    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
+    # download QC sample paired files
+    aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-        # create ASV files
-        python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
+    # create ASV files
+    python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
 
-        # run tronko assign paired v1
-        time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -p -z -w -1 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta -2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
+    # run tronko assign paired v1
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -p -z -w -1 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta -2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
 
-        # filter tronko output
-        /mnt/chisquared_filter.pl $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
+    # filter tronko output
+    /mnt/chisquared_filter.pl $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
 
-        # Count rows with values less than 5 in the 4th and 5th columns in v1 of paired
-        count_1=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt")
-        if [[ -z "$count_1" ]]; then
-            count_1=0
-        fi
-        # create rc ASV files
-        python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired --rc
-
-        # run tronko assign paired v2 (rc)
-        time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -p -z -w -1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta -2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
-
-        # filter tronko output
-        /mnt/chisquared_filter.pl $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
-
-        # Count rows with values less than 5 in the 4th and 5th columns in v2 (rc) of paired
-        count_2=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt")
-        if [[ -z "$count_2" ]]; then
-            count_2=0
-        fi
-        # Compare counts and upload folder with the highest count
-        if [ "$count_1" -ge "$count_2" ]; then
-            echo "v1 has the highest count: $count_1"
-            # rename filtered files
-            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
-            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
-            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filtered.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
-            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filtered.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta
-            mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filtered.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta
-            # upload output
-            aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        else
-            echo "v2 (rc) has the highest count: $count_2"
-            # rename filtered files
-            # rename filtered files
-            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
-            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
-            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
-            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta
-            mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R_filtered.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta
-            # upload output
-            aws s3 sync $PROJECTID-$PRIMER-rc/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        fi
-
-        # cleanup
-        rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    # Count rows with values less than 5 in the 4th and 5th columns in v1 of paired
+    count_1=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt")
+    if [[ -z "$count_1" ]]; then
+        count_1=0
     fi
+    # create rc ASV files
+    python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired --rc
+
+    # run tronko assign paired v2 (rc)
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -p -z -w -1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta -2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
+
+    # filter tronko output
+    /mnt/chisquared_filter.pl $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+
+    # Count rows with values less than 5 in the 4th and 5th columns in v2 (rc) of paired
+    count_2=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt")
+    if [[ -z "$count_2" ]]; then
+        count_2=0
+    fi
+    # Compare counts and upload folder with the highest count
+    if [ "$count_1" -ge "$count_2" ]; then
+        echo "v1 has the highest count: $count_1"
+        # rename filtered files
+        mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
+        mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
+        mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filtered.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
+        mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F_filtered.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta
+        mv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R_filtered.fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta
+        # upload output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    else
+        echo "v2 (rc) has the highest count: $count_2"
+        # rename filtered files
+        # rename filtered files
+        mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
+        mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
+        mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+        mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta
+        mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R_filtered.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta
+        # upload output
+        aws s3 sync $PROJECTID-$PRIMER-rc/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    fi
+
+    # cleanup
+    rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
 fi
 
 if [ "${UNPAIRED_F}" = "TRUE" ]
 then
     # check if tronko assign already ran on unpaired_f
-    dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
-    if [ "$dir_exists" -gt 0 ]; then
-        # tronko assign unpaired_f file exists on js2
-        echo "Skipping tronko assign unpaired_f for: $PROJECTID-$PRIMER"
-    else
-        # tronko assign unpaired_f does not exist on js2, run
-        echo "File does not exist on s3 - run unpaired_f: $PROJECTID-$PRIMER"
-        # download tronko database
-        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        
-        # download QC sample unpaired_F files
-        aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
+    # if [ "$dir_exists" -gt 0 ]; then
+    #     # tronko assign unpaired_f file exists on js2
+    #     echo "Skipping tronko assign unpaired_f for: $PROJECTID-$PRIMER"
+    # else
+    # tronko assign unpaired_f does not exist on js2, run
+    echo "File does not exist on s3 - run unpaired_f: $PROJECTID-$PRIMER"
+    # download tronko database
+    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
+    # download QC sample unpaired_F files
+    aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-        # create ASV files
-        python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
+    # create ASV files
+    python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
 
-        # run tronko assign
-        time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt
+    # run tronko assign
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt
 
-        # Count rows with values less than 5 in the 4th column in v1 of unpaired_F
-        count_1=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt")
-        if [[ -z "$count_1" ]]; then
-            count_1=0
-        fi
-        # run tronko assign unpaired_F v2 (rc)
-        time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt
-
-        # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
-        count_2=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")
-        if [[ -z "$count_2" ]]; then
-            count_2=0
-        fi
-        # Compare counts and upload folder with the highest count
-        if [ "$count_1" -ge "$count_2" ]; then
-            echo "v1 has the highest count: $count_1"
-            # split assign output
-            aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        else
-            echo "v2 (rc) has the highest count: $count_2"
-            # split assign output
-            aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-            aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        fi
-
-        # cleanup
-        rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    # Count rows with values less than 5 in the 4th column in v1 of unpaired_F
+    count_1=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt")
+    if [[ -z "$count_1" ]]; then
+        count_1=0
     fi
+    # run tronko assign unpaired_F v2 (rc)
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt
+
+    # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
+    count_2=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")
+    if [[ -z "$count_2" ]]; then
+        count_2=0
+    fi
+    # Compare counts and upload folder with the highest count
+    if [ "$count_1" -ge "$count_2" ]; then
+        echo "v1 has the highest count: $count_1"
+        # split assign output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    else
+        echo "v2 (rc) has the highest count: $count_2"
+        # split assign output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    fi
+
+    # cleanup
+    rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    # fi
 fi
 
 if [ "${UNPAIRED_R}" = "TRUE" ]
 then
-    # check if tronko assign already ran on unpaired_r files
-    dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
-    if [ "$dir_exists" -gt 0 ]; then
-        # tronko assign unpaired_r file exists on js2
-        echo "Skipping tronko assign unpaired_r for: $PROJECTID-$PRIMER"
-    else
-        # tronko assign unpaired_r does not exist on js2, run
-        echo "File does not exist on s3 - run unpaired_r: $PROJECTID-$PRIMER"
-        # download tronko database
-        aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        
-        # download QC sample unpaired_R
-        aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # # check if tronko assign already ran on unpaired_r files
+    # dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
+    # if [ "$dir_exists" -gt 0 ]; then
+    #     # tronko assign unpaired_r file exists on js2
+    #     echo "Skipping tronko assign unpaired_r for: $PROJECTID-$PRIMER"
+    # else
+    # tronko assign unpaired_r does not exist on js2, run
+    echo "File does not exist on s3 - run unpaired_r: $PROJECTID-$PRIMER"
+    # download tronko database
+    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
+    # download QC sample unpaired_R
+    aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-        # create ASV files
-        python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
+    # create ASV files
+    python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
 
-        # run tronko assign
-        time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt
+    # run tronko assign
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt
 
-        # Count rows with values less than 5 in the 5th column in v1 of unpaired_R
-        count_1=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt")
-        if [[ -z "$count_1" ]]; then
-            count_1=0
-        fi
-        # run tronko assign unpaired_R v2 (rc)
-        time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt
-
-        # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
-        count_2=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")
-        if [[ -z "$count_2" ]]; then
-            count_2=0
-        fi
-        # Compare counts and upload folder with the highest count
-        if [ "$count_1" -gt "$count_2" ]; then
-            echo "v1 has the highest count: $count_1"
-            # split assign output
-            aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        else
-            echo "v2 (rc) has the highest count: $count_2"
-            # split assign output
-            aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-            aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        fi
-
-        # cleanup
-        rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    # Count rows with values less than 5 in the 5th column in v1 of unpaired_R
+    count_1=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt")
+    if [[ -z "$count_1" ]]; then
+        count_1=0
     fi
+    # run tronko assign unpaired_R v2 (rc)
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt
+
+    # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
+    count_2=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")
+    if [[ -z "$count_2" ]]; then
+        count_2=0
+    fi
+    # Compare counts and upload folder with the highest count
+    if [ "$count_1" -gt "$count_2" ]; then
+        echo "v1 has the highest count: $count_1"
+        # split assign output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    else
+        echo "v2 (rc) has the highest count: $count_2"
+        # split assign output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://ednaexplorer/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    fi
+
+    # cleanup
+    rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    # fi
 fi
 
 mkdir ${PROJECTID}_processed_tronko
@@ -250,11 +249,11 @@ rm -r ${PROJECTID}*
 
 # download 
 # # Trigger taxonomy initializer script
-# curl -X POST http://$IPADDRESS:8004/initializer \
-#      -H "Content-Type: application/json" \
-#      -d "{
-#            \"ProjectID\": \"$PROJECTID\"
-#          }"
+curl -X POST http://$IPADDRESS:8004/initializer \
+     -H "Content-Type: application/json" \
+     -d "{
+           \"ProjectID\": \"$PROJECTID\"
+         }"
 
 
 
