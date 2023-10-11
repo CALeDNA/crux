@@ -9,6 +9,9 @@ RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential
     wget -P /tmp/ "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh" && \
     bash "/tmp/Miniconda3-py38_4.12.0-Linux-x86_64.sh" -b -p /usr/local/miniconda
 
+# Install cutadapt using pip from Miniconda
+RUN /usr/local/miniconda/bin/python3 -m pip install --upgrade cutadapt
+
 COPY env.yml /app/env.yml
 COPY install_deps.R /app/install_deps.R
 
