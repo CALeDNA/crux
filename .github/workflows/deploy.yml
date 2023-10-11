@@ -1,0 +1,27 @@
+name: Build & Test
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+    deploy:
+        if: github.event_name == 'push'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - name: Add SSH key
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+                chmod 700 ~/.ssh/id_rsa
+            - name: Copy repo to server
+              run: |
+                scp -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.SSH_ADDRESS }}:/home/${{ secrets.SSH_USER }}/crux
+            - name: Clean up SSH key
+              run: |
+                rm -f ~/.ssh/id_rsa
