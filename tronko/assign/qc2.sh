@@ -55,27 +55,23 @@ aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://ednaexplorer/project
 
 
 # add ben tronko-assign jobs
-# add tronko assign paired/unpaired_F/R on $PRIMER and sample file
-cd $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered || exit
-find . -type f -name '*_F_filt.fastq.gz' | sed 's/\.\///g' | sed 's/_F_filt\.fastq.gz//g' | while read -r filename; do
-    if [[ -e "../paired/${filename}_F_filt.fastq.gz" ]]; then
-        parameters="-1 -2 -3"
-    else
-        parameters="-2"
-    fi;
-    
-    /etc/ben/ben add -s /tmp/ben-assign -c "docker run --rm -t -v /home/ubuntu/crux/tronko/assign:/mnt -v /home/ubuntu/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER-$filename crux /mnt/assign.sh -f $filename -i $PROJECTID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER-$filename -f main -o $OUTPUT;
-done
+# check if paired folder has files
+paired_files=$(ls -A "$PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered" | wc -l)
+unpaired_F_files=$(ls -A "$PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered" | wc -l)
+unpaired_R_files=$(ls -A "$PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered" | wc -l)
+parameters=""
+if [ "$paired_files" -gt 0 ]; then
+    parameters+="-1"
+fi
+if [ "$unpaired_F_files" -gt 0 ]; then
+    parameters+=" -2"
+fi
+if [ "$unpaired_R_files" -gt 0 ]; then
+    parameters+=" -3"
+fi
 
-# add unpaired_R files missed
-cd ../../unpaired_R/filtered || exit
-find . -type f -name '*_R_filt.fastq.gz' | sed 's/\.\///g' | sed 's/_R_filt\.fastq.gz//g' | while read -r filename; do
-    if [[ ! -e "../paired/${filename}_R_filt.fastq.gz" ]]; then
-        /etc/ben/ben add -s /tmp/ben-assign -c "docker run --rm -t -v /home/ubuntu/crux/tronko/assign:/mnt -v /home/ubuntu/crux/crux/vars:/vars -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $PROJECTID-assign-$PRIMER-$filename crux /mnt/assign.sh -f $filename -i $PROJECTID -p $PRIMER -3" $PROJECTID-assign-$PRIMER-$filename -f main -o $OUTPUT;
-    else
-        echo "Skipping $filename - already in queue.";   
-    fi
-done
+# add tronko assign job on $PRIMER
+/etc/ben/ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_S3_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID -e AWS_S3_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY -e AWS_S3_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION -e AWS_S3_BUCKET=$AWS_S3_BUCKET --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
 
 # clean up
 rm -r /mnt/$PROJECTID-$PRIMER /mnt/Anacapa
