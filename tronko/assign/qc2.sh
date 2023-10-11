@@ -3,6 +3,7 @@
 export AWS_MAX_ATTEMPTS=3
 
 OUTPUT="/etc/ben/output"
+RUNID="2023-04-07"
 while getopts "i:p:b:" opt; do
     case $opt in
         i) PROJECTID="$OPTARG"
