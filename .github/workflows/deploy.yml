@@ -21,7 +21,7 @@ jobs:
                 chmod 700 ~/.ssh/id_rsa
             - name: Copy repo to server
               run: |
-                scp -v -o StrictHostKeyChecking=no -r . ${{ secrets.SSH_USER }}@${{ secrets.SSH_ADDRESS }}:/home/${{ secrets.SSH_USER }}/crux
+                scp -v -o StrictHostKeyChecking=no -r ./* ${{ secrets.SSH_USER }}@${{ secrets.SSH_ADDRESS }}:/home/${{ secrets.SSH_USER }}/crux
             - name: Clean up SSH key
               run: |
                 rm -f ~/.ssh/id_rsa
