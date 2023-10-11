@@ -131,7 +131,7 @@ while IFS="," read -ra row; do
     marker_value="${row[1]}"
     if [[ -n "$marker_value" && "${unique_values[$marker_value]}" = "${row[2]} ${row[3]}" ]]; then
         job=$PROJECTID-QC-$marker_value
-        $BENPATH add -s $BENSERVER -c " docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_S3_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID -e AWS_S3_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY -e AWS_S3_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION -e AWS_S3_BUCKET=$AWS_S3_BUCKET --name $job /mnt/qc2.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign" $job -o $OUTPUT
+        $BENPATH add -s $BENSERVER -c " docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_S3_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID -e AWS_S3_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY -e AWS_S3_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION -e AWS_S3_BUCKET=$AWS_S3_BUCKET --name $job qc /mnt/qc2.sh -i $PROJECTID -p $marker_value -b /tmp/ben-assign" $job -o $OUTPUT
         # remove from hashmap
         unset "unique_values[$marker_value]"
     fi
