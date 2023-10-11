@@ -3,7 +3,7 @@
 
 JS2AUTOSCALING="/home/ubuntu/crux/js2-autoscaling.sh"
 CONFIG="/home/ubuntu/crux/crux/vars/crux_vars.sh"
-QUEUES=("/etc/ben/queue/ecopcr.ini" "/etc/ben/queue/blast.ini" "/etc/ben/queue/ac.ini" "/etc/ben/queue/newick.ini" "/etc/ben/queue/tronko.ini" "/etc/ben/queue/qc.ini" "/etc/ben/queue/assign.ini")
+QUEUES=("/etc/ben/queue/qc.ini" "/etc/ben/queue/assign.ini" "/etc/ben/queue/ecopcr.ini" "/etc/ben/queue/blast.ini" "/etc/ben/queue/ac.ini" "/etc/ben/queue/newick.ini" "/etc/ben/queue/tronko.ini")
 
 cd /home/ubuntu/crux
 
