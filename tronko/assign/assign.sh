@@ -211,7 +211,7 @@ mkdir ${PROJECTID}_processed_tronko
 # dl all assign folders for $PROJECTID
 aws s3 sync s3://ednaexplorer/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
-mismatches=(1 5 10 30 50 100)
+mismatches=(1 5 10 25 50 100)
 for dir in "$PROJECTID"/*; do
   if [ -d "$dir" ]; then
     primer=$(basename $dir)
@@ -245,6 +245,7 @@ aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJEC
 cd /mnt/jwt
 ./processing_notif.sh -i $PROJECTID
 
+# cleanup
 rm -r ${PROJECTID}*
 
 # download 
@@ -267,6 +268,3 @@ curl -X POST http://$IPADDRESS:8004/initializer \
 
 # unpaired_R run both versions:
 # v2: run without -v
-
-# cleanup
-rm -r $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc 
