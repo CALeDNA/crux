@@ -79,7 +79,7 @@ if __name__ == "__main__":
     args = process_arguments()
     base_dir, out_file, allowed_mismatches, project_dir = args.base_dir, args.out, args.mismatches, args.project
 
-    mismatch_bins = {(0, 2): 0, (3, 5): 0, (6, 10): 0, (11, 20): 0, (21, 30): 0, (31, 40): 0, (41, 50): 0, 
+    mismatch_bins = {(0, 2): 0, (3, 5): 0, (6, 10): 0, (11, 25): 0, (26, 40): 0, (41, 50): 0, 
                      (51, 60): 0, (61, 70): 0, (71, 80): 0, (81, 90): 0, (91, 100): 0, "up to Max": 0}
 
     paired_ASV, header_P, paired_taxa_set = process_directory(base_dir, "paired", "paired", "paired_F", allowed_mismatches, mismatch_bins)
