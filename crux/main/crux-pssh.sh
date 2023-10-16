@@ -35,9 +35,9 @@ if [ "$(wc -l < tmphost)" -eq 1 ]; then
     ssh "$host" "sudo apt install awscli -y"
 
     if [ "$QC" = "TRUE" ]; then
-        ssh "$host" "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"  
-    else
         ssh "$host" "docker pull hbaez/qc:latest; docker tag hbaez/qc qc"
+    else
+        ssh "$host" "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"  
     fi
 else
     if [ "$ASSIGN" = "TRUE" ]; then
@@ -50,9 +50,9 @@ else
     parallel-ssh -i -t 0 -h tmphost "sudo apt install awscli -y"
 
     if [ "$QC" = "TRUE" ]; then
-        parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"
-    else
         parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/qc:latest; docker tag hbaez/qc qc"
+    else
+        parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"
     fi
 fi
 

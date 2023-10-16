@@ -72,7 +72,7 @@ else
     ./setup_instance.sh -u $USER -f $FLAVOR -i $IMAGE -k $PRIVATEKEY -j $JSCRED -n $NUMINSTANCES -m $VMNAME -b $VMNUMBER -s $SECURITY -w $NETWORK -c $CONFIG
 fi
 
-pssh_command="./crux-pssh.sh -h $hostnames -c $VARS -u $USER -s $START"
+pssh_command="./crux-pssh.sh -h hostnames -c $VARS -u $USER -s $START"
 # 2) setup docker images on client VMs
 if [[ $FLAVOR == "m3.xl" ]]; then
     pssh_command="$pssh_command -a"
