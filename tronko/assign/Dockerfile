@@ -12,8 +12,8 @@ RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential
 # Install cutadapt using pip from Miniconda
 RUN /usr/local/miniconda/bin/python3 -m pip install --upgrade cutadapt
 
-RUN wget https://www.poirrier.ca/ben/ben-2.14.tar.gz && \
-    tar -xf ben-2.14.tar.gz && \
+RUN wget https://www.poirrier.ca/ben/ben-2.16.tar.gz && \
+    tar -xf ben-2.16.tar.gz && \
     mkdir -p /usr/local/bin && \
     cd ben && make && mv ben /usr/local/bin/ben
 

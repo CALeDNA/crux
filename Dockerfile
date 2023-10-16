@@ -16,8 +16,8 @@ RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential
 COPY env.yml /app/env.yml
 ADD bin /usr/local/crux_bin
 
-RUN wget https://www.poirrier.ca/ben/ben-2.14.tar.gz && \
-    tar -xf ben-2.14.tar.gz && \
+RUN wget https://www.poirrier.ca/ben/ben-2.16.tar.gz && \
+    tar -xf ben-2.16.tar.gz && \
     cd ben && make && mv ben /usr/local/crux_bin
 
 RUN git clone https://github.com/stamatak/standard-RAxML.git && \
