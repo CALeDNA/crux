@@ -1,7 +1,8 @@
 #! /bin/bash
 
 ASSIGN="FALSE"
-while getopts "h:c:u:s:a" opt; do
+QC="FALSE"
+while getopts "h:c:u:s:aq" opt; do
     case $opt in
         h) HOSTNAME="$OPTARG"
         ;;
@@ -12,6 +13,8 @@ while getopts "h:c:u:s:a" opt; do
         s) START="$OPTARG"
         ;;
         a) ASSIGN="TRUE"
+        ;;
+        q) QC="TRUE"
         ;;
     esac
 done
@@ -31,9 +34,11 @@ if [ "$(wc -l < tmphost)" -eq 1 ]; then
 
     ssh "$host" "sudo apt install awscli -y"
 
-    ssh "$host" "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"
-
-    ssh "$host" "docker pull hbaez/qc:latest; docker tag hbaez/qc qc"
+    if [ "$QC" = "TRUE" ]; then
+        ssh "$host" "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"  
+    else
+        ssh "$host" "docker pull hbaez/qc:latest; docker tag hbaez/qc qc"
+    fi
 else
     if [ "$ASSIGN" = "TRUE" ]; then
         parallel-scp -h tmphost ./.env /home/$USER/crux/tronko/assign/jwt
@@ -44,9 +49,11 @@ else
 
     parallel-ssh -i -t 0 -h tmphost "sudo apt install awscli -y"
 
-    parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"
-
-    parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/qc:latest; docker tag hbaez/qc qc"
+    if [ "$QC" = "TRUE" ]; then
+        parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/crux:latest; docker tag hbaez/crux crux"
+    else
+        parallel-ssh -i -t 0 -h tmphost "docker pull hbaez/qc:latest; docker tag hbaez/qc qc"
+    fi
 fi
 
 rm tmphost
