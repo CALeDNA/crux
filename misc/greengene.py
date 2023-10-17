@@ -24,3 +24,4 @@ with open(FASTA_OUT, 'w') as file:
                 file.write(f'>{nt_id}\n{seq}\n')
                 file2.write(f'{nt_id}\t{path}\n')
 
+# awk 'NR==FNR { ids[$0]; next } /^>/ { id = substr($0, 2); if (id in ids) skip = 1; else skip = 0 } !skip' Greengene_Bacteria_prune.txt Greengene_Bacteria.fasta2 > Greengene_Bacteria.fasta.tmp
