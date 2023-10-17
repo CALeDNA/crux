@@ -58,7 +58,7 @@ if [ -e $checksums_file ]; then
             # Loop through the objects and delete the ones that match the pattern
             for object in $objects; do
             if [[ $object == *"$pattern"* ]]; then
-                echo "aws s3 rm s3://ednaexplorer/$object --endpoint-url https://js2.jetstream-cloud.org:8001/"
+                aws s3 rm s3://ednaexplorer/$object --endpoint-url https://js2.jetstream-cloud.org:8001/
                 echo "Deleted: $object"
             fi
             done
