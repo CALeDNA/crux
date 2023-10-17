@@ -33,7 +33,7 @@ def getTaxaDict(tronko, allowed_mismatches, mismatch_bins):
                 if not placed:
                     mismatch_bins["up to Max"] += 1
 
-                if total_mismatch < allowed_mismatches:
+                if total_mismatch <= allowed_mismatches:
                     taxaDict[Readname] = Taxonomic_Path
                 else:
                     taxaDict[Readname] = "Unassigned"
