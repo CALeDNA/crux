@@ -17,14 +17,99 @@ while getopts "i:p:b:" opt; do
     esac
 done
 
-# download $PROJECTID/QC and samples
+# download $PROJECTID/QC, checksum and samples
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC/$PRIMER ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # download Anacapa
 git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
 
 
+
+# Only keep files that haven't been ran through QC
+
+checksums_file="${PROJECTID}-$PRIMER/checksums.txt"
+# check if it's been run before
+if [ -e $checksums_file ]; then
+    # Check if any files in md5sum file were deleted
+    # Create a temporary file
+    temp_file=$(mktemp)
+    # List objects in the S3 bucket that match the prefix
+    objects=$(aws s3 ls "s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER" --recursive --endpoint-url https://js2.jetstream-cloud.org:8001/ | awk '{print $4}')
+    # Loop through the lines in the checksum file
+    while IFS= read -r line; do
+        # Extract the checksum and file path
+        md5_checksum=$(echo "$line" | awk '{print $1}')
+        file_path=$(echo "$line" | awk '{ $1=""; print $0 }' | xargs )
+
+        # Check if the file exists
+        if [ -f "$file_path" ]; then
+            # If the file exists, add the line to the temporary file
+            echo "$line" >> "$temp_file"
+        else
+            # If previously run file no longer exists in samples, delete it from QC $PRIMER js2 folder
+            echo "File '$file_path' no longer exists in samples. Deleting $PRIMER QC file..."
+            file_name=$(basename "$line" | sed -E 's/_R[12]_001\.fastq\.gz$//' | tr '_' '-')
+
+            # pattern to match
+            pattern="${PRIMER}_${file_name}"
+
+            # Loop through the objects and delete the ones that match the pattern
+            for object in $objects; do
+            if [[ $object == *"$pattern"* ]]; then
+                echo "aws s3 rm s3://ednaexplorer/$object --endpoint-url https://js2.jetstream-cloud.org:8001/"
+                echo "Deleted: $object"
+            fi
+            done
+        fi
+    done < "$checksums_file"
+    mv $temp_file $checksums_file
+
+
+    declare -A checksums
+
+    # Read checksums from the file into the associative array
+    while read -r checksum filename; do
+        echo $filename
+        echo $checksum
+        checksums["$filename"]=$checksum
+    done < "$checksums_file"
+
+    # Loop through the files in the directory
+    for file in "${PROJECTID}-$PRIMER/samples/"*; do
+        # Check if the file exists in the associative array
+        if [[ -n ${checksums["$file"]} ]]; then
+            echo "File $file exists in checksums.txt."
+            echo "Checking checksums..."
+            new_md5sum=$(md5sum $file | cut -d' ' -f1)
+            if [ "${checksums["$file"]}" = "$new_md5sum" ]; then
+                echo "MD5 checksums are the same. Deleting..."
+                rm $file
+            else
+                echo "MD5 checksums are different. Keeping $file"
+            fi
+        else
+            echo "File does not exist in checksums.txt. Keeping $file"
+            md5sum "$file" >> "$checksums_file"
+        fi
+    done
+
+    # upload new checksums
+    aws s3 cp $checksums_file s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/checksums.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+else
+    echo "MD5 file does not exist. Keeping all files."
+    # create md5 checksum
+    for file in "${PROJECTID}-$PRIMER/samples/"*; do
+        md5sum "$file" >> $checksums_file
+    done
+    # upload checksums
+    aws s3 cp $checksums_file s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/checksums.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+fi
+
+
+
+# Run QC
 
 # EDIT THESE
 BASEDIR="./Anacapa"
