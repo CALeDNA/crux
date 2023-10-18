@@ -17,7 +17,7 @@ while getopts "i:p:b:" opt; do
     esac
 done
 
-# download $PROJECTID/QC, checksum and samples
+# download $PROJECTID/QC primers, checksum and samples
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC/$PRIMER ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
@@ -28,7 +28,6 @@ git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
 
 
 # Only keep files that haven't been ran through QC
-
 checksums_file="${PROJECTID}-$PRIMER/checksums.txt"
 # check if it's been run before
 if [ -e $checksums_file ]; then
