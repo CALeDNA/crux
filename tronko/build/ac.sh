@@ -50,8 +50,9 @@ len=$(wc -l ${taxa} | cut -d ' ' -f1)
 if (( $len > $cutoff_length ))
 then
     # run ancestral clust
-    bin_size=$(( ($len + $max_length - 1) / $max_length ))
-    time ancestralclust -i $fasta -t $taxa -d $JOB/dir -f -u -r 1000 -b $bin_size -c 4 -p 75
+    bin_size=$(( (len + max_length - 1) / max_length ))
+    initial_size=$(( bin_size * 10 ))
+    time ancestralclust -i $fasta -t $taxa -d $JOB/dir -f -u -r $initial_size -b $bin_size -c 4 -p 75
 else
     cp $fasta $JOB/dir/0.fasta
     cp $taxa $JOB/dir/0_taxonomy.txt
