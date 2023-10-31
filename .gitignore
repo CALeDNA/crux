@@ -4,5 +4,4 @@
 *.ipynb
 test/crux_db
 app-cred-docker-cli-auth-openrc.sh
-ben/supabase/database.ini
 crux/main/.env

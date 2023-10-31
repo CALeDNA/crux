@@ -52,6 +52,7 @@ while getopts "u:f:i:k:j:n:m:b:s:w:v:c:p:o:e:" opt; do
 done
 
 BASEDIR=$(pwd)
+MONITOR="$BASEDIR/../t-rex-monitor"
 
 # check if hostnames exists and get length
 if [ -f "hostnames" ]; then
@@ -82,20 +83,20 @@ if [[ $BENSERVER == *"-qc" ]]; then
 fi
 eval "$pssh_command"
 
-mv hostnames $BASEDIR/grafana/main
-cd $BASEDIR/grafana/main
+mv hostnames $MONITOR/grafana/main
+cd $MONITOR/grafana/main
 # 3) setup grafana
 # updates datasources.yaml and grafana overview dashboard with new VMs
 ./grafana.sh -h hostnames -u $USER -s $START -n $VMNAME -b $VMNUMBER
 
-mv hostnames $BASEDIR/ben
-cd $BASEDIR/ben
+mv hostnames $MONITOR/scheduler
+cd $MONITOR/scheduler
 # 4) setup ben
 ./ben.sh -h hostnames -c $CONFIG -s $START -n $NODES -m $VMNAME -u $USER -e $BENSERVER -b $VMNUMBER
 
 # move files back to basedir
 mv hostnames $BASEDIR
 
-cd $BASEDIR/grafana/main
+cd $MONITOR/grafana/main
 # update ben panels in grafana
 sudo python3 ben-dashboard-mod.py --dashboard $DASHBOARD
