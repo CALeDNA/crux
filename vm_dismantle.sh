@@ -24,6 +24,7 @@ while getopts "j:h:m:e:c:d:" opt; do
 done
 
 BASEDIR=$(pwd)
+MONITOR="$BASEDIR/../t-rex-monitor"
 
 mv $HOSTNAME $BASEDIR/crux/main
 cd $BASEDIR/crux/main
@@ -41,7 +42,7 @@ ssh-keygen -f "/home/$USER/.ssh/known_hosts" -R "$address"
 
 
 mv $HOSTNAME $BASEDIR
-cd $BASEDIR/grafana/main
+cd $MONITOR/grafana/main
 # update grafana dashboard
 sudo python3 dashboard-mod.py --dashboard $DASHBOARD --datasource $DATASOURCE
 
