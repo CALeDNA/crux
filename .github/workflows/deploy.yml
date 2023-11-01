@@ -9,13 +9,13 @@ on:
 
 jobs:
     deploy:
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
       runs-on: ubuntu-latest
       env:
-        SSH_ADDRESS: ${{ github.ref == 'refs/heads/main' && secrets.SSH_ADDRESS_PROD || secrets.SSH_ADDRESS }}
-        SSH_USER: ${{ github.ref == 'refs/heads/main' && secrets.SSH_USER_PROD || secrets.SSH_USER }}
-        SSH_KEY: ${{ github.ref == 'refs/heads/main' && secrets.SSH_KEY_PROD || secrets.SSH_KEY }}
-        DEPLOY_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'PRODUCTION' || 'STAGING' }}
+        SSH_ADDRESS: ${{ github.ref == 'refs/heads/master' && secrets.SSH_ADDRESS_PROD || secrets.SSH_ADDRESS }}
+        SSH_USER: ${{ github.ref == 'refs/heads/master' && secrets.SSH_USER_PROD || secrets.SSH_USER }}
+        SSH_KEY: ${{ github.ref == 'refs/heads/master' && secrets.SSH_KEY_PROD || secrets.SSH_KEY }}
+        DEPLOY_ENVIRONMENT: ${{ github.ref == 'refs/heads/master' && 'PRODUCTION' || 'STAGING' }}
       steps:
       - name: Checkout code
         uses: actions/checkout@v4
