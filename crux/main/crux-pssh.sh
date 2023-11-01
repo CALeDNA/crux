@@ -19,12 +19,18 @@ while getopts "h:c:u:s:aq" opt; do
     esac
 done
 
+source $CONFIG
+
 sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 
 if [ "$(wc -l < tmphost)" -eq 1 ]; then
     host=$(cat tmphost)
 
-    ssh "$host" "git clone https://github.com/CALeDNA/crux.git"
+    if [ "$branch" = "master" ]; then
+        ssh "$host" "git clone https://github.com/CALeDNA/crux.git"
+    else
+        ssh "$host" "git clone -b $branch https://github.com/CALeDNA/crux.git"
+    fi
 
     scp "$CONFIG" "$host:/home/$USER/crux/crux/vars/"
 
@@ -43,7 +49,12 @@ else
     if [ "$ASSIGN" = "TRUE" ]; then
         parallel-scp -h tmphost ./.env /home/$USER/crux/tronko/assign/jwt
     fi
-    parallel-ssh -i -t 0 -h tmphost "git clone https://github.com/CALeDNA/crux.git"
+
+    if [ "$branch" = "master" ]; then
+        parallel-ssh -i -t 0 -h tmphost "git clone https://github.com/CALeDNA/crux.git"
+    else
+        parallel-ssh -i -t 0 -h tmphost "git clone -b $branch https://github.com/CALeDNA/crux.git"
+    fi
 
     parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
 
