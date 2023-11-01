@@ -26,10 +26,10 @@ sed -n "$(($START+1))"',$p' $HOSTNAME >> tmphost
 if [ "$(wc -l < tmphost)" -eq 1 ]; then
     host=$(cat tmphost)
 
-    if [ "$branch" = "master" ]; then
+    if [ "$BRANCH" = "master" ]; then
         ssh "$host" "git clone https://github.com/CALeDNA/crux.git"
     else
-        ssh "$host" "git clone -b $branch https://github.com/CALeDNA/crux.git"
+        ssh "$host" "git clone -b $BRANCH https://github.com/CALeDNA/crux.git"
     fi
 
     scp "$CONFIG" "$host:/home/$USER/crux/crux/vars/"
@@ -50,10 +50,10 @@ else
         parallel-scp -h tmphost ./.env /home/$USER/crux/tronko/assign/jwt
     fi
 
-    if [ "$branch" = "master" ]; then
+    if [ "$BRANCH" = "master" ]; then
         parallel-ssh -i -t 0 -h tmphost "git clone https://github.com/CALeDNA/crux.git"
     else
-        parallel-ssh -i -t 0 -h tmphost "git clone -b $branch https://github.com/CALeDNA/crux.git"
+        parallel-ssh -i -t 0 -h tmphost "git clone -b $BRANCH https://github.com/CALeDNA/crux.git"
     fi
 
     parallel-scp -h tmphost $CONFIG /home/$USER/crux/crux/vars/
