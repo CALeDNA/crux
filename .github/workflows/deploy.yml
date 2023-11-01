@@ -3,25 +3,34 @@ name: Build & Test
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [master]
+    branches: [master, develop]
   push:
-    branches: [master]
+    branches: [master, develop]
 
 jobs:
     deploy:
-        if: github.event_name == 'push'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-            - name: Add SSH key
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-                chmod 700 ~/.ssh/id_rsa
-            - name: Copy repo to server
-              run: |
-                scp -v -o StrictHostKeyChecking=no -r ./* ${{ secrets.SSH_USER }}@${{ secrets.SSH_ADDRESS }}:/home/${{ secrets.SSH_USER }}/crux
-            - name: Clean up SSH key
-              run: |
-                rm -f ~/.ssh/id_rsa
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+      runs-on: ubuntu-latest
+      env:
+        SSH_ADDRESS: ${{ github.ref == 'refs/heads/main' && secrets.SSH_ADDRESS_PROD || secrets.SSH_ADDRESS }}
+        SSH_USER: ${{ github.ref == 'refs/heads/main' && secrets.SSH_USER_PROD || secrets.SSH_USER }}
+        SSH_KEY: ${{ github.ref == 'refs/heads/main' && secrets.SSH_KEY_PROD || secrets.SSH_KEY }}
+        DEPLOY_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'PRODUCTION' || 'STAGING' }}
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Add SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 700 ~/.ssh/id_rsa
+      - name: Copy repo to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_ADDRESS }} "mkdir -p $HOME/crux"
+          scp -v -o StrictHostKeyChecking=no -r ./* ${{ env.SSH_USER }}@${{ env.SSH_ADDRESS }}:$HOME/crux
+      - name: Move Ben binary
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_ADDRESS }} "sudo mkdir -p /etc/ben; mv $HOME/crux/bin/ben /etc/ben/ben"
+      - name: Clean up SSH key
+        run: |
+          rm -f ~/.ssh/id_rsa
