@@ -6,6 +6,7 @@ THREADS=16
 BLAST_THREADS=16
 RUNID="2023-04-07"
 BRANCH=master
+BUCKET=[GET_BUCKET_NAME]
 
 # Obitools ecopcr variables
 ERROR=3

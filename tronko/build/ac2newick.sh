@@ -19,6 +19,7 @@ while getopts "d:j:i:p:" opt; do
     esac
 done
 
+source /vars/crux_vars.sh
 
 fixNewLines() {
     local file=$1
@@ -28,7 +29,7 @@ fixNewLines() {
 mkdir -p $JOB/newick
 
 # download ancestralclust folder
-aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER $JOB/$FOLDER/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER $JOB/$FOLDER/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 echo "running newick steps in $JOB/$FOLDER, saving in $JOB/newick"
 
@@ -46,7 +47,7 @@ find $JOB/$FOLDER -maxdepth 1 -type f -name '*fasta' | parallel -j2 '
         nw_reroot $JOB/newick/${i}_RAxML/RAxML_bestTree.1 > $JOB/newick/RAxML_bestTree.${i}.reroot # converts to newick
         cp $JOB/$FOLDER/${i}_taxonomy.txt $JOB/newick/${i}_taxonomy.txt # copy taxa file to output folder
         # upload output
-        aws s3 sync $JOB/newick/ s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/newick/$JOB --exclude "*" --include "${i}_*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $JOB/newick/ s3://$BUCKET/CruxV2/$RUNID/$PRIMER/newick/$JOB --exclude "*" --include "${i}_*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
     fi
 '
 

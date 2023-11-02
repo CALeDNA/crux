@@ -8,7 +8,7 @@ BENPATH="/etc/ben/ben"
 ADAPTER="nextera"
 PROJECTID_LOG="$OUTPUT/projectids.txt"
 MISSINGMARKERS="$OUTPUT/missingmarkers.json"
-while getopts "p:b:k:s:r:K:S:R:B:" opt; do
+while getopts "p:b:k:s:r:K:S:R:B:c:" opt; do
     case $opt in
         p) PROJECTID="$OPTARG"
         ;;
@@ -28,8 +28,12 @@ while getopts "p:b:k:s:r:K:S:R:B:" opt; do
         ;;
         B) AWS_S3_BUCKET="$OPTARG"
         ;;
+        c) CONFIG="$OPTARG"
+        ;;
     esac
 done
+
+source $CONFIG
 
 export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -44,9 +48,9 @@ touch $PROJECTID/reverse_primers.txt
 touch $PROJECTID/metabarcode_loci_min_merge_length.txt
 
 # download metadata file
-aws s3 cp s3://ednaexplorer/projects/${PROJECTID}/$INPUT_METADATA ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://$BUCKET/projects/${PROJECTID}/$INPUT_METADATA ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # download primer master sheet
-aws s3 cp s3://ednaexplorer/CruxV2/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://$BUCKET/CruxV2/eDNAExplorerPrimers.csv ${PROJECTID}/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # Read the header row and split it into an array
 IFS="," read -ra headers < "$PROJECTID/$INPUT_METADATA"
@@ -121,9 +125,9 @@ done < <(tail -n +2 "$PROJECTID/eDNAExplorerPrimers.csv" | tr -d '\r')
 
 
 # save QC files to project folder
-aws s3 cp $PROJECTID/forward_primers.txt s3://ednaexplorer/projects/${PROJECTID}/QC/forward_primers.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 cp $PROJECTID/reverse_primers.txt s3://ednaexplorer/projects/${PROJECTID}/QC/reverse_primers.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 cp $PROJECTID/metabarcode_loci_min_merge_length.txt s3://ednaexplorer/projects/${PROJECTID}/QC/metabarcode_loci_min_merge_length.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp $PROJECTID/forward_primers.txt s3://$BUCKET/projects/${PROJECTID}/QC/forward_primers.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp $PROJECTID/reverse_primers.txt s3://$BUCKET/projects/${PROJECTID}/QC/reverse_primers.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp $PROJECTID/metabarcode_loci_min_merge_length.txt s3://$BUCKET/projects/${PROJECTID}/QC/metabarcode_loci_min_merge_length.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # add QC ben jobs
 #TODO: switch from crux to qc image

@@ -20,7 +20,7 @@ while getopts "f:p:c:i:j:s" opt; do
     esac
 done
 
-source ${CONFIG}
+source $CONFIG
 
 mkdir -p $JOB/$BLASTDIR
 touch $JOB/$BLASTDIR/${FASTA}_tmp
@@ -30,9 +30,9 @@ if [ "${EMPTY}" = "TRUE" ]
 then
     # upload empty files
     touch $JOB/$BLASTDIR/$FASTA
-    aws s3 cp $JOB/$BLASTDIR/$FASTA s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    # aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp $JOB/logs s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/logs/$FASTA.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $JOB/$BLASTDIR/$FASTA s3://$BUCKET/CruxV2/$RUNID/$PRIMER/blast/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://$BUCKET/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $JOB/logs s3://$BUCKET/CruxV2/$RUNID/$PRIMER/logs/$FASTA.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 else
     # download taxdump and taxid2taxonpath script
     if [ ! -d "taxdump" ] ; then
@@ -60,7 +60,7 @@ else
     python3 get-largest.py --input $JOB/$BLASTDIR/${FASTA}_tmp --output $JOB/$BLASTDIR/${FASTA} --log $JOB/logs
 
     # upload to js2 bucket
-    aws s3 cp $JOB/$BLASTDIR/$FASTA s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    # aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp $JOB/logs s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/logs/$FASTA.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $JOB/$BLASTDIR/$FASTA s3://$BUCKET/CruxV2/$RUNID/$PRIMER/blast/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # aws s3 cp $JOB/$BLASTDIR/$FASTA.tax.tsv s3://$BUCKET/CruxV2/$RUNID/$PRIMER/blast/$FASTA.tax.tsv --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $JOB/logs s3://$BUCKET/CruxV2/$RUNID/$PRIMER/logs/$FASTA.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 fi
