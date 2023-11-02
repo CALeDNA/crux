@@ -14,8 +14,10 @@ while getopts "d:p:i:" opt; do
     esac
 done
 
+source /vars/crux_vars.sh
+
 # dl primer's newick folders
-aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/newick $FOLDER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/newick $FOLDER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # get list of newick folders per primer
 folders=$(find ${FOLDER} -maxdepth 1 -mindepth 1 -type d -name "${PRIMER}*")
@@ -41,6 +43,6 @@ do
 done
 
 # upload cp to aws
-aws s3 sync ${outdir} s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/newick/merged_$PRIMER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync ${outdir} s3://$BUCKET/CruxV2/$RUNID/$PRIMER/newick/merged_$PRIMER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # rm orig newick folders
 rm -r ${FOLDER}/${PRIMER}-newick*

@@ -30,11 +30,11 @@ rm -rf $JOB 2>/dev/null
 mkdir $JOB
 
 # download ecopcr fasta file
-aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ecopcr/$ECOPCRCHUNK ./ecopcr/$ECOPCRCHUNK --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ecopcr/$ECOPCRCHUNK ./ecopcr/$ECOPCRCHUNK --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # download missing nt files
 if [ ! -d "nt-missing-files" ] ; then
-    aws s3 cp s3://ednaexplorer/CruxV2/nt-missing-files.tar.gz . --no-progress  --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/nt-missing-files.tar.gz . --no-progress  --endpoint-url https://js2.jetstream-cloud.org:8001/
     tar --skip-old-files -xf nt-missing-files.tar.gz
     rm nt-missing-files.tar.gz
 fi
@@ -98,7 +98,7 @@ rm -rf $JOB
 
 #TODO: check if blast folder has (142*108) files
 total=$((ECOPCRLINKS * NTOTAL))
-actual=$(aws s3 ls s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/blast --recursive --endpoint-url https://js2.jetstream-cloud.org:8001/ | grep -v -e "CruxV2/$RUNID/$PRIMER/blast/logs" -e ".*tax.tsv" | wc -l)
+actual=$(aws s3 ls s3://$BUCKET/CruxV2/$RUNID/$PRIMER/blast --recursive --endpoint-url https://js2.jetstream-cloud.org:8001/ | grep -v -e "CruxV2/$RUNID/$PRIMER/blast/logs" -e ".*tax.tsv" | wc -l)
 if [ "$total" -eq "$actual" ]; then
     #start dereplicate step
     cd /mnt/dereplicate

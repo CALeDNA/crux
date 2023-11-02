@@ -15,6 +15,8 @@ while getopts "i:p:b:" opt; do
     esac
 done
 
+source /vars/crux_vars.sh
+
 cd /mnt
 
 mkdir ${PRIMER}
@@ -29,7 +31,7 @@ mkdir ${outdir}
 partitions=$(ls ${newick}/*txt | wc -l)
 
 # sync down tronko output
-aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko $outdir --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko $outdir --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
 if (( $partitions > 1 ))
@@ -49,7 +51,7 @@ cat $newick/*_taxonomy.txt >> $outdir/${PRIMER}_taxonomy.txt
 bwa index $outdir/$PRIMER.fasta
 
 # upload
-aws s3 sync $outdir s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/tronko --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $outdir s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # cleanup
 rm -r $PRIMER

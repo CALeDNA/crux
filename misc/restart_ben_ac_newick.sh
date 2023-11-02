@@ -1,9 +1,10 @@
 #! /bin/bash
 
+BUCKET="ednaexplorer"
 # restart ben after a crash / resize
 output="/etc/ben/output/"
 cutoff_length=25000
-folders=$(aws s3 ls s3://ednaexplorer/tronko/2022-12-27/ --endpoint-url https://js2.jetstream-cloud.org:8001/)
+folders=$(aws s3 ls s3://$BUCKET/tronko/2022-12-27/ --endpoint-url https://js2.jetstream-cloud.org:8001/)
 
 for folder in $folders
 do
@@ -11,7 +12,7 @@ do
     then
         echo "skip PRE"
     else
-        aws s3 sync s3://ednaexplorer/tronko/2022-12-27/$folder $folder --exclude "*" --include "*_taxonomy.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync s3://$BUCKET/tronko/2022-12-27/$folder $folder --exclude "*" --include "*_taxonomy.txt" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
         added_job="FALSE"
         for file in $folder*
         do
@@ -41,7 +42,7 @@ do
                 suffix=$( echo $JOB | rev | cut -d'-' -f1 | rev | tr -dc '0-9' )
                 job="${primer}-newick${suffix}"
                 # ben add -c "docker run -t -v $(pwd):/mnt --name ${job} -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} crux /mnt/ac2newick.sh -d ${JOB} -j ${job} -i ${RUNID}" ${job} -f main -o output
-                if [[ $(aws s3 ls s3://ednaexplorer/tronko/2022-12-27/$job/ | head) ]]
+                if [[ $(aws s3 ls s3://$BUCKET/tronko/2022-12-27/$job/ | head) ]]
                 then
                     echo "$job done"
                 else

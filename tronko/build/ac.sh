@@ -30,17 +30,18 @@ while getopts "d:t:f:p:j:i:b:B:k:s:r:1?" opt; do
     esac
 done
 
+source /vars/crux_vars.sh
 
 cd /mnt
 mkdir -p $JOB/dir
 
 # download dereplicated fasta and taxa file
 if [ "${FIRST}" = "TRUE" ]; then
-    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/dereplicated/$PRIMER.fasta $JOB/$PRIMER.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/dereplicated/$PRIMER.tax.tsv $JOB/${PRIMER}_taxonomy.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/dereplicated/$PRIMER.fasta $JOB/$PRIMER.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/dereplicated/$PRIMER.tax.tsv $JOB/${PRIMER}_taxonomy.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 else
-    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA $JOB/$PRIMER.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA $JOB/${PRIMER}_taxonomy.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA $JOB/$PRIMER.fasta --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA $JOB/${PRIMER}_taxonomy.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 fi
 
 fasta=$JOB/$PRIMER.fasta
@@ -62,7 +63,7 @@ fi
 rm $taxa $fasta
 
 # upload ac
-aws s3 sync $JOB/dir s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$JOB --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $JOB/dir s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$JOB --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # add ac jobs to queue
 added_job="FALSE"
@@ -96,14 +97,14 @@ rm -r $JOB
 
 # delete recursed file from bucket
 if [ "${FIRST}" != "TRUE" ]; then
-    aws s3 rm s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 rm s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 rm s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$FASTA --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 rm s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER/$TAXA --endpoint-url https://js2.jetstream-cloud.org:8001/
 fi
 
 # check if parent bucket is newick ready
 newick_ready="TRUE"
 if [ "${FIRST}" != "TRUE" ]; then
-    aws s3 sync s3://ednaexplorer/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER $JOB/$FOLDER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$FOLDER $JOB/$FOLDER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
     for file in $JOB/$FOLDER/*taxonomy.txt
     do
         echo $file

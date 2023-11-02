@@ -2,7 +2,7 @@
 
 export AWS_MAX_ATTEMPTS=3
 
-while getopts "d:t:f:i:k:s:r:" opt; do
+while getopts "d:t:f:i:k:s:r:b:" opt; do
     case $opt in
         d) FOLDER="$OPTARG" # folder of last run
         ;;
@@ -18,6 +18,8 @@ while getopts "d:t:f:i:k:s:r:" opt; do
         ;;
         r) AWS_DEFAULT_REGION="$OPTARG"
         ;;
+        b) BUCKET="$OPTARG"
+        ;;
     esac
 done
 
@@ -28,8 +30,8 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
 
 primer=$(echo $FOLDER | cut -d"-" -f1)
 # download master fasta and local taxa
-aws s3 cp s3://ednaexplorer/crux/$RUNID/fa-taxid/$primer.fa . --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 cp s3://ednaexplorer/tronko/$RUNID/$FOLDER/$TAXA . --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://$BUCKET/crux/$RUNID/fa-taxid/$primer.fa . --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp s3://$BUCKET/tronko/$RUNID/$FOLDER/$TAXA . --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
 while read line; do
@@ -43,4 +45,4 @@ while read line; do
     echo $seq >> $FASTA
 done < $TAXA # local taxonomy
 
-aws s3 cp $FASTA s3://ednaexplorer/tronko/$RUNID/$FOLDER/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp $FASTA s3://$BUCKET/tronko/$RUNID/$FOLDER/$FASTA --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
