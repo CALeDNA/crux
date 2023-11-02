@@ -30,10 +30,15 @@ jobs:
           scp -v -o StrictHostKeyChecking=no -r ./* ${{ env.SSH_USER }}@${{ env.SSH_ADDRESS }}:/home/${{ env.SSH_USER }}/crux
       - name: Move Ben binary
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_ADDRESS }} "sudo mkdir -p /etc/ben/queue; sudo mkdir -p /etc/ben/output; sudo chown -R ${{ env.SSH_USER }}:${{ env.SSH_USER }} /etc/ben; sudo mv /home/${{ env.SSH_USER }}/crux/bin/ben /etc/ben/ben"
+          ssh -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_ADDRESS }} "sudo mkdir -p /etc/ben/queue; sudo mkdir -p /etc/ben/output; sudo chown -R ${{ env.SSH_USER }}:${{ env.SSH_USER }} /etc/ben; \
+          if [ -f /etc/ben/ben ]; then \
+            echo 'Ben binary already exists.'; \
+          else \
+            sudo mv /home/${{ env.SSH_USER }}/crux/bin/ben /etc/ben/ben; \
+          fi"
       - name: Install apt dependencies
         run: |
-          sudo apt install python3-openstackclient jq -y
+          sudo apt install python3-openstackclient jq pssh awscli -y
       - name: Clean up SSH key
         run: |
           rm -f ~/.ssh/id_rsa
