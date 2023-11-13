@@ -33,6 +33,8 @@ while getopts "i:p:b:a:k:s:r:K:S:R:B:" opt; do
     esac
 done
 
+source /vars/crux_vars.sh
+
 export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
@@ -40,27 +42,27 @@ export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
 cd ~/crux/tronko/assign || exit
 
 # check if QC already ran on this primer
-# dir_exists=$(aws s3 ls s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
+# dir_exists=$(aws s3 ls s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/paired/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
 # if [ "$dir_exists" -gt 0 ]; then
 #     # QC exists on js2 for this project
 #     echo "Skipping QC step for: $PROJECTID-$PRIMER"
 
 #     # download QC files
 #     mkdir -p $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered
-#     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+#     aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/paired $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 #     mkdir -p $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered
-#     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+#     aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 #     mkdir -p $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered
-#     aws s3 sync s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+#     aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # else
 # download $PROJECTID/QC and samples
-aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 sync s3://ednaexplorer/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # download anacapa
 git clone -b cruxrachel-nexterafix https://github.com/CALeDNA/Anacapa.git
 # download singularity & image
-aws s3 sync s3://ednaexplorer/anacapa/ Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/anacapa/ Anacapa/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
 # EDIT THESE
@@ -92,12 +94,12 @@ time $BASEDIR/singularity/bin/singularity exec -B $BASEDIR $CONTAINER /bin/bash 
 cd ~/crux/tronko/assign || exit
 
 # upload $OUT
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # upload QC logs
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://ednaexplorer/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 # fi
 
 # add ben tronko-assign jobs
