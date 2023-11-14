@@ -183,7 +183,7 @@ then
     aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
     aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-    # download checksum
+    # download old assign files
     aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
@@ -203,6 +203,11 @@ then
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
 
+    # remove duplicate sequences
+    if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/paired --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+    fi
+
     # run tronko assign paired v1
     time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -p -z -w -1 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta -2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
 
@@ -216,6 +221,11 @@ then
     fi
     # create rc ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired --rc
+
+    # remove duplicate sequences
+    if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER-rc/paired --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+    fi
 
     # run tronko assign paired v2 (rc)
     time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -p -z -w -1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta -2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
