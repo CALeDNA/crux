@@ -81,14 +81,40 @@ if __name__ == "__main__":
 
     mismatch_bins = {(0, 2): 0, (3, 5): 0, (6, 10): 0, (11, 25): 0, (26, 40): 0, (41, 50): 0, 
                      (51, 60): 0, (61, 70): 0, (71, 80): 0, (81, 90): 0, (91, 100): 0, "up to Max": 0}
+    if os.path.exists(os.path.join(base_dir, "paired")):
+        paired_ASV, header_P, paired_taxa_set = process_directory(base_dir, "paired", "paired", "paired_F", allowed_mismatches, mismatch_bins)
+    else:
+        paired_ASV = {}
+        header_P = []
+        paired_taxa_set = set()
+    if os.path.exists(os.path.join(base_dir, "unpaired_F")):
+        unpaired_F_ASV, header_F, unpaired_F_taxa_set = process_directory(base_dir, "unpaired_F", "unpaired_F", "unpaired_F", allowed_mismatches, mismatch_bins)
+    else:
+        unpaired_F_ASV = {}
+        header_F = []
+        unpaired_F_taxa_set = set()
+    if os.path.exists(os.path.join(base_dir, "unpaired_R")):
+        unpaired_R_ASV, header_R, unpaired_R_taxa_set = process_directory(base_dir, "unpaired_R", "unpaired_R", "unpaired_R", allowed_mismatches, mismatch_bins)
+    else:
+        unpaired_R_ASV = {}
+        header_R = []
+        unpaired_R_taxa_set = set()
 
-    paired_ASV, header_P, paired_taxa_set = process_directory(base_dir, "paired", "paired", "paired_F", allowed_mismatches, mismatch_bins)
-    unpaired_F_ASV, header_F, unpaired_F_taxa_set = process_directory(base_dir, "unpaired_F", "unpaired_F", "unpaired_F", allowed_mismatches, mismatch_bins)
-    unpaired_R_ASV, header_R, unpaired_R_taxa_set = process_directory(base_dir, "unpaired_R", "unpaired_R", "unpaired_R", allowed_mismatches, mismatch_bins)
-    first_elem = header_P[0]
-    header_P.pop(0)
-    header_F.pop(0)
-    header_R.pop(0)
+    if (len(header_P) > 0):
+        first_elem = header_P[0]
+    elif (len(header_F) > 0):
+        first_elem = header_F[0]
+    elif (len(header_R) > 0):
+        first_elem = header_R[0]
+    else:
+        first_elem = ""
+
+    if header_P:
+        header_P.pop(0)
+    if header_F:
+        header_F.pop(0)
+    if header_R:
+        header_R.pop(0)
     header = list(set(header_P + header_F + header_R))
 
     total_taxa_unfiltered = len(paired_taxa_set | unpaired_F_taxa_set | unpaired_R_taxa_set)
