@@ -133,6 +133,15 @@ removeProcessedFiles() {
         done
         mv $temp_file $checksums_file
 
+        # add new files to checksum
+        for file in $PROJECTID-$PRIMER/paired/*_F_filt.fastq.gz; do
+            # Check if file is in the checksum file
+            if ! grep -q "$(basename "$file")" "$checksums_file"; then
+                echo "New file being processed: $file"
+                md5sum "$file" >> "$checksums_file"
+            fi
+        done
+
         # loop $ASV for rows with only 0's. Del those rows and append to id.txt
         removed_id=$(mktemp)
         awk -F'\t' '{
