@@ -160,9 +160,9 @@ if __name__ == "__main__":
         seqDict = create_dict(dir, old, projectid, primer, isPaired=True)
         rewrite_files(seqDict, dir, projectid, primer, isPaired=True)
     elif isUnpairedF:
-        seqDict = create_dict(dir, old, projectid, primer, suffix="paired_F")
-        rewrite_files(seqDict, dir, projectid, primer, suffix="paired_F")
+        seqDict = create_dict(dir, old, projectid, primer, suffix="unpaired_F")
+        rewrite_files(seqDict, dir, projectid, primer, suffix="unpaired_F")
     elif isUnpairedR:
-        seqDict = create_dict(dir, old, projectid, primer, suffix="paired_R")
-        rewrite_files(seqDict, dir, projectid, primer, suffix="paired_R")
+        seqDict = create_dict(dir, old, projectid, primer, suffix="unpaired_R")
+        rewrite_files(seqDict, dir, projectid, primer, suffix="unpaired_R")
     print("Done!")
