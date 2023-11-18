@@ -34,9 +34,10 @@ removeProcessedFiles() {
     PRIMER=$2
     tronko_type=$3
     fr=$4
+    paired_type=$5
 
 
-    if [[ "$tronko_type" == "paired_"* ]]; then
+    if [[ "$paired_type" == "paired" ]]; then
         checksums_file="$PROJECTID-$PRIMER/old/checksums_${fr}.txt"
     else
         checksums_file="$PROJECTID-$PRIMER/old/checksums.txt"
@@ -58,7 +59,7 @@ removeProcessedFiles() {
         temp_file=$(mktemp)
         ASV="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-$tronko_type.asv"
         FASTA="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-$tronko_type.fasta"
-        if [[ "$tronko_type" == "paired_"* ]]; then
+        if [[ "$paired_type" == "paired" ]]; then
             TRONKO="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt"
         else
             TRONKO="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-$tronko_type.txt"
@@ -72,7 +73,7 @@ removeProcessedFiles() {
         for file in "${file_list[@]}"; do
             file="${file%$'\r'}"  # remove trail characters
             # Check if the file exists
-            file_path="$PROJECTID-$PRIMER/paired/${file}_${fr}_filt.fastq.gz"
+            file_path="$PROJECTID-$PRIMER/${paired_type}/${file}_${fr}_filt.fastq.gz"
             if [ -f "$file_path" ]; then
                 new_md5sum=$(md5sum $file_path | cut -d' ' -f1)
                 if [ "${checksums["$file_path"]}" = "$new_md5sum" ]; then
@@ -107,7 +108,7 @@ removeProcessedFiles() {
                 fi
             else
                 # If previously run file no longer exists in samples, or checksum is different, delete it from assign output files
-                echo "File '$file_path' no longer exists in QC/$PRIMER/paired. Deleting $PRIMER assign data for '$file_path' ..."
+                echo "File '$file_path' no longer exists in QC/$PRIMER/${paired_type}. Deleting $PRIMER assign data for '$file_path' ..."
                 # remove $file column from asv
                 awk -F'\t' -v colname="$file" 'BEGIN {OFS = "\t"} {
                     if (NR == 1) {
@@ -134,7 +135,7 @@ removeProcessedFiles() {
         mv $temp_file $checksums_file
 
         # add new files to checksum
-        for file in $PROJECTID-$PRIMER/paired/*_F_filt.fastq.gz; do
+        for file in $PROJECTID-$PRIMER/${paired_type}/*_${fr}_filt.fastq.gz; do
             # Check if file is in the checksum file
             if ! grep -q "$(basename "$file")" "$checksums_file"; then
                 echo "New file being processed: $file"
@@ -173,16 +174,10 @@ removeProcessedFiles() {
         rm $removed_id
     else
         echo "MD5 file does not exist. Keeping all files."
-        # create md5 checksum
-        if [[ "$tronko_type" == "paired_"* ]]; then
-            for file in "$PROJECTID-$PRIMER/paired"/*_${fr}_filt.fastq.gz; do
+        # create md5 checksum file
+        for file in "$PROJECTID-$PRIMER/${paired_type}"/*_${fr}_filt.fastq.gz; do
                 md5sum "$file" >> "$checksums_file"
-            done
-        else
-            for file in "$PROJECTID-$PRIMER/${tronko_type}/"*; do
-                md5sum "$file" >> $checksums_file
-            done
-        fi
+        done
     fi
 }
 
@@ -199,12 +194,12 @@ then
     # download QC sample paired files
     aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-    removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_F" "F"
+    removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_F" "F" "paired"
 
     # upload new checksum_F
     aws s3 cp $PROJECTID-$PRIMER/old/checksums_F.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_F.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-    removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_R" "R"
+    removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_R" "R" "paired"
 
     # upload new checksum_R
     aws s3 cp $PROJECTID-$PRIMER/old/checksums_R.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_R.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
