@@ -261,12 +261,10 @@ then
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt"
         if [ -f "$old_asv_f" ]; then
             OFS="\t"
-            awk 'NR==FNR{next} FNR==1{next} {for(i=3; i<=NF; i++) $i = $i OFS $i} 1' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv > merged_f.asv
-            mv merged_f.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
-
-            awk 'BEGIN {OFS="\t"} NR==FNR{if (FNR==1) next; for(i=2; i<=NF; i++) header = header OFS $i; next} FNR==1 {print header} {print $1, $0}' "$old_asv_r" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv" > merged_r.asv
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv > merged_f.asv
+            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
             
-            awk 'NR==FNR{next} FNR==1{next} {for(i=3; i<=NF; i++) $i = $i OFS $i} 1' $old_asv_r $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_r $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
             mv merged_r.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
 
             tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
@@ -298,11 +296,12 @@ then
         old_fasta_r="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired_R.fasta"
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt"
         if [ -f "$old_asv_f" ]; then
-            awk 'NR==FNR{next} FNR==1{next} {for(i=3; i<=NF; i++) $i = $i OFS $i} 1' $old_asv_f $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv > merged_f.asv
-            mv merged_f.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
-
-            awk 'NR==FNR{next} FNR==1{next} {for(i=3; i<=NF; i++) $i = $i OFS $i} 1' $old_asv_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
-            mv merged_R.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+        OFS="\t"
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv > merged_f.asv
+            mv merged.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
+            
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
+            mv merged_r.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
 
             tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
             mv $old_fasta_f $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta
@@ -310,8 +309,8 @@ then
             tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta | cat >> $old_fasta_r
             mv $old_fasta_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt | cat >> $old_output
-            mv $old_output $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt
+            tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt | cat >> $old_output
+            mv $old_output $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
         fi
 
         # upload output
@@ -319,149 +318,232 @@ then
     fi
 
     # cleanup
-    # rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
 fi
 
-# if [ "${UNPAIRED_F}" = "TRUE" ]
-# then
-#     # check if tronko assign already ran on unpaired_f
-#     # dir_exists=$(aws s3 ls s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
-#     # if [ "$dir_exists" -gt 0 ]; then
-#     #     # tronko assign unpaired_f file exists on js2
-#     #     echo "Skipping tronko assign unpaired_f for: $PROJECTID-$PRIMER"
-#     # else
-#     # tronko assign unpaired_f does not exist on js2, run
-#     echo "File does not exist on s3 - run unpaired_f: $PROJECTID-$PRIMER"
-#     # download tronko database
-#     aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#     aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+if [ "${UNPAIRED_F}" = "TRUE" ]
+then
+    # download tronko database
+    aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
     
-#     # download QC sample unpaired_F files
-#     aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # download old assign files
+    aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-#     # create ASV files
-#     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
+    # download QC sample unpaired_F files
+    aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-#     # run tronko assign
-#     time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt
+    removeProcessedFiles "$PROJECTID" "$PRIMER" "unpaired_F" "F" "unpaired_F"
 
-#     # Count rows with values less than 5 in the 4th column in v1 of unpaired_F
-#     count_1=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt")
-#     if [[ -z "$count_1" ]]; then
-#         count_1=0
-#     fi
-#     # run tronko assign unpaired_F v2 (rc)
-#     time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt
+    # upload new checksum_F
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/checksums.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-#     # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
-#     count_2=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")
-#     if [[ -z "$count_2" ]]; then
-#         count_2=0
-#     fi
-#     # Compare counts and upload folder with the highest count
-#     if [ "$count_1" -ge "$count_2" ]; then
-#         echo "v1 has the highest count: $count_1"
-#         # split assign output
-#         aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#     else
-#         echo "v2 (rc) has the highest count: $count_2"
-#         # split assign output
-#         aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#         aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#     fi
+    # create ASV files
+    python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
 
-#     # cleanup
-#     rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
-#     # fi
-# fi
+    # remove duplicate sequences
+    if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.txt" ]; then
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/unpaired_F --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --unpairedf
+    fi
 
-# if [ "${UNPAIRED_R}" = "TRUE" ]
-# then
-#     # # check if tronko assign already ran on unpaired_r files
-#     # dir_exists=$(aws s3 ls s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/ --endpoint-url https://js2.jetstream-cloud.org:8001/ | wc -l)
-#     # if [ "$dir_exists" -gt 0 ]; then
-#     #     # tronko assign unpaired_r file exists on js2
-#     #     echo "Skipping tronko assign unpaired_r for: $PROJECTID-$PRIMER"
-#     # else
-#     # tronko assign unpaired_r does not exist on js2, run
-#     echo "File does not exist on s3 - run unpaired_r: $PROJECTID-$PRIMER"
-#     # download tronko database
-#     aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#     aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # run tronko assign
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt
+
+    # Count rows with values less than 5 in the 4th column in v1 of unpaired_F
+    count_1=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.txt")
+    if [[ -z "$count_1" ]]; then
+        count_1=0
+    fi
+    # run tronko assign unpaired_F v2 (rc)
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt
+
+    # Count rows with values less than 5 in the 4th column in v2 (rc) of unpaired_F
+    count_2=$(awk -F '\t' '$4 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt")
+    if [[ -z "$count_2" ]]; then
+        count_2=0
+    fi
+    # Compare counts and upload folder with the highest count
+    if [ "$count_1" -ge "$count_2" ]; then
+        echo "v1 has the highest count: $count_1"
+
+        # combine old and new files
+        old_asv="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.asv"
+        old_fasta="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.fasta"
+        old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.txt"
+
+        if [ -f "$old_asv" ]; then
+            OFS="\t"
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv > merged_f.asv
+            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv
+
+            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta | cat >> $old_fasta_f
+            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta
+
+            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
+            mv $old_output $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt
+        fi
+
+        # upload output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    else
+        echo "v2 (rc) has the highest count: $count_2"
+
+        # combine old and new files
+        old_asv="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.asv"
+        old_fasta="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.fasta"
+        old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.txt"
+
+        if [ -f "$old_asv" ]; then
+            OFS="\t"
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv > merged_f.asv
+            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv
+
+            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta | cat >> $old_fasta_f
+            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta
+
+            tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
+            mv $old_output $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt
+        fi
+
+        # upload output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    fi
+
+    # cleanup
+    rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+fi
+
+if [ "${UNPAIRED_R}" = "TRUE" ]
+then
+    # download tronko database
+    aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
     
-#     # download QC sample unpaired_R
-#     aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # download old assign files
+    aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    
+    # download QC sample unpaired_R
+    aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-#     # create ASV files
-#     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
+    removeProcessedFiles "$PROJECTID" "$PRIMER" "unpaired_R" "R" "unpaired_R"
 
-#     # run tronko assign
-#     time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt
+    # upload new checksum_R
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/checksums.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-#     # Count rows with values less than 5 in the 5th column in v1 of unpaired_R
-#     count_1=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt")
-#     if [[ -z "$count_1" ]]; then
-#         count_1=0
-#     fi
-#     # run tronko assign unpaired_R v2 (rc)
-#     time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt
+    # create ASV files
+    python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
 
-#     # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
-#     count_2=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")
-#     if [[ -z "$count_2" ]]; then
-#         count_2=0
-#     fi
-#     # Compare counts and upload folder with the highest count
-#     if [ "$count_1" -gt "$count_2" ]; then
-#         echo "v1 has the highest count: $count_1"
-#         # split assign output
-#         aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#     else
-#         echo "v2 (rc) has the highest count: $count_2"
-#         # split assign output
-#         aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#         aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-#     fi
+    # remove duplicate sequences
+    if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.txt" ]; then
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/unpaired_R --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --unpairedf
+    fi
 
-#     # cleanup
-#     rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
-#     # fi
-# fi
+    # run tronko assign
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -v -o $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt
 
-# mkdir ${PROJECTID}_processed_tronko
-# # dl all assign folders for $PROJECTID
-# aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-# # run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
-# mismatches=(1 5 10 25 50 100)
-# for dir in "$PROJECTID"/*; do
-#   if [ -d "$dir" ]; then
-#     primer=$(basename $dir)
-#     mkdir ${PROJECTID}_processed_tronko/$primer
-#     for mismatch in "${mismatches[@]}"; do
-#         python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
-#     done
-#   fi
-# done
-# # zip
-# tar -czvf ${PROJECTID}_processed_tronko.tar.gz ${PROJECTID}_processed_tronko
-# # upload
-# aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # Count rows with values less than 5 in the 5th column in v1 of unpaired_R
+    count_1=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.txt")
+    if [[ -z "$count_1" ]]; then
+        count_1=0
+    fi
+    # run tronko assign unpaired_R v2 (rc)
+    time tronko-assign -r -f $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz -a $PROJECTID-$PRIMER/tronkodb/$PRIMER.fasta -s -w -g $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta -6 -C 1 -c 5 -o $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt
+
+    # Count rows with values less than 5 in the 5th column in v2 (rc) of unpaired_R
+    count_2=$(awk -F '\t' '$5 < 5 { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt")
+    if [[ -z "$count_2" ]]; then
+        count_2=0
+    fi
+    # Compare counts and upload folder with the highest count
+    if [ "$count_1" -gt "$count_2" ]; then
+        echo "v1 has the highest count: $count_1"
+
+        # combine old and new files
+        old_asv="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.asv"
+        old_fasta="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.fasta"
+        old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.txt"
+
+        if [ -f "$old_asv" ]; then
+            OFS="\t"
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv > merged.asv
+            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv
+
+            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta | cat >> $old_fasta_f
+            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta
+
+            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
+            mv $old_output $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt
+        fi
+
+        # upload assign output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    else
+        echo "v2 (rc) has the highest count: $count_2"
+
+        # combine old and new files
+        old_asv="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.asv"
+        old_fasta="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.fasta"
+        old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.txt"
+
+        if [ -f "$old_asv" ]; then
+            OFS="\t"
+            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv > merged.asv
+            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv
+
+            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta | cat >> $old_fasta_f
+            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta
+
+            tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
+            mv $old_output $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt
+        fi
+
+        # upload assign output
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    fi
+
+    # cleanup
+    rm -r $PROJECTID-$PRIMER/* $PROJECTID-$PRIMER-rc/*
+    # fi
+fi
+
+mkdir ${PROJECTID}_processed_tronko
+# dl all assign folders for $PROJECTID
+aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+# run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
+mismatches=(1 5 10 25 50 100)
+for dir in "$PROJECTID"/*; do
+  if [ -d "$dir" ]; then
+    primer=$(basename $dir)
+    mkdir ${PROJECTID}_processed_tronko/$primer
+    for mismatch in "${mismatches[@]}"; do
+        python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
+    done
+  fi
+done
+# zip
+tar -czvf ${PROJECTID}_processed_tronko.tar.gz ${PROJECTID}_processed_tronko
+# upload
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 
-# # download primer list for jwt step. Downloading here since we rewrite aws creds in next line.
-# aws s3 cp s3://$BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt /mnt/jwt/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+# download primer list for jwt step. Downloading here since we rewrite aws creds in next line.
+aws s3 cp s3://$BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt /mnt/jwt/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
-# # update s3 bucket creds
-# # should be temporary until s3 bucket is the same for all steps
-# export AWS_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID
-# export AWS_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY
-# export AWS_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION
-# export AWS_BUCKET=$AWS_S3_BUCKET
+# update s3 bucket creds
+# should be temporary until s3 bucket is the same for all steps
+export AWS_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY
+export AWS_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION
+export AWS_BUCKET=$AWS_S3_BUCKET
 
-# # upload to aws s3 bucket
-# aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
+# upload to aws s3 bucket
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
 
 
+#TODO
 # # call processing_notif.sh
 # cd /mnt/jwt
 # ./processing_notif.sh -i $PROJECTID
