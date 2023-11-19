@@ -88,21 +88,13 @@ removeProcessedFiles() {
                     md5sum "$file_path" >> "$temp_file"
                     # remove $file column from asv
                     awk -F'\t' -v colname="$file" 'BEGIN {OFS = "\t"} {
-                        if (NR == 1) {
-                            for (i = 1; i <= NF; i++) {
-                                if ($i == colname) {
-                                    delete $i
-                                }
+                        new_line = ""
+                        for (i = 1; i <= NF; i++) {
+                            if ($i != colname) {
+                                new_line = (new_line == "" ? $i : new_line OFS $i)
                             }
-                            print
-                        } else {
-                            for (i = 1; i <= NF; i++) {
-                                if ($i == colname) {
-                                    delete $i
-                                }
-                            }
-                            print
                         }
+                        print new_line
                     }' "$ASV" > "$ASV.new"
                     mv $ASV.new $ASV
                 fi
