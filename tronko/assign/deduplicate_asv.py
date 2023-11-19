@@ -129,7 +129,7 @@ def rewrite_files(seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=
                         seq=f"{line.strip()}"
                         if id in seq_dict.keys():
                             out.write(f">{id}\n")
-                            out_f.write(f"{seq}\n")
+                            out.write(f"{seq}\n")
         shutil.move(f"{fasta}_tmp", fasta)
 
         # rewrite new asv files without duplicate sequences
