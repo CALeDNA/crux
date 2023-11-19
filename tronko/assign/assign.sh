@@ -209,7 +209,7 @@ then
 
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
-        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/paired --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
     fi
 
     # run tronko assign paired v1
@@ -228,7 +228,8 @@ then
 
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
-        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER-rc/paired --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+        cp $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired*.fasta $PROJECTID-$PRIMER-rc
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER-rc/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
     fi
 
     # run tronko assign paired v2 (rc)
@@ -281,7 +282,6 @@ then
         aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
     else
         echo "v2 (rc) has the highest count: $count_2"
-        # rename filtered files
         # rename filtered files
         mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt
         mv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F_filtered.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
@@ -343,7 +343,7 @@ then
 
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.txt" ]; then
-        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/unpaired_F --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --unpairedf
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --unpairedf
     fi
 
     # run tronko assign
@@ -437,7 +437,7 @@ then
 
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.txt" ]; then
-        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/unpaired_R --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --unpairedf
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --unpairedf
     fi
 
     # run tronko assign
