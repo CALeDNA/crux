@@ -199,9 +199,12 @@ then
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
 
+    echo "1) paired_F.asv size: $(wc -l "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv")"
+
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
         python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+        echo "2) paired_F.asv size: $(wc -l "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv")"
     fi
 
     # run tronko assign paired v1
@@ -218,10 +221,13 @@ then
     # create rc ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired --rc
 
+    echo "3) paired_F.asv size: $(wc -l "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv")"
+
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
         cp $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired*.fasta $PROJECTID-$PRIMER-rc
         python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER-rc/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+        echo "4) paired_F.asv size: $(wc -l "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv")"
     fi
 
     # run tronko assign paired v2 (rc)
@@ -229,6 +235,8 @@ then
 
     # filter tronko output
     /mnt/chisquared_filter.pl $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+
+    echo "5) paired_F.asv size: $(wc -l "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv")"
 
     # Count rows with values less than 5 in the 4th and 5th columns in v2 (rc) of paired
     count_2=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_filtered.txt")
