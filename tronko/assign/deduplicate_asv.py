@@ -15,6 +15,7 @@ def process_arguments():
     return parser.parse_args()
 
 def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=False):
+    last_id = None
     if isPaired:
         fastaf=os.path.join(dir, f"{projectid}-{primer}-paired_F.fasta")
         fastar=os.path.join(dir, f"{projectid}-{primer}-paired_R.fasta")
@@ -28,6 +29,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
             for line_f, line_r in zip(file_f, file_r):
                 if line_f.startswith(">"):
                     id=line_f.strip().lstrip(">")
+                    last_id=line.split('_')[-1].strip()
                     continue
                 else:
                     seq=f"{line_f.strip()},{line_r.strip()}"
@@ -56,6 +58,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
             for line in file:
                 if line.startswith(">"):
                     id=line.strip().lstrip(">")
+                    last_id=line.split('_')[-1].strip()
                     continue
                 else:
                     seq=f"{line.strip()}"
@@ -72,10 +75,10 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     seq=f"{line.strip()}"
                     if seq not in old_seq_dict.keys():
                         seq_dict.setdefault(id, seq)
-        return seq_dict
+        return seq_dict, last_id
 
 
-def rewrite_files(seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=False):
+def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=False):
     if isPaired:
         fastaf=os.path.join(dir, f"{projectid}-{primer}-paired_F.fasta")
         fastar=os.path.join(dir, f"{projectid}-{primer}-paired_R.fasta")
@@ -86,6 +89,7 @@ def rewrite_files(seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=
         with open(fastaf, 'r') as file_f, open(fastar, 'r') as file_r:
             with open(f"{fastaf}_tmp", 'w') as out_f, open(f"{fastar}_tmp", 'w') as out_r:
                 id=""
+                counter = last_id
                 for line_f, line_r in zip(file_f, file_r):
                     if line_f.startswith(">"):
                         id=line_f.strip().lstrip(">")
@@ -93,6 +97,11 @@ def rewrite_files(seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=
                     else:
                         seq=f"{line_f.strip()},{line_r.strip()}"
                         if id in seq_dict.keys():
+                            counter+=1
+                            # replace with new ID
+                            parts = id.split('_')
+                            parts[-1] = str(counter)  # Make sure new_id_number is a string
+                            id='_'.join(parts)
                             out_f.write(f">{id}\n")
                             out_r.write(f">{id}\n")
                             out_f.write(f"{seq.split(',')[0]}\n")
@@ -106,9 +115,19 @@ def rewrite_files(seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=
                 # skip header
                 next(file_f)
                 next(file_r)
+                counter = last_id
                 for line_f, line_r in zip(file_f, file_r):
                     id=line_f.strip().split('\t')[0]
                     if id in seq_dict.keys():
+                        counter+=1
+                        # replace with new ID
+                        parts = id.split('_')
+                        parts[-1] = str(counter)  # Make sure new_id_number is a string
+                        new_id='_'.join(parts)
+                        line_f.replace(id, new_id)
+                        id.replace("_F_", "_R_")
+                        new_id.replace("_F_", "_R_")
+                        line_r.replace(id, new_id)
                         out_f.write(line_f)
                         out_r.write(line_r)
         shutil.move(f"{asvf}_tmp", asvf)
@@ -157,12 +176,12 @@ if __name__ == "__main__":
 
     print("Deduplicating ASV sequences with previous tronko run...")
     if isPaired:
-        seqDict = create_dict(dir, old, projectid, primer, isPaired=True)
-        rewrite_files(seqDict, dir, projectid, primer, isPaired=True)
+        seqDict, last_id = create_dict(dir, old, projectid, primer, isPaired=True)
+        rewrite_files(last_id, seqDict, dir, projectid, primer, isPaired=True)
     elif isUnpairedF:
-        seqDict = create_dict(dir, old, projectid, primer, suffix="unpaired_F")
-        rewrite_files(seqDict, dir, projectid, primer, suffix="unpaired_F")
+        seqDict, last_id = create_dict(dir, old, projectid, primer, suffix="unpaired_F")
+        rewrite_files(last_id, seqDict, dir, projectid, primer, suffix="unpaired_F")
     elif isUnpairedR:
-        seqDict = create_dict(dir, old, projectid, primer, suffix="unpaired_R")
-        rewrite_files(seqDict, dir, projectid, primer, suffix="unpaired_R")
+        seqDict, last_id = create_dict(dir, old, projectid, primer, suffix="unpaired_R")
+        rewrite_files(last_id, seqDict, dir, projectid, primer, suffix="unpaired_R")
     print("Done!")
