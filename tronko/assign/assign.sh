@@ -262,10 +262,10 @@ then
             awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_r $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
             mv merged_r.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
+            tail -n +1 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
             mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta | cat >> $old_fasta_r
+            tail -n +1 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta | cat >> $old_fasta_r
             mv $old_fasta_r $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.fasta
 
             tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired.txt | cat >> $old_output
@@ -297,10 +297,10 @@ then
             awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
             mv merged_r.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
 
-            tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
+            tail -n +1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
             mv $old_fasta_f $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta
 
-            tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta | cat >> $old_fasta_r
+            tail -n +1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta | cat >> $old_fasta_r
             mv $old_fasta_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta
 
             tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt | cat >> $old_output

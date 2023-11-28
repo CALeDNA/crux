@@ -24,12 +24,13 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
 
         # Create seq dict for old seqs
         old_seq_dict={}
+        dupl_seq_dict={}
         with open(oldfastaf, 'r') as file_f, open(oldfastar, 'r') as file_r:
             id=""
             for line_f, line_r in zip(file_f, file_r):
                 if line_f.startswith(">"):
                     id=line_f.strip().lstrip(">")
-                    last_id=line.split('_')[-1].strip()
+                    last_id=line_f.split('_')[-1].strip()
                     continue
                 else:
                     seq=f"{line_f.strip()},{line_r.strip()}"
@@ -46,13 +47,50 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     seq=f"{line_f.strip()},{line_r.strip()}"
                     if seq not in old_seq_dict.keys():
                         seq_dict.setdefault(id, seq)
-        return seq_dict
+                    else:
+                        dupl_seq_dict.setdefault(old_seq_dict[seq], seq)
+        
+        # get new asv occurrences
+        asvf=os.path.join(dir, f"{projectid}-{primer}-paired_F.asv")
+        asvr=os.path.join(dir, f"{projectid}-{primer}-paired_R.asv")
+        with open(asvf, "w") as asvf, open(asvr, "w") as asvr:
+            for line_f, line_r in zip(asvf, asvr):
+                seqf=line_f.strip().split('\t')[1]
+                seqr=line_r.strip().split('\t')[1]
+                for key, value in dupl_seq_dict.items():
+                    if value == f"{seqf},{seqr}":
+                        dupl_seq_dict[key]="\t".join(line_f.strip().split('\t')[2:])
+                        break
+
+        # update old asv files with deduplicated occurrences
+        oldasvf=os.path.join(old_dir, f"{projectid}-{primer}-paired_F.asv")
+        newasvf=os.path.join(old_dir, f"{projectid}-{primer}-paired_F.asv_tmp")
+        oldasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv")
+        newasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv_tmp")
+        with open(oldasvf, "r") as oasvf, open(oldasvr, "r") as oasvr:
+            with open(newasvf, "w") as nasvf, open(newasvr, "w") as nasvr:
+                for line_number, (line_f, line_r) in enumerate(zip(oasvf, oasvr)):
+                    if line_number == 0:
+                        # skip header row
+                        continue
+                    id=line_f.strip().split('\t')[0]
+                    newlinef=line_f
+                    newliner=line_r
+                    if id in dupl_seq_dict.keys():
+                        newlinef+= "\t" + dupl_seq_dict[id]
+                        newliner+= "\t" + dupl_seq_dict[id]
+                    nasvf.writelines(newlinef)
+                    nasvr.writelines(newliner)
+        shutil.move(newasvf, oasvf)
+        shutil.move(newasvr, oasvr)
+        return seq_dict, last_id
     else:
         fasta=os.path.join(dir, f"{projectid}-{primer}-{suffix}.fasta")
         oldfasta=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.fasta")
 
         # Create seq dict for old seqs
         old_seq_dict={}
+        dupl_seq_dict={}
         with open(oldfasta, 'r') as file:
             id=""
             for line in file:
@@ -75,6 +113,35 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     seq=f"{line.strip()}"
                     if seq not in old_seq_dict.keys():
                         seq_dict.setdefault(id, seq)
+                    else:
+                        dupl_seq_dict.setdefault(old_seq_dict[seq], seq)
+        
+        # get new asv occurrences
+        asv=os.path.join(dir, f"{projectid}-{primer}-{suffix}.asv")
+        with open(asv, "w") as asv:
+            for line in asv:
+                seq=line.strip().split('\t')[1]
+                for key, value in dupl_seq_dict.items():
+                    if value == seq:
+                        dupl_seq_dict[key]="\t".join(line.strip().split('\t')[2:])
+                        break
+
+        # update old asv files with deduplicated occurrences
+        oldasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv")
+        newasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv_tmp")
+        with open(oldasv, "r") as oasv:
+            with open(newasv, "w") as nasv:
+                for line_number, line in enumerate(oasv):
+                    if line_number == 0:
+                        # skip header row
+                        continue
+                    id=line.strip().split('\t')[0]
+                    newline=line
+                    if id in dupl_seq_dict.keys():
+                        newline+= "\t" + dupl_seq_dict[id]
+                    nasv.writelines(newline)
+        shutil.move(newasv, oasv)
+        
         return seq_dict, last_id
 
 
