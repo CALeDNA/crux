@@ -286,8 +286,10 @@ then
             tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod"
             tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod"
             # Combine old and new asv files
-            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv"
-            paste "$old_asv_r" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv"
+            mv "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv" 
+            cat "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod" >> "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv"
+            mv "$old_asv_r" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv"
+            cat "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod" >> "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv"
             rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod*"
             rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod*"
             
@@ -351,8 +353,10 @@ then
             tail -n +2 "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_modified" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod"
             tail -n +2 "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_modified" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod"
             # Combine old and new asv files
-            paste "$old_asv_f" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv"
-            paste "$old_asv_r" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv"
+            mv "$old_asv_f" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv"
+            cat "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod" >> "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv"
+            mv "$old_asv_r" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv"
+            cat "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod" >> "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv"
             rm "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod*"
             rm "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod*"
 
@@ -454,7 +458,8 @@ then
             # Remove the header row from the second file
             tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod"
             # Combine old and new asv files
-            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
+            mv "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
+            cat "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod" >> "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
             rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod*"
             
             # combine fasta and tronko output files
@@ -504,7 +509,8 @@ then
             # Remove the header row from the second file
             tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod"
             # Combine old and new asv files
-            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
+            mv "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
+            cat "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod" >> "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
             rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod*"
             
             # combine fasta and tronko output files
@@ -604,7 +610,8 @@ then
             # Remove the header row from the second file
             tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod"
             # Combine old and new asv files
-            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
+            mv "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
+            cat "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod" >> "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
             rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod*"
             
             # combine fasta and tronko output files
@@ -654,7 +661,8 @@ then
             # Remove the header row from the second file
             tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod"
             # Combine old and new asv files
-            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
+            mv "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
+            cat "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod" >> "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
             rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod*"
             
             # combine fasta and tronko output files
@@ -709,7 +717,6 @@ export AWS_BUCKET=$AWS_S3_BUCKET
 aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
 
 
-#TODO
 # # call processing_notif.sh
 # cd /mnt/jwt
 # ./processing_notif.sh -i $PROJECTID
@@ -724,16 +731,3 @@ aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJEC
 #      -d "{
 #            \"ProjectID\": \"$PROJECTID\"
 #          }"
-
-
-
-# paired:
-# run both versions 
-# v2: switch -1 and -2 files
-# then, pick the output file with the most lines with mismatches under 5
-
-# in upaired_F run both versions, v2:run with -v
-# then, pick the output file with the most lines with mismatches under 5
-
-# unpaired_R run both versions:
-# v2: run without -v
