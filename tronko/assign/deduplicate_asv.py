@@ -78,7 +78,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                 for line_number, (line_f, line_r) in enumerate(zip(oasvf, oasvr)):
                     if line_number == 0:
                         # count number of samples in old asv
-                        oldColumnCount+=line_f.split('\t') - 2
+                        oldColumnCount+=len(line_f.split('\t')) - 2
                         # update header row
                         header=line_f + "\t" + newheaderfiles
                         nasvf.writelines(header)
@@ -154,7 +154,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                 for line_number, line in enumerate(oasv):
                     if line_number == 0:
                         # count number of samples in old asv
-                        oldColumnCount+=line.split('\t') - 2
+                        oldColumnCount+=len(line.split('\t')) - 2
                         # update header row
                         header=line + "\t" + newheaderfiles
                         nasv.writelines(header)
