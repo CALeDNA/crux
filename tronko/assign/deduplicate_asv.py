@@ -88,8 +88,8 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                         newliner+= "\t" + dupl_seq_dict[id]
                     nasvf.writelines(newlinef)
                     nasvr.writelines(newliner)
-        shutil.move(newasvf, oasvf)
-        shutil.move(newasvr, oasvr)
+        shutil.move(newasvf, oldasvf)
+        shutil.move(newasvr, oldasvr)
         print(f"Last used ID: {last_id}")
         return seq_dict, last_id
     else:
@@ -153,7 +153,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     if id in dupl_seq_dict.keys():
                         newline+= "\t" + dupl_seq_dict[id]
                     nasv.writelines(newline)
-        shutil.move(newasv, oasv)
+        shutil.move(newasv, oldasv)
         print(f"Last used ID: {last_id}")
         return seq_dict, last_id
 
