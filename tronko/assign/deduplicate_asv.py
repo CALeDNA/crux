@@ -72,7 +72,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         newasvf=os.path.join(old_dir, f"{projectid}-{primer}-paired_F.asv_tmp")
         oldasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv")
         newasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv_tmp")
-        nooccur=re.sub(r'[^\\t]', '0', dupl_seq_dict.values()[0])
+        nooccur=re.sub(r'[^\\t]', '0', next(iter(dupl_seq_dict.values())))
         with open(oldasvf, "r") as oasvf, open(oldasvr, "r") as oasvr:
             with open(newasvf, "w") as nasvf, open(newasvr, "w") as nasvr:
                 for line_number, (line_f, line_r) in enumerate(zip(oasvf, oasvr)):
@@ -148,7 +148,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         # update old asv files with deduplicated occurrences
         oldasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv")
         newasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv_tmp")
-        nooccur=re.sub(r'[^\\t]', '0', dupl_seq_dict.values()[0])
+        nooccur=re.sub(r'[^\\t]', '0', next(iter(dupl_seq_dict.values())))
         with open(oldasv, "r") as oasv:
             with open(newasv, "w") as nasv:
                 for line_number, line in enumerate(oasv):
