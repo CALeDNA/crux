@@ -24,19 +24,19 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
 
         # Create seq dict for old seqs
         old_seq_dict={}
-        dupl_seq_dict={}
         with open(oldfastaf, 'r') as file_f, open(oldfastar, 'r') as file_r:
             id=""
             for line_f, line_r in zip(file_f, file_r):
                 if line_f.startswith(">"):
                     id=line_f.strip().lstrip(">")
-                    last_id=line_f.split('_')[-1].strip()
+                    last_id=int(line_f.split('_')[-1])
                     continue
                 else:
                     seq=f"{line_f.strip()},{line_r.strip()}"
                     old_seq_dict.setdefault(seq, id)
 
         seq_dict={}
+        dupl_seq_dict={}
         with open(fastaf, 'r') as file_f, open(fastar, 'r') as file_r:
             id=""
             for line_f, line_r in zip(file_f, file_r):
@@ -53,8 +53,11 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         # get new asv occurrences
         asvf=os.path.join(dir, f"{projectid}-{primer}-paired_F.asv")
         asvr=os.path.join(dir, f"{projectid}-{primer}-paired_R.asv")
+        newheaderfiles=""
         with open(asvf, "r") as asvf, open(asvr, "r") as asvr:
             for line_f, line_r in zip(asvf, asvr):
+                if("sequence" in line_f):
+                    newheaderfiles="\t".join(line_f.split("\t")[2:])
                 seqf=line_f.strip().split('\t')[1]
                 seqr=line_r.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
@@ -71,7 +74,11 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
             with open(newasvf, "w") as nasvf, open(newasvr, "w") as nasvr:
                 for line_number, (line_f, line_r) in enumerate(zip(oasvf, oasvr)):
                     if line_number == 0:
-                        # skip header row
+                        # update header row
+                        header=line_f + "\t" + newheaderfiles
+                        nasvf.writelines(header)
+                        header=line_r + "\t" + newheaderfiles
+                        nasvr.writelines(header)
                         continue
                     id=line_f.strip().split('\t')[0]
                     newlinef=line_f
@@ -83,6 +90,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     nasvr.writelines(newliner)
         shutil.move(newasvf, oasvf)
         shutil.move(newasvr, oasvr)
+        print(f"Last used ID: {last_id}")
         return seq_dict, last_id
     else:
         fasta=os.path.join(dir, f"{projectid}-{primer}-{suffix}.fasta")
@@ -90,19 +98,19 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
 
         # Create seq dict for old seqs
         old_seq_dict={}
-        dupl_seq_dict={}
         with open(oldfasta, 'r') as file:
             id=""
             for line in file:
                 if line.startswith(">"):
                     id=line.strip().lstrip(">")
-                    last_id=line.split('_')[-1].strip()
+                    last_id=int(line.split('_')[-1])
                     continue
                 else:
                     seq=f"{line.strip()}"
                     old_seq_dict.setdefault(seq, id)
         
         seq_dict={}
+        dupl_seq_dict={}
         with open(fasta, 'r') as file:
             id=""
             for line in file:
@@ -118,8 +126,11 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         
         # get new asv occurrences
         asv=os.path.join(dir, f"{projectid}-{primer}-{suffix}.asv")
+        newheaderfiles=""
         with open(asv, "r") as asv:
             for line in asv:
+                if("sequence" in line):
+                    newheaderfiles="\t".join(line.split("\t")[2:])
                 seq=line.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
                     if value == seq:
@@ -133,7 +144,9 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
             with open(newasv, "w") as nasv:
                 for line_number, line in enumerate(oasv):
                     if line_number == 0:
-                        # skip header row
+                        # update header row
+                        header=line + "\t" + newheaderfiles
+                        nasv.writelines(header)
                         continue
                     id=line.strip().split('\t')[0]
                     newline=line
@@ -141,7 +154,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                         newline+= "\t" + dupl_seq_dict[id]
                     nasv.writelines(newline)
         shutil.move(newasv, oasv)
-        
+        print(f"Last used ID: {last_id}")
         return seq_dict, last_id
 
 
@@ -204,12 +217,18 @@ def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", 
         asv=os.path.join(dir, f"{projectid}-{primer}-{suffix}.asv")
 
         # rewrite new fasta files without duplicate sequences
+        counter=last_id
         with open(fasta, 'r') as file:
             with open(f"{fasta}_tmp", 'w') as out:
                 id=""
                 for line in file:
                     if line.startswith(">"):
+                        counter+=1
                         id=line.strip().lstrip(">")
+                        # replace with new ID
+                        parts = id.split('_')
+                        parts[-1] = str(counter)  # Make sure new_id_number is a string
+                        id='_'.join(parts)
                         continue
                     else:
                         seq=f"{line.strip()}"
@@ -219,6 +238,7 @@ def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", 
         shutil.move(f"{fasta}_tmp", fasta)
 
         # rewrite new asv files without duplicate sequences
+        counter=last_id
         with open(asv, 'r') as file:
             with open(f"{asv}_tmp", 'w') as out:
                 # skip header
@@ -226,6 +246,11 @@ def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", 
                 for line in file:
                     id=line.strip().split('\t')[0]
                     if id in seq_dict.keys():
+                        counter+=1
+                        # replace with new ID
+                        parts = id.split('_')
+                        parts[-1] = str(counter)  # Make sure new_id_number is a string
+                        id='_'.join(parts)
                         out.write(line)
         shutil.move(f"{asv}_tmp", asv)
 

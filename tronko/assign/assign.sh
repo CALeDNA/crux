@@ -255,13 +255,43 @@ then
         old_fasta_r="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired_R.fasta"
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt"
         if [ -f "$old_asv_f" ]; then
-            OFS="\t"
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv > merged_f.asv
-            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
-            
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_r $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
-            mv merged_r.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
+            # Determine the number of columns in the first file
+            num_columns_oldasv=$(head -n 1 "$old_asv_f" | tr '\t' '\n' | wc -l)
+            # Determine the number of columns in the second file
+            num_columns_newasv=$(head -n 1 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv" | tr '\t' '\n' | wc -l)
+            # Calculate the difference in the number of columns
+            column_diff=$((num_columns_oldasv - num_columns_newasv))
+            # Generate a string of "0" columns to insert
+            zero_columns=$(yes "0" | head -n "$column_diff" | tr '\n' '\t')
+            # Construct the awk command dynamically based on the number of columns
+            awk_command="{
+                print \$1, \$2"
+            for ((i = 1; i <= $column_diff; i++)); do
+                awk_command="${awk_command}, 0"
+            done
+            awk_command="${awk_command}, \$3, \$4"
+            for ((i = num_columns_newasv + 1; i <= num_columns_oldasv; i++)); do
+                awk_command="${awk_command}, \$${i}"
+            done
+            awk_command="${awk_command}
+            }"
 
+            # Insert the "0" columns after the second column in the second file
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_modified"
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_modified"
+            rm $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv
+            rm $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv
+
+            # Remove the header row from the second file
+            tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod"
+            tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod"
+            # Combine old and new asv files
+            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv"
+            paste "$old_asv_r" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv"
+            rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv_mod*"
+            rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_R.asv_mod*"
+            
+            # combine fasta and tronko output files
             tail -n +1 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
             mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.fasta
 
@@ -290,17 +320,47 @@ then
         old_fasta_r="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired_R.fasta"
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt"
         if [ -f "$old_asv_f" ]; then
-        OFS="\t"
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv > merged_f.asv
-            mv merged.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
-            
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv > merged_r.asv
-            mv merged_r.asv $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+            # Determine the number of columns in the first file
+            num_columns_oldasv=$(head -n 1 "$old_asv_f" | tr '\t' '\n' | wc -l)
+            # Determine the number of columns in the second file
+            num_columns_newasv=$(head -n 1 "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv" | tr '\t' '\n' | wc -l)
+            # Calculate the difference in the number of columns
+            column_diff=$((num_columns_oldasv - num_columns_newasv))
+            # Generate a string of "0" columns to insert
+            zero_columns=$(yes "0" | head -n "$column_diff" | tr '\n' '\t')
+            # Construct the awk command dynamically based on the number of columns
+            awk_command="{
+                print \$1, \$2"
+            for ((i = 1; i <= $column_diff; i++)); do
+                awk_command="${awk_command}, 0"
+            done
+            awk_command="${awk_command}, \$3, \$4"
+            for ((i = num_columns_newasv + 1; i <= num_columns_oldasv; i++)); do
+                awk_command="${awk_command}, \$${i}"
+            done
+            awk_command="${awk_command}
+            }"
 
-            tail -n +1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta | cat >> $old_fasta_f
+            # Insert the "0" columns after the second column in the second file
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_modified"
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_modified"
+            rm $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv
+            rm $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv
+
+            # Remove the header row from the second file
+            tail -n +2 "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_modified" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod"
+            tail -n +2 "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_modified" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod"
+            # Combine old and new asv files
+            paste "$old_asv_f" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv"
+            paste "$old_asv_r" "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod" > "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv"
+            rm "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv_mod*"
+            rm "$PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.asv_mod*"
+
+            # combine fasta and tronko output files
+            cat $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta >> $old_fasta_f
             mv $old_fasta_f $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.fasta
 
-            tail -n +1 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta | cat >> $old_fasta_r
+            cat $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta >> $old_fasta_r
             mv $old_fasta_r $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_R.fasta
 
             tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired.txt | cat >> $old_output
@@ -366,12 +426,40 @@ then
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.txt"
 
         if [ -f "$old_asv" ]; then
-            OFS="\t"
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv > merged_f.asv
-            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv
+            # Determine the number of columns in the first file
+            num_columns_oldasv=$(head -n 1 "$old_asv" | tr '\t' '\n' | wc -l)
+            # Determine the number of columns in the second file
+            num_columns_newasv=$(head -n 1 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv" | tr '\t' '\n' | wc -l)
+            # Calculate the difference in the number of columns
+            column_diff=$((num_columns_oldasv - num_columns_newasv))
+            # Generate a string of "0" columns to insert
+            zero_columns=$(yes "0" | head -n "$column_diff" | tr '\n' '\t')
+            # Construct the awk command dynamically based on the number of columns
+            awk_command="{
+                print \$1, \$2"
+            for ((i = 1; i <= $column_diff; i++)); do
+                awk_command="${awk_command}, 0"
+            done
+            awk_command="${awk_command}, \$3, \$4"
+            for ((i = num_columns_newasv + 1; i <= num_columns_oldasv; i++)); do
+                awk_command="${awk_command}, \$${i}"
+            done
+            awk_command="${awk_command}
+            }"
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta | cat >> $old_fasta_f
-            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta
+            # Insert the "0" columns after the second column in the second file
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_modified"
+            rm $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv
+
+            # Remove the header row from the second file
+            tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod"
+            # Combine old and new asv files
+            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
+            rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod*"
+            
+            # combine fasta and tronko output files
+            cat $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta >> $old_fasta
+            mv $old_fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta
 
             tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
             mv $old_output $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt
@@ -388,12 +476,40 @@ then
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_F.txt"
 
         if [ -f "$old_asv" ]; then
-            OFS="\t"
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv > merged_f.asv
-            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv
+            # Determine the number of columns in the first file
+            num_columns_oldasv=$(head -n 1 "$old_asv" | tr '\t' '\n' | wc -l)
+            # Determine the number of columns in the second file
+            num_columns_newasv=$(head -n 1 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv" | tr '\t' '\n' | wc -l)
+            # Calculate the difference in the number of columns
+            column_diff=$((num_columns_oldasv - num_columns_newasv))
+            # Generate a string of "0" columns to insert
+            zero_columns=$(yes "0" | head -n "$column_diff" | tr '\n' '\t')
+            # Construct the awk command dynamically based on the number of columns
+            awk_command="{
+                print \$1, \$2"
+            for ((i = 1; i <= $column_diff; i++)); do
+                awk_command="${awk_command}, 0"
+            done
+            awk_command="${awk_command}, \$3, \$4"
+            for ((i = num_columns_newasv + 1; i <= num_columns_oldasv; i++)); do
+                awk_command="${awk_command}, \$${i}"
+            done
+            awk_command="${awk_command}
+            }"
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta | cat >> $old_fasta_f
-            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta
+            # Insert the "0" columns after the second column in the second file
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_modified"
+            rm $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv
+
+            # Remove the header row from the second file
+            tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod"
+            # Combine old and new asv files
+            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv"
+            rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv_mod*"
+            
+            # combine fasta and tronko output files
+            cat $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta >> $old_fasta
+            mv $old_fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.fasta
 
             tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
             mv $old_output $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt
@@ -460,12 +576,40 @@ then
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.txt"
 
         if [ -f "$old_asv" ]; then
-            OFS="\t"
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv > merged.asv
-            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv
+            # Determine the number of columns in the first file
+            num_columns_oldasv=$(head -n 1 "$old_asv" | tr '\t' '\n' | wc -l)
+            # Determine the number of columns in the second file
+            num_columns_newasv=$(head -n 1 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv" | tr '\t' '\n' | wc -l)
+            # Calculate the difference in the number of columns
+            column_diff=$((num_columns_oldasv - num_columns_newasv))
+            # Generate a string of "0" columns to insert
+            zero_columns=$(yes "0" | head -n "$column_diff" | tr '\n' '\t')
+            # Construct the awk command dynamically based on the number of columns
+            awk_command="{
+                print \$1, \$2"
+            for ((i = 1; i <= $column_diff; i++)); do
+                awk_command="${awk_command}, 0"
+            done
+            awk_command="${awk_command}, \$3, \$4"
+            for ((i = num_columns_newasv + 1; i <= num_columns_oldasv; i++)); do
+                awk_command="${awk_command}, \$${i}"
+            done
+            awk_command="${awk_command}
+            }"
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta | cat >> $old_fasta_f
-            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta
+            # Insert the "0" columns after the second column in the second file
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_modified"
+            rm $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv
+
+            # Remove the header row from the second file
+            tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod"
+            # Combine old and new asv files
+            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
+            rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod*"
+            
+            # combine fasta and tronko output files
+            cat $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta >> $old_fasta
+            mv $old_fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta
 
             tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
             mv $old_output $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired.txt
@@ -482,12 +626,40 @@ then
         old_output="$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-unpaired_R.txt"
 
         if [ -f "$old_asv" ]; then
-            OFS="\t"
-            awk 'BEGIN {OFS="\t"} NR==FNR{a[FNR]=$0; next} FNR==1{next} {for(i=3; i<=NF; i++) a[FNR]=a[FNR] OFS $i} END{for(j=1; j<=FNR; j++) print a[j]}' $old_asv_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv > merged.asv
-            mv merged.asv $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv
+            # Determine the number of columns in the first file
+            num_columns_oldasv=$(head -n 1 "$old_asv" | tr '\t' '\n' | wc -l)
+            # Determine the number of columns in the second file
+            num_columns_newasv=$(head -n 1 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv" | tr '\t' '\n' | wc -l)
+            # Calculate the difference in the number of columns
+            column_diff=$((num_columns_oldasv - num_columns_newasv))
+            # Generate a string of "0" columns to insert
+            zero_columns=$(yes "0" | head -n "$column_diff" | tr '\n' '\t')
+            # Construct the awk command dynamically based on the number of columns
+            awk_command="{
+                print \$1, \$2"
+            for ((i = 1; i <= $column_diff; i++)); do
+                awk_command="${awk_command}, 0"
+            done
+            awk_command="${awk_command}, \$3, \$4"
+            for ((i = num_columns_newasv + 1; i <= num_columns_oldasv; i++)); do
+                awk_command="${awk_command}, \$${i}"
+            done
+            awk_command="${awk_command}
+            }"
 
-            tail -n +2 $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta | cat >> $old_fasta_f
-            mv $old_fasta_f $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta
+            # Insert the "0" columns after the second column in the second file
+            awk -F'\t' -v OFS='\t' "$awk_command" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_modified"
+            rm $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv
+
+            # Remove the header row from the second file
+            tail -n +2 "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_modified" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod"
+            # Combine old and new asv files
+            paste "$old_asv_f" "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod" > "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv"
+            rm "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv_mod*"
+            
+            # combine fasta and tronko output files
+            cat $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta >> $old_fasta
+            mv $old_fasta $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.fasta
 
             tail -n +2 $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt | cat >> $old_output
             mv $old_output $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired.txt
