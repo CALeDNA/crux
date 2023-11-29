@@ -1,6 +1,7 @@
 import os
 import argparse
 import shutil
+import re
 
 def process_arguments():
     parser = argparse.ArgumentParser(description='Convert QC fastq files to ASV format')
@@ -16,6 +17,7 @@ def process_arguments():
 
 def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=False):
     last_id = None
+    oldColumnCount=0
     if isPaired:
         fastaf=os.path.join(dir, f"{projectid}-{primer}-paired_F.fasta")
         fastar=os.path.join(dir, f"{projectid}-{primer}-paired_R.fasta")
@@ -70,10 +72,13 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         newasvf=os.path.join(old_dir, f"{projectid}-{primer}-paired_F.asv_tmp")
         oldasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv")
         newasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv_tmp")
+        nooccur=re.sub(r'[^\\t]', '0', dupl_seq_dict.values()[0])
         with open(oldasvf, "r") as oasvf, open(oldasvr, "r") as oasvr:
             with open(newasvf, "w") as nasvf, open(newasvr, "w") as nasvr:
                 for line_number, (line_f, line_r) in enumerate(zip(oasvf, oasvr)):
                     if line_number == 0:
+                        # count number of samples in old asv
+                        oldColumnCount+=line_f.split('\t') - 2
                         # update header row
                         header=line_f + "\t" + newheaderfiles
                         nasvf.writelines(header)
@@ -86,12 +91,15 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     if id in dupl_seq_dict.keys():
                         newlinef+= "\t" + dupl_seq_dict[id]
                         newliner+= "\t" + dupl_seq_dict[id]
+                    else:
+                        newlinef+= "\t" + nooccur
+                        newliner+= "\t" + nooccur
                     nasvf.writelines(newlinef)
                     nasvr.writelines(newliner)
         shutil.move(newasvf, oldasvf)
         shutil.move(newasvr, oldasvr)
         print(f"Last used ID: {last_id}")
-        return seq_dict, last_id
+        return seq_dict, last_id, oldColumnCount
     else:
         fasta=os.path.join(dir, f"{projectid}-{primer}-{suffix}.fasta")
         oldfasta=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.fasta")
@@ -140,10 +148,13 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         # update old asv files with deduplicated occurrences
         oldasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv")
         newasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv_tmp")
+        nooccur=re.sub(r'[^\\t]', '0', dupl_seq_dict.values()[0])
         with open(oldasv, "r") as oasv:
             with open(newasv, "w") as nasv:
                 for line_number, line in enumerate(oasv):
                     if line_number == 0:
+                        # count number of samples in old asv
+                        oldColumnCount+=line.split('\t') - 2
                         # update header row
                         header=line + "\t" + newheaderfiles
                         nasv.writelines(header)
@@ -152,13 +163,15 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     newline=line
                     if id in dupl_seq_dict.keys():
                         newline+= "\t" + dupl_seq_dict[id]
+                    else:
+                        newline+= "\t" + nooccur
                     nasv.writelines(newline)
         shutil.move(newasv, oldasv)
         print(f"Last used ID: {last_id}")
-        return seq_dict, last_id
+        return seq_dict, last_id, oldColumnCount
 
 
-def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=False):
+def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=False):
     if isPaired:
         fastaf=os.path.join(dir, f"{projectid}-{primer}-paired_F.fasta")
         fastar=os.path.join(dir, f"{projectid}-{primer}-paired_R.fasta")
@@ -204,12 +217,13 @@ def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", 
                         parts = id.split('_')
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
                         new_id='_'.join(parts)
-                        line_f.replace(id, new_id)
-                        id.replace("_F_", "_R_")
-                        new_id.replace("_F_", "_R_")
-                        line_r.replace(id, new_id)
-                        out_f.write(line_f)
-                        out_r.write(line_r)
+                        # add empty file columns
+                        nline_f = line_f.split("\t")[:2] + [0] * oldColumnCount + line_f.split("\t")[2:]
+                        nline_r = line_r.split("\t")[:2] + [0] * oldColumnCount + line_r.split("\t")[2:]
+                        nline_f[0]=new_id
+                        nline_r[0]=new_id.replace("_F_", "_R_")
+                        out_f.write("\t".join(nline_f))
+                        out_r.write("\t".join(nline_r))
         shutil.move(f"{asvf}_tmp", asvf)
         shutil.move(f"{asvr}_tmp", asvr)
     else:
@@ -251,6 +265,10 @@ def rewrite_files(last_id, seq_dict, dir, projectid, primer, suffix="paired_F", 
                         parts = id.split('_')
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
                         id='_'.join(parts)
+                        # add empty file columns
+                        nline = line.split("\t")[:2] + [0] * oldColumnCount + line.split("\t")[2:]
+                        nline[0]=new_id
+                        out.write("\t".join(nline))
                         out.write(line)
         shutil.move(f"{asv}_tmp", asv)
 
@@ -268,12 +286,12 @@ if __name__ == "__main__":
 
     print("Deduplicating ASV sequences with previous tronko run...")
     if isPaired:
-        seqDict, last_id = create_dict(dir, old, projectid, primer, isPaired=True)
-        rewrite_files(last_id, seqDict, dir, projectid, primer, isPaired=True)
+        seqDict, last_id, oldColumnCount = create_dict(dir, old, projectid, primer, isPaired=True)
+        rewrite_files(last_id, oldColumnCount, seqDict, dir, projectid, primer, isPaired=True)
     elif isUnpairedF:
-        seqDict, last_id = create_dict(dir, old, projectid, primer, suffix="unpaired_F")
-        rewrite_files(last_id, seqDict, dir, projectid, primer, suffix="unpaired_F")
+        seqDict, last_id, oldColumnCount = create_dict(dir, old, projectid, primer, suffix="unpaired_F")
+        rewrite_files(last_id, oldColumnCount, seqDict, dir, projectid, primer, suffix="unpaired_F")
     elif isUnpairedR:
-        seqDict, last_id = create_dict(dir, old, projectid, primer, suffix="unpaired_R")
-        rewrite_files(last_id, seqDict, dir, projectid, primer, suffix="unpaired_R")
+        seqDict, last_id, oldColumnCount = create_dict(dir, old, projectid, primer, suffix="unpaired_R")
+        rewrite_files(last_id, oldColumnCount, seqDict, dir, projectid, primer, suffix="unpaired_R")
     print("Done!")
