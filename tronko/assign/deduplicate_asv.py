@@ -53,7 +53,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         # get new asv occurrences
         asvf=os.path.join(dir, f"{projectid}-{primer}-paired_F.asv")
         asvr=os.path.join(dir, f"{projectid}-{primer}-paired_R.asv")
-        with open(asvf, "w") as asvf, open(asvr, "w") as asvr:
+        with open(asvf, "r") as asvf, open(asvr, "r") as asvr:
             for line_f, line_r in zip(asvf, asvr):
                 seqf=line_f.strip().split('\t')[1]
                 seqr=line_r.strip().split('\t')[1]
@@ -118,7 +118,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         
         # get new asv occurrences
         asv=os.path.join(dir, f"{projectid}-{primer}-{suffix}.asv")
-        with open(asv, "w") as asv:
+        with open(asv, "r") as asv:
             for line in asv:
                 seq=line.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
