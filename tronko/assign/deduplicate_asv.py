@@ -60,9 +60,12 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         with open(asvf, "r") as asvf, open(asvr, "r") as asvr:
             for line_f, line_r in zip(asvf, asvr):
                 if("sequence" in line_f):
-                    newheaderfiles="\t".join(line_f.split("\t")[2:])
+                    newheaderfiles="\t".join(line_f.strip().split("\t")[2:])
+                elif nooccur == "":
                     # count number of new samples
-                    nooccur=re.sub(r'[^\\t]', '0', "\t".join(line_f.strip().split("\t")[2:]))
+                    nooccur="\t".join(line_f.strip().split("\t")[2:])
+                    nooccur = re.sub(r'\d', '0', nooccur)
+                    print(f"nooccur: {nooccur}")
                 seqf=line_f.strip().split('\t')[1]
                 seqr=line_r.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
@@ -82,14 +85,14 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                         # count number of samples in old asv
                         oldColumnCount+=len(line_f.split('\t')) - 2
                         # update header row
-                        header=line_f + "\t" + newheaderfiles
+                        header=line_f.strip() + "\t" + newheaderfiles
                         nasvf.writelines(header)
-                        header=line_r + "\t" + newheaderfiles
+                        header=line_r.strip() + "\t" + newheaderfiles
                         nasvr.writelines(header)
                         continue
                     id=line_f.strip().split('\t')[0]
-                    newlinef=line_f
-                    newliner=line_r
+                    newlinef=line_f.strip()
+                    newliner=line_r.strip()
                     if id in dupl_seq_dict.keys():
                         newlinef+= "\t" + dupl_seq_dict[id] + "\n"
                         newliner+= "\t" + dupl_seq_dict[id] + "\n"
@@ -101,6 +104,8 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         shutil.move(newasvf, oldasvf)
         shutil.move(newasvr, oldasvr)
         print(f"Last used ID: {last_id}")
+        print(f"Last newlinef: {newlinef}")
+        print(f"Last newliner: {newliner}")
         return seq_dict, last_id, oldColumnCount
     else:
         fasta=os.path.join(dir, f"{projectid}-{primer}-{suffix}.fasta")
@@ -142,8 +147,11 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
             for line in asv:
                 if("sequence" in line):
                     newheaderfiles="\t".join(line.split("\t")[2:])
+                elif nooccur == "":
                     # count number of new samples
-                    nooccur=re.sub(r'[^\\t]', '0', "\t".join(line.strip().split("\t")[2:]))
+                    nooccur="\t".join(line.strip().split("\t")[2:])
+                    nooccur = re.sub(r'\d', '0', nooccur)
+                    print(f"nooccur: {nooccur}")
                 seq=line.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
                     if value == seq:
@@ -160,11 +168,11 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                         # count number of samples in old asv
                         oldColumnCount+=len(line.split('\t')) - 2
                         # update header row
-                        header=line + "\t" + newheaderfiles
+                        header=line.strip() + "\t" + newheaderfiles
                         nasv.writelines(header)
                         continue
                     id=line.strip().split('\t')[0]
-                    newline=line
+                    newline=line.strip()
                     if id in dupl_seq_dict.keys():
                         newline+= "\t" + dupl_seq_dict[id] + "\n"
                     else:
@@ -222,12 +230,12 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
                         new_id='_'.join(parts)
                         # add empty file columns
-                        nline_f = line_f.split("\t")[:2] + ['0'] * oldColumnCount + line_f.split("\t")[2:]
-                        nline_r = line_r.split("\t")[:2] + ['0'] * oldColumnCount + line_r.split("\t")[2:]
+                        nline_f = line_f.strip().split("\t")[:2] + ['0'] * oldColumnCount + line_f.strip().split("\t")[2:]
+                        nline_r = line_r.strip().split("\t")[:2] + ['0'] * oldColumnCount + line_r.strip().split("\t")[2:]
                         nline_f[0]=new_id
                         nline_r[0]=new_id.replace("_F_", "_R_")
-                        out_f.write("\t".join(nline_f).strip() + "\n")
-                        out_r.write("\t".join(nline_r).strip() + "\n")
+                        out_f.write("\t".join(nline_f) + "\n")
+                        out_r.write("\t".join(nline_r) + "\n")
         shutil.move(f"{asvf}_tmp", asvf)
         shutil.move(f"{asvr}_tmp", asvr)
     else:
@@ -270,7 +278,7 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
                         id='_'.join(parts)
                         # add empty file columns
-                        nline = line.split("\t")[:2] + ['0'] * oldColumnCount + line.split("\t")[2:]
+                        nline = line.strip().split("\t")[:2] + ['0'] * oldColumnCount + line.strip().split("\t")[2:]
                         nline[0]=new_id
                         out.write("\t".join(nline).strip() + "\n")
         shutil.move(f"{asv}_tmp", asv)
