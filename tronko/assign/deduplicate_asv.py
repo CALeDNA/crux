@@ -218,8 +218,8 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
                         new_id='_'.join(parts)
                         # add empty file columns
-                        nline_f = line_f.split("\t")[:2] + [0] * oldColumnCount + line_f.split("\t")[2:]
-                        nline_r = line_r.split("\t")[:2] + [0] * oldColumnCount + line_r.split("\t")[2:]
+                        nline_f = line_f.split("\t")[:2] + ['0'] * oldColumnCount + line_f.split("\t")[2:]
+                        nline_r = line_r.split("\t")[:2] + ['0'] * oldColumnCount + line_r.split("\t")[2:]
                         nline_f[0]=new_id
                         nline_r[0]=new_id.replace("_F_", "_R_")
                         out_f.write("\t".join(nline_f))
@@ -266,7 +266,7 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
                         id='_'.join(parts)
                         # add empty file columns
-                        nline = line.split("\t")[:2] + [0] * oldColumnCount + line.split("\t")[2:]
+                        nline = line.split("\t")[:2] + ['0'] * oldColumnCount + line.split("\t")[2:]
                         nline[0]=new_id
                         out.write("\t".join(nline))
                         out.write(line)
