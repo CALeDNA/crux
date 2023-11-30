@@ -56,10 +56,13 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         asvf=os.path.join(dir, f"{projectid}-{primer}-paired_F.asv")
         asvr=os.path.join(dir, f"{projectid}-{primer}-paired_R.asv")
         newheaderfiles=""
+        nooccur=""
         with open(asvf, "r") as asvf, open(asvr, "r") as asvr:
             for line_f, line_r in zip(asvf, asvr):
                 if("sequence" in line_f):
                     newheaderfiles="\t".join(line_f.split("\t")[2:])
+                    # count number of new samples
+                    nooccur=re.sub(r'[^\\t]', '0', "\t".join(line_f.strip().split("\t")[2:]))
                 seqf=line_f.strip().split('\t')[1]
                 seqr=line_r.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
@@ -72,7 +75,6 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         newasvf=os.path.join(old_dir, f"{projectid}-{primer}-paired_F.asv_tmp")
         oldasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv")
         newasvr=os.path.join(old_dir, f"{projectid}-{primer}-paired_R.asv_tmp")
-        nooccur=re.sub(r'[^\\t]', '0', next(iter(dupl_seq_dict.values())))
         with open(oldasvf, "r") as oasvf, open(oldasvr, "r") as oasvr:
             with open(newasvf, "w") as nasvf, open(newasvr, "w") as nasvr:
                 for line_number, (line_f, line_r) in enumerate(zip(oasvf, oasvr)):
@@ -89,11 +91,11 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     newlinef=line_f
                     newliner=line_r
                     if id in dupl_seq_dict.keys():
-                        newlinef+= "\t" + dupl_seq_dict[id]
-                        newliner+= "\t" + dupl_seq_dict[id]
+                        newlinef+= "\t" + dupl_seq_dict[id] + "\n"
+                        newliner+= "\t" + dupl_seq_dict[id] + "\n"
                     else:
-                        newlinef+= "\t" + nooccur
-                        newliner+= "\t" + nooccur
+                        newlinef+= "\t" + nooccur + "\n"
+                        newliner+= "\t" + nooccur + "\n"
                     nasvf.writelines(newlinef)
                     nasvr.writelines(newliner)
         shutil.move(newasvf, oldasvf)
@@ -135,10 +137,13 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         # get new asv occurrences
         asv=os.path.join(dir, f"{projectid}-{primer}-{suffix}.asv")
         newheaderfiles=""
+        nooccur=""
         with open(asv, "r") as asv:
             for line in asv:
                 if("sequence" in line):
                     newheaderfiles="\t".join(line.split("\t")[2:])
+                    # count number of new samples
+                    nooccur=re.sub(r'[^\\t]', '0', "\t".join(line.strip().split("\t")[2:]))
                 seq=line.strip().split('\t')[1]
                 for key, value in dupl_seq_dict.items():
                     if value == seq:
@@ -148,7 +153,6 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         # update old asv files with deduplicated occurrences
         oldasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv")
         newasv=os.path.join(old_dir, f"{projectid}-{primer}-{suffix}.asv_tmp")
-        nooccur=re.sub(r'[^\\t]', '0', next(iter(dupl_seq_dict.values())))
         with open(oldasv, "r") as oasv:
             with open(newasv, "w") as nasv:
                 for line_number, line in enumerate(oasv):
@@ -162,9 +166,9 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     id=line.strip().split('\t')[0]
                     newline=line
                     if id in dupl_seq_dict.keys():
-                        newline+= "\t" + dupl_seq_dict[id]
+                        newline+= "\t" + dupl_seq_dict[id] + "\n"
                     else:
-                        newline+= "\t" + nooccur
+                        newline+= "\t" + nooccur + "\n"
                     nasv.writelines(newline)
         shutil.move(newasv, oldasv)
         print(f"Last used ID: {last_id}")
@@ -222,8 +226,8 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         nline_r = line_r.split("\t")[:2] + ['0'] * oldColumnCount + line_r.split("\t")[2:]
                         nline_f[0]=new_id
                         nline_r[0]=new_id.replace("_F_", "_R_")
-                        out_f.write("\t".join(nline_f))
-                        out_r.write("\t".join(nline_r))
+                        out_f.write("\t".join(nline_f).strip() + "\n")
+                        out_r.write("\t".join(nline_r).strip() + "\n")
         shutil.move(f"{asvf}_tmp", asvf)
         shutil.move(f"{asvr}_tmp", asvr)
     else:
@@ -268,8 +272,7 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         # add empty file columns
                         nline = line.split("\t")[:2] + ['0'] * oldColumnCount + line.split("\t")[2:]
                         nline[0]=new_id
-                        out.write("\t".join(nline))
-                        out.write(line)
+                        out.write("\t".join(nline).strip() + "\n")
         shutil.move(f"{asv}_tmp", asv)
 
 
