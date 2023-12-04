@@ -86,9 +86,9 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                         oldColumnCount+=len(line_f.split('\t')) - 2
                         # update header row
                         header=line_f.strip() + "\t" + newheaderfiles
-                        nasvf.writelines(header)
+                        nasvf.write(header+"\n")
                         header=line_r.strip() + "\t" + newheaderfiles
-                        nasvr.writelines(header)
+                        nasvr.write(header+"\n")
                         continue
                     id=line_f.strip().split('\t')[0]
                     newlinef=line_f.strip()
@@ -99,8 +99,8 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                     else:
                         newlinef+= "\t" + nooccur + "\n"
                         newliner+= "\t" + nooccur + "\n"
-                    nasvf.writelines(newlinef)
-                    nasvr.writelines(newliner)
+                    nasvf.write(newlinef)
+                    nasvr.write(newliner)
         shutil.move(newasvf, oldasvf)
         shutil.move(newasvr, oldasvr)
         print(f"Last used ID: {last_id}")
@@ -169,7 +169,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
                         oldColumnCount+=len(line.split('\t')) - 2
                         # update header row
                         header=line.strip() + "\t" + newheaderfiles
-                        nasv.writelines(header)
+                        nasv.write(header+"\n")
                         continue
                     id=line.strip().split('\t')[0]
                     newline=line.strip()
@@ -183,7 +183,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         return seq_dict, last_id, oldColumnCount
 
 
-def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=False):
+def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suffix="paired_F", isPaired=False, isRC=False):
     if isPaired:
         fastaf=os.path.join(dir, f"{projectid}-{primer}-paired_F.fasta")
         fastar=os.path.join(dir, f"{projectid}-{primer}-paired_R.fasta")
