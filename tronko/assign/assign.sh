@@ -181,6 +181,8 @@ then
 
     # download old assign files
     aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    # copy to rc
+    cp -r "$PROJECTID-$PRIMER/old" "$PROJECTID-$PRIMER-rc/old"
 
 
     # download QC sample paired files
@@ -202,10 +204,15 @@ then
     # create rc ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired --rc
 
-
     # remove duplicate sequences
     if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
         python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
+    fi
+
+    # remove rc duplicate sequences
+    if [ -f "$PROJECTID-$PRIMER-rc/old/$PROJECTID-$PRIMER-paired.txt" ]; then
+        cp $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired*.fasta $PROJECTID-$PRIMER-rc
+        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER-rc/ --old $PROJECTID-$PRIMER-rc/old --projectid $PROJECTID --primer $PRIMER --paired
     fi
 
     # run tronko assign paired v1
@@ -218,12 +225,6 @@ then
     count_1=$(awk -F '\t' '($4 < 5) && ($5 < 5) { count++ } END { print count }' "$PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_filtered.txt")
     if [[ -z "$count_1" ]]; then
         count_1=0
-    fi
-
-    # remove duplicate sequences
-    if [ -f "$PROJECTID-$PRIMER/old/$PROJECTID-$PRIMER-paired.txt" ]; then
-        cp $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired*.fasta $PROJECTID-$PRIMER-rc
-        python3 /mnt/deduplicate_asv.py --dir $PROJECTID-$PRIMER-rc/ --old $PROJECTID-$PRIMER/old --projectid $PROJECTID --primer $PRIMER --paired
     fi
 
     # run tronko assign paired v2 (rc)

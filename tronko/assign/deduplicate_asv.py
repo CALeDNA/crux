@@ -146,7 +146,7 @@ def create_dict(dir, old_dir, projectid, primer, suffix="paired_F", isPaired=Fal
         with open(asv, "r") as asv:
             for line in asv:
                 if("sequence" in line):
-                    newheaderfiles="\t".join(line.split("\t")[2:])
+                    newheaderfiles="\t".join(line.strip().split("\t")[2:])
                 elif nooccur == "":
                     # count number of new samples
                     nooccur="\t".join(line.strip().split("\t")[2:])
@@ -276,7 +276,7 @@ def rewrite_files(last_id, oldColumnCount, seq_dict, dir, projectid, primer, suf
                         # replace with new ID
                         parts = id.split('_')
                         parts[-1] = str(counter)  # Make sure new_id_number is a string
-                        id='_'.join(parts)
+                        new_id='_'.join(parts)
                         # add empty file columns
                         nline = line.strip().split("\t")[:2] + ['0'] * oldColumnCount + line.strip().split("\t")[2:]
                         nline[0]=new_id
