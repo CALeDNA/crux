@@ -96,10 +96,11 @@ fi
 # cleanup
 rm -rf $JOB
 
-#TODO: check if blast folder has (142*108) files
-total=$((ECOPCRLINKS * NTOTAL))
-actual=$(aws s3 ls s3://$BUCKET/CruxV2/$RUNID/$PRIMER/blast --recursive --endpoint-url https://js2.jetstream-cloud.org:8001/ | grep -v -e "CruxV2/$RUNID/$PRIMER/blast/logs" -e ".*tax.tsv" | wc -l)
-if [ "$total" -eq "$actual" ]; then
+# check there's no other running jobs
+currentJobs=$(ben list -s /tmp/ben-assign -t r | grep -c "$PROJECTID") # should be 1
+pendingJobs=$(ben list -s /tmp/ben-assign -t p | grep -c "$PROJECTID") # should be 0
+totalJobs=$((currentJobs + pendingJobs))
+if [ "$totalJobs" -eq "1" ]; then 
     #start dereplicate step
     cd /mnt/dereplicate
     ./dereplicate.sh -j $PRIMER-dereplicate -i $RUNID -p $PRIMER -b /tmp/ben-ac -B /tmp/ben-newick
