@@ -107,8 +107,7 @@ while(<ASVR>){
         next; 
         }
 	my @spl = split("\t",$line);
-    @spl = split(/paired_R/, $spl[0]);
-    $read = $spl[0] . "paired_F" . $spl[1];
+    $read = $spl[0];
     $asvr_lines{$read} = $line;
 }
 close(ASVR);
@@ -119,7 +118,7 @@ my $chi_squared;
 my $divergence;
 
 
-print $TRONKO "Readname\tTaxonomic_Path\tScore\tForward_Mismatch\tReverse_Mismatch\tForward_length\tReverse_length\tTree_Number\tNode_Number\n";
+print $TRONKO "Readname\tTaxonomic_Path\tScore\tForward_Mismatch\tReverse_Mismatch\tTree_Number\tNode_Number\n";
 open(RESULTS,$ARGV[0]) || die("Cannot open file!");
 while(<RESULTS>){
 	my $line = $_;
@@ -129,19 +128,21 @@ while(<RESULTS>){
 	if ($spl[1] =~ /unassigned/ ){ next; }
 	if ($spl[1] eq "NA" ){ next; }
 	my $readname = $spl[0];
+	my $readnamer = $readname;
+	$readnamer =~ s/_F_/_R_/;
 	if ($spl[3]==0 && $spl[4]==0){ 
-        print $TRONKO "$spl[0]\t$spl[1]\t$spl[2]\t$spl[3]\t$spl[4]\t$forward_lengths{$readname}\t$reverse_lengths{$readname}\t$spl[5]\t$spl[6]\n";
+        print $TRONKO "$spl[0]\t$spl[1]\t$spl[2]\t$spl[3]\t$spl[4]\t$spl[5]\t$spl[6]\n";
         print $ASVF "$asvf_lines{$readname}\n";
-        print $ASVR "$asvr_lines{$readname}\n";
+        print $ASVR "$asvr_lines{$readnamer}\n";
         print $FASTAF ">$readname\n";
-        print $FASTAR ">$readname\n";
+        print $FASTAR ">$readnamer\n";
         print $FASTAF "$forward_sequences{$readname}\n";
-        print $FASTAR "$reverse_sequences{$readname}\n";
+        print $FASTAR "$reverse_sequences{$readnamer}\n";
         next; }
 	my $mismatch_forward = $spl[3];
 	my $mismatch_reverse = $spl[4];
-	my $forward_length = $forward_lengths{$readname};
-	my $reverse_length = $reverse_lengths{$readname};
+	my $forward_length = length($forward_sequences{$readname});
+	my $reverse_length = length($reverse_sequences{$readnamer});
 	my $score = $spl[2];
 	$eF = ($forward_length/($forward_length+$reverse_length))*($mismatch_forward + $mismatch_reverse);
 	$eR = ($reverse_length/($forward_length+$reverse_length))*($mismatch_forward + $mismatch_reverse);
@@ -150,11 +151,11 @@ while(<RESULTS>){
 	if ( $chi_squared <= $ARGV[5] && $divergence <= $ARGV[6]){
 		print $TRONKO "$spl[0]\t$spl[1]\t$spl[2]\t$spl[3]\t$spl[4]\t$forward_length\t$reverse_length\t$spl[5]\t$spl[6]\n";
         print $ASVF "$asvf_lines{$readname}\n";
-        print $ASVR "$asvr_lines{$readname}\n";
+        print $ASVR "$asvr_lines{$readnamer}\n";
         print $FASTAF ">$readname\n";
-        print $FASTAR ">$readname\n";
+        print $FASTAR ">$readnamer\n";
         print $FASTAF "$forward_sequences{$readname}\n";
-        print $FASTAR "$reverse_sequences{$readname}\n";
+        print $FASTAR "$reverse_sequences{$readnamer}\n";
 	}
 }
 

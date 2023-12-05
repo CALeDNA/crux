@@ -5,8 +5,9 @@ BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
 BLAST_THREADS=16
 RUNID="2023-04-07"
-BRANCH=master
 BUCKET=[GET_BUCKET_NAME]
+
+ASSIGNXL=("ITS1_Fungi")
 
 # Obitools ecopcr variables
 ERROR=3
@@ -20,23 +21,6 @@ NUM_ALIGNMENTS="1000"
 GAP_OPEN="1"
 GAP_EXTEND="1"
 
-# Jetstream2 variables and credentials
-USER="ubuntu"
-FLAVOR="m3.large"
-IMAGE="Featured-Ubuntu22"
-# create the ssh key
-#ssh-keygen -b 2048 -t rsa -f ${SSHKEY}
-# upload to OpenStack
-#openstack keypair create --public-key ${SSHKEY}.pub ${SSHKEY}
-SSHKEY=[GET_SSH_KEY_NAME]
-# include your Jetstream credentials openrc file
-# https://github.com/jetstream-cloud/js2docs/blob/main/docs/ui/cli/openrc.md
-JSCRED="/path/to/app-cred-docker-cli-auth-openrc.sh"
-NUMINSTANCES=10 # number of virtual machines
-SECURITY=[GET_SECURITY_GROUP]
-NETWORK=[GET_NETWORK_ID]
-VOLUME=1000 # volume backed storage for virtual machines. 0 for default size
-
 # accession ID file/folder names
 #LINKS="wgsgbsize"
 URLS="urls"
@@ -45,23 +29,6 @@ NTOTAL=108 # number of nt chunks
 NTFILE="nt-ftp"
 
 IPADDRESS=[GET_GBIF_ADDRESS]
-HOSTNAME="hostnames"
-SSHCONFIG="/home/$USER/.ssh/config"
-
-#GRAFANA
-DATASOURCE="/etc/grafana/provisioning/datasources/datasources.yaml"
-
-#AUTOSCALING
-MAX_TOTAL=21
-MAX_ECOPCR=5
-MAX_BLAST=5
-MAX_AC=5
-MAX_NEWICK=5
-MAX_TRONKO=2
-MAX_QC=7
-MAX_ASSIGN=7
-
-
 
 # parallel.py docker commands
 # DOCKER_BUILD="cd crux/crux; docker build -q -t crux ."

@@ -44,6 +44,9 @@ if [ ! -d "taxid2taxonpath" ] ; then
 fi
 
 cat $JOB/blast/* >> $JOB/$PRIMER.fa
+rm -r $JOB/blast/
+# remove null bytes
+sed -i '/\x0/d' "$JOB/$PRIMER.fa"
 
 python3 fix-fasta.py --input $JOB/$PRIMER.fa --output $JOB/$PRIMER.fasta --log logs
 

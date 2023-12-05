@@ -3,7 +3,7 @@ set -o allexport
 
 export AWS_MAX_ATTEMPTS=3
 
-max_length=20000
+target_length=20000
 cutoff_length=25000
 FIRST="FALSE"
 OUTPUT="/etc/ben/output"
@@ -51,9 +51,13 @@ len=$(wc -l ${taxa} | cut -d ' ' -f1)
 if (( $len > $cutoff_length ))
 then
     # run ancestral clust
-    bin_size=$(( (len + max_length - 1) / max_length ))
-    initial_size=$(( bin_size * 10 ))
-    time ancestralclust -i $fasta -t $taxa -d $JOB/dir -f -u -r $initial_size -b $bin_size -c 4 -p 75
+    bin_count=$(( (len + target_length - 1) / target_length ))
+    initial_target_size=$(( bin_count * 30 ))
+    if [ "$initial_target_size" -gt 4000 ]; then
+        initial_target_size=4000
+    fi
+    threads=$(cat /proc/cpuinfo | grep processor | wc -l)
+    time ancestralclust -i $fasta -t $taxa -d $JOB/dir -f -u -r $initial_target_size -b $bin_count -c $threads -p 75
 else
     cp $fasta $JOB/dir/0.fasta
     cp $taxa $JOB/dir/0_taxonomy.txt
