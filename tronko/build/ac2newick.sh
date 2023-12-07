@@ -43,7 +43,7 @@ find $JOB/$FOLDER -maxdepth 1 -type f -name '*fasta' | parallel -j2 '
         fixNewLines "$JOB/newick/${i}_MSA.fasta"
         fasta2phyml.pl "$JOB/newick/${i}_MSA.fasta" # converts to phyml
         mkdir -p "$JOB/newick/${i}_RAxML"
-        raxmlHPC-PTHREADS-SSE3 silent -m GTRGAMMA -w $(pwd)/$JOB/newick/${i}_RAxML -n 1 -p 1234 -T 4 -s $(pwd)/$JOB/newick/${i}_MSA.phymlAln # converts to raxml
+        raxmlHPC-PTHREADS-SSE3 silent -m GTRGAMMA -w $(pwd)/$JOB/newick/${i}_RAxML -n 1 -p 1234 -T 8 -s $(pwd)/$JOB/newick/${i}_MSA.phymlAln # converts to raxml
         nw_reroot $JOB/newick/${i}_RAxML/RAxML_bestTree.1 > $JOB/newick/RAxML_bestTree.${i}.reroot # converts to newick
         cp $JOB/$FOLDER/${i}_taxonomy.txt $JOB/newick/${i}_taxonomy.txt # copy taxa file to output folder
         # upload output

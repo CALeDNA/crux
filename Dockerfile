@@ -27,7 +27,12 @@ RUN git clone https://github.com/stamatak/standard-RAxML.git && \
     mv raxmlHPC* /usr/local/crux_bin
 
 RUN git clone https://github.com/lpipes/AncestralClust.git && \
-    cd AncestralClust && make && mv ancestralclust /usr/local/crux_bin
+    cd AncestralClust && \
+    sed -i 's/#define MAXNUMBEROFCLUSTERS 100/#define MAXNUMBEROFCLUSTERS 1000000/' global.h && \
+    sed -i 's/#define MAXNUMINCLUSTER 10000/#define MAXNUMINCLUSTER 100000000/' global.h && \
+    sed -i 's/#define MAXNUMBEROFKSEQS 10000/#define MAXNUMBEROFKSEQS 100000000/' global.h && \
+    sed -i 's/#define FASTA_MAXLINE 6000/#define FASTA_MAXLINE 60000000/' global.h && \
+    make && mv ancestralclust /usr/local/crux_bin
 
 RUN git clone https://github.com/refresh-bio/FAMSA && \
     cd FAMSA && make && \
