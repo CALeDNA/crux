@@ -176,27 +176,27 @@ removeProcessedFiles() {
 if [ "${PAIRED}" = "TRUE" ]
 then
     # download tronko database
-    aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 cp s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $AWS_ENDPOINT
 
     # download old assign files
-    aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired $PROJECTID-$PRIMER/old --no-progress --endpoint-url $AWS_ENDPOINT
     # copy to rc
     cp -r "$PROJECTID-$PRIMER/old" "$PROJECTID-$PRIMER-rc/old"
 
 
     # download QC sample paired files
-    aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url $AWS_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_F" "F" "paired"
 
     # upload new checksum_F
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums_F.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_F.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums_F.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_F.txt --endpoint-url $AWS_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_R" "R" "paired"
 
     # upload new checksum_R
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums_R.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_R.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums_R.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_R.txt --endpoint-url $AWS_ENDPOINT
 
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
@@ -275,7 +275,7 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $AWS_ENDPOINT
     else
         echo "v2 (rc) has the highest count: $count_2"
         # rename filtered files
@@ -310,7 +310,7 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER-rc/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $PROJECTID-$PRIMER-rc/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $AWS_ENDPOINT
     fi
 
     # cleanup
@@ -320,19 +320,19 @@ fi
 if [ "${UNPAIRED_F}" = "TRUE" ]
 then
     # download tronko database
-    aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 cp s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $AWS_ENDPOINT
     
     # download old assign files
-    aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F $PROJECTID-$PRIMER/old --no-progress --endpoint-url $AWS_ENDPOINT
 
     # download QC sample unpaired_F files
-    aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url $AWS_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "unpaired_F" "F" "unpaired_F"
 
     # upload new checksum_F
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/checksums.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/checksums.txt --endpoint-url $AWS_ENDPOINT
 
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
@@ -381,7 +381,7 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $AWS_ENDPOINT
     else
         echo "v2 (rc) has the highest count: $count_2"
 
@@ -404,9 +404,9 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $AWS_ENDPOINT
 
-        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url $AWS_ENDPOINT
     fi
 
     # cleanup
@@ -416,19 +416,19 @@ fi
 if [ "${UNPAIRED_R}" = "TRUE" ]
 then
     # download tronko database
-    aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-    aws s3 cp s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 cp s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $AWS_ENDPOINT
     
     # download old assign files
-    aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R $PROJECTID-$PRIMER/old --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R $PROJECTID-$PRIMER/old --no-progress --endpoint-url $AWS_ENDPOINT
     
     # download QC sample unpaired_R
-    aws s3 sync s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url $AWS_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "unpaired_R" "R" "unpaired_R"
 
     # upload new checksum_R
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/checksums.txt --endpoint-url https://js2.jetstream-cloud.org:8001/
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/checksums.txt --endpoint-url $AWS_ENDPOINT
 
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
@@ -477,7 +477,7 @@ then
         fi
 
         # upload assign output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $AWS_ENDPOINT
     else
         echo "v2 (rc) has the highest count: $count_2"
 
@@ -500,8 +500,8 @@ then
         fi
 
         # upload assign output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url $AWS_ENDPOINT
     fi
 
     # cleanup
@@ -511,7 +511,7 @@ fi
 
 mkdir ${PROJECTID}_processed_tronko
 # dl all assign folders for $PROJECTID
-aws s3 sync s3://$BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url $AWS_ENDPOINT
 # run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
 mismatches=(1 5 10 25 50 100)
 for dir in "$PROJECTID"/*; do
@@ -526,34 +526,26 @@ done
 # zip
 tar -czvf ${PROJECTID}_processed_tronko.tar.gz ${PROJECTID}_processed_tronko
 # upload
-aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
 
 
 # download primer list for jwt step. Downloading here since we rewrite aws creds in next line.
-aws s3 cp s3://$BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt /mnt/jwt/ --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-
-# update s3 bucket creds
-# should be temporary until s3 bucket is the same for all steps
-export AWS_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY
-export AWS_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION
-export AWS_BUCKET=$AWS_S3_BUCKET
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt /mnt/jwt/ --no-progress --endpoint-url $AWS_ENDPOINT
 
 # upload to aws s3 bucket
-aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress
+aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
 
 
-# # call processing_notif.sh
-# cd /mnt/jwt
-# ./processing_notif.sh -i $PROJECTID
+# call processing_notif.sh
+cd /mnt/jwt
+./processing_notif.sh -i $PROJECTID
 
-# # cleanup
-# rm -r ${PROJECTID}*
+# cleanup
+rm -r ${PROJECTID}*
 
-# # download 
-# # # Trigger taxonomy initializer script
-# curl -X POST http://$IPADDRESS:8004/initializer \
-#      -H "Content-Type: application/json" \
-#      -d "{
-#            \"ProjectID\": \"$PROJECTID\"
-#          }"
+# # Trigger taxonomy initializer script
+curl -X POST http://$IPADDRESS:8004/initializer \
+     -H "Content-Type: application/json" \
+     -d "{
+           \"ProjectID\": \"$PROJECTID\"
+         }"
