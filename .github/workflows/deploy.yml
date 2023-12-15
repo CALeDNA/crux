@@ -38,6 +38,7 @@ jobs:
           fi"
       - name: Install apt dependencies
         run: |
+          sudo apt-get update
           sudo apt install python3-openstackclient jq pssh awscli -y
       - name: Clean up SSH key
         run: |
