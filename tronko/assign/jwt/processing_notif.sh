@@ -8,7 +8,7 @@ while getopts "i:" opt; do
 done
 
 # check there's no other running jobs
-currentJobs=$(ben list -s /tmp/ben-assign -t r | grep -c "$PROJECTID") # should be 1
+current_jobs=currentJobs=$(( $(ben list -s /tmp/ben-assign -t r | grep -c "$PROJECTID") + $(ben list -s /tmp/ben-assignxl -t r | grep -c "$PROJECTID") )) # should be 1
 pendingJobs=$(ben list -s /tmp/ben-assign -t p | grep -c "$PROJECTID") # should be 0
 totalJobs=$((currentJobs + pendingJobs))
 
