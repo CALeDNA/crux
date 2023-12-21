@@ -17,7 +17,7 @@ done
 source /vars/crux_vars.sh
 
 # dl primer's newick folders
-aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/newick $FOLDER --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/newick/ $FOLDER --exclude "logs/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # get list of newick folders per primer
 folders=$(find ${FOLDER} -maxdepth 1 -mindepth 1 -type d -name "${PRIMER}*")
