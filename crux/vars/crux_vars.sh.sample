@@ -3,7 +3,7 @@ CYVERSE="/vars/config.yaml" # cyverse config file name
 CYVERSE_BASE="/iplant/home/shared/eDNA_Explorer/crux"
 BWA_INDEX_URL="https://data.cyverse.org/dav-anon${CYVERSE_BASE}/bwa-index"
 THREADS=16
-BLAST_THREADS=16
+BLAST_THREADS=8
 RUNID="2023-04-07"
 BUCKET=[GET_BUCKET_NAME]
 
