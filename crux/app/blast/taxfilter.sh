@@ -54,7 +54,7 @@ else
     ./remove_uncultured.pl $JOB/$BLASTDIR/$FASTA.tax.tsv $JOB/$BLASTDIR/$FASTA
 
     # remove gaps
-    sed -i 's/-//g' $JOB/$BLASTDIR/${FASTA}_tmp
+    sed -i '/^[^>]/ s/-//g' $JOB/$BLASTDIR/${FASTA}_tmp
     # get largest seq per nt accession id
     rm $JOB/$BLASTDIR/${FASTA}; touch $JOB/$BLASTDIR/${FASTA}
     python3 get-largest.py --input $JOB/$BLASTDIR/${FASTA}_tmp --output $JOB/$BLASTDIR/${FASTA} --log $JOB/logs

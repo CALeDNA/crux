@@ -20,8 +20,8 @@ done
 source /vars/crux_vars.sh
 
 # download $PROJECTID/QC and samples
-aws s3 sync s3://$BUCKET/projects/${PROJECTID}/QC ${PROJECTID}-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 sync s3://$BUCKET/projects/${PROJECTID}/samples ${PROJECTID}-$PRIMER/samples --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/samples --no-progress --endpoint-url $AWS_ENDPOINT
 
 # download Anacapa
 git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
@@ -49,12 +49,12 @@ mv tmp "$REVERSE"
 time $DB/anacapa_QC_dada2.sh -i $DATA -o $OUT -d $DB -f $FORWARD -r $REVERSE -m 50 -q 30
 
 # upload $OUT
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url $AWS_ENDPOINT
 
 # upload QC logs
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://$BUCKET/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url $AWS_ENDPOINT
 
 
 # add ben tronko-assign jobs
@@ -74,7 +74,7 @@ if [ "$unpaired_R_files" -gt 0 ]; then
 fi
 
 # add tronko assign job on $PRIMER
-ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_S3_ACCESS_KEY_ID=$AWS_S3_ACCESS_KEY_ID -e AWS_S3_SECRET_ACCESS_KEY=$AWS_S3_SECRET_ACCESS_KEY -e AWS_S3_DEFAULT_REGION=$AWS_S3_DEFAULT_REGION -e AWS_S3_BUCKET=$AWS_S3_BUCKET --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
+ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_ENDPOINT=$AWS_ENDPOINT -e AWS_BUCKET=$AWS_BUCKET --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
 
 # clean up
 rm -r /mnt/$PROJECTID-$PRIMER /mnt/Anacapa
