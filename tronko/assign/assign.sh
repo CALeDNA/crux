@@ -509,7 +509,7 @@ then
     # fi
 fi
 
-mkdir ${PROJECTID}_processed_tronko
+mkdir -p ${PROJECTID}_data/{tronko,terradactyl}
 # dl all assign folders for $PROJECTID
 aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url $AWS_ENDPOINT
 # run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
@@ -517,27 +517,28 @@ mismatches=(1 5 10 25 50 100)
 for dir in "$PROJECTID"/*; do
   if [ -d "$dir" ]; then
     primer=$(basename $dir)
-    mkdir ${PROJECTID}_processed_tronko/$primer
+    mkdir ${PROJECTID}_data/$primer
     for mismatch in "${mismatches[@]}"; do
-        python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_processed_tronko/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID
+        python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_data/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID --primer $primer
     done
   fi
 done
+
+# download terradactyl files
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/METABARCODING.csv ${PROJECTID}_data/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ${PROJECTID}_data/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
+# copy README
+cp /mnt/README.md ${PROJECTID}_data/
 # zip
-tar -czvf ${PROJECTID}_processed_tronko.tar.gz ${PROJECTID}_processed_tronko
+tar -czvf ${PROJECTID}_data.tar.gz ${PROJECTID}_data
 # upload
-aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
-
-
-# download primer list for jwt step. Downloading here since we rewrite aws creds in next line.
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt /mnt/jwt/ --no-progress --endpoint-url $AWS_ENDPOINT
-
-# upload to aws s3 bucket
-aws s3 cp ${PROJECTID}_processed_tronko.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_processed_tronko.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp ${PROJECTID}_data.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_data.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
 
 
 # call processing_notif.sh
 cd /mnt/jwt
+# download primer list for jwt step.
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt . --no-progress --endpoint-url $AWS_ENDPOINT
 ./processing_notif.sh -i $PROJECTID
 
 # cleanup
