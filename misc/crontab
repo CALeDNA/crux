@@ -21,5 +21,6 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-0 * * * * curl http://127.0.0.1:8001
-*/30 * * * * /home/ubuntu/crux/autoscale.sh >> /etc/ben/output/autoscale.log 2>&1
+58 * * * * curl http://127.0.0.1:8001
+58 * * * * /usr/bin/python3 /home/ubuntu/t-rex-monitor/scheduler/supabase/benparser.py
+0 * * * * /home/ubuntu/t-rex-monitor/autoscale.sh >> /etc/ben/output/autoscale.log 2>&1
