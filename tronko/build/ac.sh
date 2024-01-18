@@ -71,22 +71,30 @@ aws s3 sync $JOB/dir s3://$BUCKET/CruxV2/$RUNID/$PRIMER/ancestralclust/$JOB --no
 
 # add ac jobs to queue
 added_job="FALSE"
-for file in $JOB/dir/*taxonomy.txt
-do
-    len=$(wc -l $file | cut -d ' ' -f1)
-    if (( $len > $cutoff_length ))
-    then
-        added_job="TRUE"
-        folder=$( echo $file | rev | cut -d"/" -f3 | rev )
-        taxa=$( basename $file )
-        job=$( echo $taxa | sed 's/_[^_]*$//g')
-        fasta="$job.fasta"
-        job=$(printf '%02d' "$job") # add leading zero
-        job="$folder$job" # -> ex: 12S_MiFish_U-ac-001203
+taxonomy_files=($JOB/dir/*taxonomy.txt)
 
-        ben add -s $ACSERVER -c "docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $JOB-$RUNID crux /mnt/ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER" $job-$RUNID -o $OUTPUT  
-    fi
-done
+# Check if the number of new clusters is greater than 1
+# break out of recursive loop if it isn't
+if [ ${#taxonomy_files[@]} -le 1 ]; then
+    echo "Only one cluster in output. Exiting recursive loop."
+else
+    for file in "${taxonomy_files[@]}"
+    do
+        len=$(wc -l $file | cut -d ' ' -f1)
+        if (( $len > $cutoff_length ))
+        then
+            added_job="TRUE"
+            folder=$( echo $file | rev | cut -d"/" -f3 | rev )
+            taxa=$( basename $file )
+            job=$( echo $taxa | sed 's/_[^_]*$//g')
+            fasta="$job.fasta"
+            job=$(printf '%02d' "$job") # add leading zero
+            job="$folder$job" # -> ex: 12S_MiFish_U-ac-001203
+
+            ben add -s $ACSERVER -c "docker run --rm -t -v ~/crux/tronko/build:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION --name $JOB-$RUNID crux /mnt/ac.sh -d $folder -t $taxa -f $fasta -p $PRIMER -j $job -i $RUNID -b $ACSERVER -B $NEWICKSERVER" $job-$RUNID -o $OUTPUT  
+        fi
+    done
+fi
 
 # if new output folder added a job, skip. otherwise start ac2newick
 if [ "$added_job" = "FALSE" ]
