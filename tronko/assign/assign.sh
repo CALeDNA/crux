@@ -509,7 +509,7 @@ then
     # fi
 fi
 
-mkdir -p ${PROJECTID}_data/{tronko,terradactyl}
+mkdir -p ednaexplorer-project-$PROJECTID/{tronko,terradactyl}
 # dl all assign folders for $PROJECTID
 aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url $AWS_ENDPOINT
 # run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
@@ -517,22 +517,22 @@ mismatches=(1 5 10 25 50 100)
 for dir in "$PROJECTID"/*; do
   if [ -d "$dir" ]; then
     primer=$(basename $dir)
-    mkdir ${PROJECTID}_data/$primer
+    mkdir ednaexplorer-project-$PROJECTID/$primer
     for mismatch in "${mismatches[@]}"; do
-        python3 /mnt/process_tronko.py --base_dir $dir --out ${PROJECTID}_data/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID --primer $primer
+        python3 /mnt/process_tronko.py --base_dir $dir --out ednaexplorer-project-$PROJECTID/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID --primer $primer
     done
   fi
 done
 
 # download terradactyl files
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/METABARCODING.csv ${PROJECTID}_data/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $AWS_ENDPOINT
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ${PROJECTID}_data/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/METABARCODING.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ednaexplorer-project-$PROJECTID/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
 # copy README
-cp /mnt/README.md ${PROJECTID}_data/
+cp /mnt/README.md ednaexplorer-project-$PROJECTID/
 # zip
-tar -czvf ${PROJECTID}_data.tar.gz ${PROJECTID}_data
+tar -czvf ednaexplorer-project-$PROJECTID.tar.gz ednaexplorer-project-$PROJECTID
 # upload
-aws s3 cp ${PROJECTID}_data.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/${PROJECTID}_data.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp ednaexplorer-project-$PROJECTID.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/ednaexplorer-project-$PROJECTID.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
 
 
 # call processing_notif.sh
