@@ -519,14 +519,14 @@ for dir in "$PROJECTID"/*; do
     primer=$(basename $dir)
     mkdir ednaexplorer-project-$PROJECTID/$primer
     for mismatch in "${mismatches[@]}"; do
-        python3 /mnt/process_tronko.py --base_dir $dir --out ednaexplorer-project-$PROJECTID/$primer/q30_${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID --primer $primer
+        python3 /mnt/process_tronko.py --base_dir $dir --out ednaexplorer-project-$PROJECTID/tronko/$primer/${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID --primer $primer
     done
   fi
 done
 
 # download terradactyl files
 aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/METABARCODING.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $AWS_ENDPOINT
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ednaexplorer-project-$PROJECTID/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
 # copy README
 cp /mnt/README.md ednaexplorer-project-$PROJECTID/
 # zip
