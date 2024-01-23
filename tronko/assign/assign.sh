@@ -517,7 +517,7 @@ mismatches=(1 5 10 25 50 100)
 for dir in "$PROJECTID"/*; do
   if [ -d "$dir" ]; then
     primer=$(basename $dir)
-    mkdir ednaexplorer-project-$PROJECTID/$primer
+    mkdir ednaexplorer-project-$PROJECTID/tronko/$primer
     for mismatch in "${mismatches[@]}"; do
         python3 /mnt/process_tronko.py --base_dir $dir --out ednaexplorer-project-$PROJECTID/tronko/$primer/${primer}_Max${mismatch}.txt --mismatches $mismatch --project $PROJECTID --primer $primer
     done
@@ -528,7 +528,7 @@ done
 aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/METABARCODING.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $AWS_ENDPOINT
 aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
 # copy README
-cp /mnt/README.md ednaexplorer-project-$PROJECTID/
+# cp /mnt/README.md ednaexplorer-project-$PROJECTID/
 # zip
 tar -czvf ednaexplorer-project-$PROJECTID.tar.gz ednaexplorer-project-$PROJECTID
 # upload
