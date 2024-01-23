@@ -8,6 +8,7 @@ def process_arguments():
     parser.add_argument('--out', type=str, help='Output file as txt or tsv; the log will have the same prefix and end in .log')
     parser.add_argument('--mismatches', type=int, default=5, help='Maximum allowable mismatches')
     parser.add_argument('--project', type=str, required=True, help='Project name that should be the directory that assign is within')
+    parser.add_argument('--primer', type=str, required=True, help='Primer name')
     return parser.parse_args()
 
 def getTaxaDict(tronko, allowed_mismatches, mismatch_bins):
@@ -77,9 +78,9 @@ def process_directory(base_dir, subfolder, tronko_suffix, asv_suffix, allowed_mi
 
 if __name__ == "__main__":
     args = process_arguments()
-    base_dir, out_file, allowed_mismatches, project_dir = args.base_dir, args.out, args.mismatches, args.project
+    base_dir, out_file, allowed_mismatches, project_dir, primer = args.base_dir, args.out, args.mismatches, args.project, args.primer
 
-    mismatch_bins = {(0, 2): 0, (3, 5): 0, (6, 10): 0, (11, 25): 0, (26, 40): 0, (41, 50): 0, 
+    mismatch_bins = {(0, 1): 0, (2, 5): 0, (6, 10): 0, (11, 25): 0, (26, 40): 0, (41, 50): 0, 
                      (51, 60): 0, (61, 70): 0, (71, 80): 0, (81, 90): 0, (91, 100): 0, "up to Max": 0}
     if os.path.exists(os.path.join(base_dir, "paired")):
         paired_ASV, header_P, paired_taxa_set = process_directory(base_dir, "paired", "paired", "paired_F", allowed_mismatches, mismatch_bins)
@@ -145,7 +146,7 @@ if __name__ == "__main__":
     print(f"Total Taxa (Unfiltered): {total_taxa_unfiltered}")
     print(f"Total Taxa (Assigned with less than {allowed_mismatches} mismatches): {total_taxa_assigned}")
 
-    with open(out_file + ".log", 'w') as logfile:
+    with open(os.path.join(os.path.dirname(out_file), f"{primer}.log"), 'w') as logfile:
         logfile.write("Mismatch Binning:\n")
         for key, value in mismatch_bins.items():
             if type(key) == tuple:
