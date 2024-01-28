@@ -24,7 +24,7 @@ close(TAXOUT);
 my $acc;
 open(FASTA,$ARGV[1]) || die("cannot open file!");
 my @which = split(/\.fasta/,$ARGV[1]);
-open(FASTAOUT, '>', $which[0] . '.fasta' . $which[1] . '_tmp') || die("cannot open file!");
+open(FASTAOUT, '>', $which[0] . '.fasta_tmp') || die("cannot open file!");
 while(<FASTA>){
 	my $line = $_;
 	chomp($line);
