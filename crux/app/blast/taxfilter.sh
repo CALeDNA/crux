@@ -56,7 +56,7 @@ else
     # remove gaps
     sed -i '/^[^>]/ s/-//g' $JOB/$BLASTDIR/${FASTA}_tmp
     # get largest seq per nt accession id
-    rm $JOB/$BLASTDIR/${FASTA}; touch $JOB/$BLASTDIR/${FASTA}
+    rm $JOB/$BLASTDIR/$FASTA; touch $JOB/$BLASTDIR/${FASTA}
     python3 get-largest.py --input $JOB/$BLASTDIR/${FASTA}_tmp --output $JOB/$BLASTDIR/${FASTA} --log $JOB/logs
 
     # upload to js2 bucket
