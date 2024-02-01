@@ -10,8 +10,6 @@ while getopts "i:p:b:" opt; do
         ;;
         p) PRIMER="$OPTARG"
         ;;
-        b) PARTITION_NUMBER="$OPTARG"
-        ;;
     esac
 done
 
@@ -33,6 +31,14 @@ partitions=$(ls ${newick}/*txt | wc -l)
 # sync down tronko output
 aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko $outdir --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
+# Calculate b (PARTITION_NUMBER)
+for i in {9999..999999}; do
+    if ! [[ -e "partition${i}.fasta" && -e "partition${i}_MSA.fasta" ]]; then
+        echo "The first number without both fasta files is: ${i}"
+        PARTITION_NUMBER=$i
+        break
+    fi
+done
 
 if (( $partitions > 1 ))
 then
