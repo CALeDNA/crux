@@ -7,11 +7,15 @@ WORKDIR /app
 RUN ulimit -d unlimited
 
 RUN apt-get update && apt-get upgrade -yy && apt-get install -yy build-essential software-properties-common \ 
-    apt-transport-https libz-dev npm cmake parallel python3-openstackclient jq awscli unzip pandoc \ 
+    apt-transport-https libz-dev npm cmake parallel python3-openstackclient jq unzip pandoc \ 
     curl wget git libssl-dev libcurl4-openssl-dev libxml2-dev -y && \
     npm i nugget -g && \
     wget -P /tmp/ "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh" && \
     bash "/tmp/Miniconda3-py38_4.12.0-Linux-x86_64.sh" -b -p /usr/local/miniconda
+
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    unzip awscliv2.zip \
+    ./aws/install
 
 COPY env.yml /app/env.yml
 ADD bin /usr/local/crux_bin
