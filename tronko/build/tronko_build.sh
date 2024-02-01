@@ -32,7 +32,7 @@ partitions=$(ls ${newick}/*txt | wc -l)
 aws s3 sync s3://$BUCKET/CruxV2/$RUNID/$PRIMER/tronko $outdir --no-progress --endpoint-url https://js2.jetstream-cloud.org:8001/
 
 # Calculate b (PARTITION_NUMBER)
-for i in {9999..999999}; do
+for i in {999..999999}; do
     if ! [[ -e "partition${i}.fasta" && -e "partition${i}_MSA.fasta" ]]; then
         echo "The first number without both fasta files is: ${i}"
         PARTITION_NUMBER=$i
