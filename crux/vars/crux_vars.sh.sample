@@ -7,7 +7,9 @@ BLAST_THREADS=8
 RUNID="2023-04-07"
 BUCKET=[GET_BUCKET_NAME]
 
+# tronko-assign
 ASSIGNXL=("ITS1_Fungi")
+LCA=5
 
 # Obitools ecopcr variables
 ERROR=3
