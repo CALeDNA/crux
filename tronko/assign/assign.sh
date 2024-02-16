@@ -174,30 +174,39 @@ removeProcessedFiles() {
     fi
 }
 
+switchAWSCreds() {
+    export AWS_ACCESS_KEY_ID=$1
+    export AWS_SECRET_ACCESS_KEY=$2
+    export AWS_DEFAULT_REGION=$3
+}
+
 if [ "${PAIRED}" = "TRUE" ]
 then
+    # Set creds to js2
+    switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
+    
     # download tronko database
-    aws s3 sync s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $AWS_ENDPOINT
-    aws s3 cp s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $JS2_ENDPOINT
+    aws s3 cp s3://$JS2_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $JS2_ENDPOINT
 
     # download old assign files
-    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired $PROJECTID-$PRIMER/old --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired $PROJECTID-$PRIMER/old --no-progress --endpoint-url $JS2_ENDPOINT
     # copy to rc
     cp -r "$PROJECTID-$PRIMER/old" "$PROJECTID-$PRIMER-rc/old"
 
 
     # download QC sample paired files
-    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/paired/ $PROJECTID-$PRIMER/paired/ --no-progress --endpoint-url $JS2_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_F" "F" "paired"
 
     # upload new checksum_F
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums_F.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_F.txt --endpoint-url $AWS_ENDPOINT
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums_F.txt s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_F.txt --endpoint-url $JS2_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "paired_R" "R" "paired"
 
     # upload new checksum_R
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums_R.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_R.txt --endpoint-url $AWS_ENDPOINT
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums_R.txt s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/checksums_R.txt --endpoint-url $JS2_ENDPOINT
 
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/paired --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-paired_F.asv --primer $PRIMER --paired
@@ -276,7 +285,10 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $JS2_ENDPOINT
+        # upload to aws
+        switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $S3_ENDPOINT
     else
         echo "v2 (rc) has the highest count: $count_2"
         # rename filtered files
@@ -311,7 +323,10 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER-rc/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 sync $PROJECTID-$PRIMER-rc/ s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $JS2_ENDPOINT
+        # upload to aws
+        switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+        aws s3 sync $PROJECTID-$PRIMER-rc/ s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/paired/ --exclude "*" --include "$PROJECTID-$PRIMER-paired*" --no-progress --endpoint-url $S3_ENDPOINT
     fi
 
     # cleanup
@@ -320,20 +335,23 @@ fi
 
 if [ "${UNPAIRED_F}" = "TRUE" ]
 then
+    # Set creds to js2
+    switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
+
     # download tronko database
-    aws s3 sync s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $AWS_ENDPOINT
-    aws s3 cp s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $JS2_ENDPOINT
+    aws s3 cp s3://$JS2_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $JS2_ENDPOINT
     
     # download old assign files
-    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F $PROJECTID-$PRIMER/old --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F $PROJECTID-$PRIMER/old --no-progress --endpoint-url $JS2_ENDPOINT
 
     # download QC sample unpaired_F files
-    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F/ $PROJECTID-$PRIMER/unpaired_F/ --no-progress --endpoint-url $JS2_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "unpaired_F" "F" "unpaired_F"
 
     # upload new checksum_F
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/checksums.txt --endpoint-url $AWS_ENDPOINT
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/checksums.txt --endpoint-url $JS2_ENDPOINT
 
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_F/ --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_F.asv --primer $PRIMER --unpairedf
@@ -382,7 +400,10 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $JS2_ENDPOINT
+        # upload to aws
+        switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $S3_ENDPOINT
     else
         echo "v2 (rc) has the highest count: $count_2"
 
@@ -405,9 +426,13 @@ then
         fi
 
         # upload output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $JS2_ENDPOINT
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url $JS2_ENDPOINT
 
-        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url $AWS_ENDPOINT
+        # upload to aws
+        switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_F*" --no-progress --endpoint-url $S3_ENDPOINT
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_F.txt s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_F/$PROJECTID-$PRIMER-unpaired_F.txt --no-progress --endpoint-url $S3_ENDPOINT
     fi
 
     # cleanup
@@ -416,20 +441,23 @@ fi
 
 if [ "${UNPAIRED_R}" = "TRUE" ]
 then
+    # Set creds to js2
+    switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
+
     # download tronko database
-    aws s3 sync s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $AWS_ENDPOINT
-    aws s3 cp s3://$AWS_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/ $PROJECTID-$PRIMER/tronkodb/ --exclude "*" --include "$PRIMER*" --no-progress --endpoint-url $JS2_ENDPOINT
+    aws s3 cp s3://$JS2_BUCKET/CruxV2/$RUNID/$PRIMER/tronko/reference_tree.txt.gz $PROJECTID-$PRIMER/tronkodb/reference_tree.txt.gz --no-progress --endpoint-url $JS2_ENDPOINT
     
     # download old assign files
-    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R $PROJECTID-$PRIMER/old --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R $PROJECTID-$PRIMER/old --no-progress --endpoint-url $JS2_ENDPOINT
     
     # download QC sample unpaired_R
-    aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url $AWS_ENDPOINT
+    aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R/ $PROJECTID-$PRIMER/unpaired_R/ --no-progress --endpoint-url $JS2_ENDPOINT
 
     removeProcessedFiles "$PROJECTID" "$PRIMER" "unpaired_R" "R" "unpaired_R"
 
     # upload new checksum_R
-    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/checksums.txt --endpoint-url $AWS_ENDPOINT
+    aws s3 cp $PROJECTID-$PRIMER/old/checksums.txt s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/checksums.txt --endpoint-url $JS2_ENDPOINT
 
     # create ASV files
     python3 /mnt/asv.py --dir $PROJECTID-$PRIMER/unpaired_R --out $PROJECTID-$PRIMER/$PROJECTID-$PRIMER-unpaired_R.asv --primer $PRIMER --unpairedr
@@ -478,7 +506,11 @@ then
         fi
 
         # upload assign output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $JS2_ENDPOINT
+
+        # upload to aws
+        switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $S3_ENDPOINT
     else
         echo "v2 (rc) has the highest count: $count_2"
 
@@ -501,8 +533,13 @@ then
         fi
 
         # upload assign output
-        aws s3 sync $PROJECTID-$PRIMER/ s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $AWS_ENDPOINT
-        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$AWS_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url $AWS_ENDPOINT
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $JS2_ENDPOINT
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$JS2_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url $JS2_ENDPOINT
+
+        # upload to aws
+        switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+        aws s3 sync $PROJECTID-$PRIMER/ s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R --exclude "*" --include "$PROJECTID-$PRIMER-unpaired_R*" --no-progress --endpoint-url $S3_ENDPOINT
+        aws s3 cp $PROJECTID-$PRIMER-rc/$PROJECTID-$PRIMER-unpaired_R.txt s3://$S3_BUCKET/projects/$PROJECTID/assign/$PRIMER/unpaired_R/$PROJECTID-$PRIMER-unpaired_R.txt --no-progress --endpoint-url $S3_ENDPOINT
     fi
 
     # cleanup
@@ -510,9 +547,12 @@ then
     # fi
 fi
 
+# Set creds to js2
+switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
+
 mkdir -p ednaexplorer-project-$PROJECTID/{tronko,terradactyl}
 # dl all assign folders for $PROJECTID
-aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/assign ./$PROJECTID --no-progress --endpoint-url $JS2_ENDPOINT
 # run process_tronko.py for each primer with 1, 5, 10, 30, 50, and 100 mismatches
 mismatches=(1 5 10 25 50 100)
 for dir in "$PROJECTID"/*; do
@@ -525,21 +565,28 @@ for dir in "$PROJECTID"/*; do
   fi
 done
 
+# Set creds to aws
+switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+
 # download terradactyl files
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/METABARCODING.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $AWS_ENDPOINT
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp s3://$S3_BUCKET/projects/$PROJECTID/METABARCODING.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_original.csv --no-progress --endpoint-url $S3_ENDPOINT
+aws s3 cp s3://$S3_BUCKET/projects/$PROJECTID/MetadataOutput_Metabarcoding.csv ednaexplorer-project-$PROJECTID/terradactyl/metabarcoding_metadata_terradactyl.csv --no-progress --endpoint-url $S3_ENDPOINT
 # copy README
 # cp /mnt/README.md ednaexplorer-project-$PROJECTID/
 # zip
 tar -czvf ednaexplorer-project-$PROJECTID.tar.gz ednaexplorer-project-$PROJECTID
-# upload
-aws s3 cp ednaexplorer-project-$PROJECTID.tar.gz s3://$AWS_BUCKET/projects/$PROJECTID/ednaexplorer-project-$PROJECTID.tar.gz --no-progress --endpoint-url $AWS_ENDPOINT
 
+# upload
+aws s3 cp ednaexplorer-project-$PROJECTID.tar.gz s3://$S3_BUCKET/projects/$PROJECTID/ednaexplorer-project-$PROJECTID.tar.gz --no-progress --endpoint-url $S3_ENDPOINT
+
+# upload to js2
+switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
+aws s3 cp ednaexplorer-project-$PROJECTID.tar.gz s3://$JS2_BUCKET/projects/$PROJECTID/ednaexplorer-project-$PROJECTID.tar.gz --no-progress --endpoint-url $JS2_ENDPOINT
 
 # call processing_notif.sh
 cd /mnt/jwt
 # download primer list for jwt step.
-aws s3 cp s3://$AWS_BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt . --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 cp s3://$JS2_BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt . --no-progress --endpoint-url $JS2_ENDPOINT
 ./processing_notif.sh -i $PROJECTID
 
 # cleanup
