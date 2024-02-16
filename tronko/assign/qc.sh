@@ -32,7 +32,7 @@ aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/sampl
 
 
 # download primer info
-aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $S3_BUCKET
+aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $S3_ENDPOINT
 
 # Set creds for js2 to download old QC if they exist
 switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
