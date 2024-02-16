@@ -19,21 +19,23 @@ done
 
 source /vars/crux_vars.sh
 
-# Set creds for aws s3 to download raw fastq files
-export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
-export AWS_DEFAULT_REGION=$S3_DEFAULT_REGION
+switchAWSCreds() {
+    export AWS_ACCESS_KEY_ID=$1
+    export AWS_SECRET_ACCESS_KEY=$2
+    export AWS_DEFAULT_REGION=$3
+}
 
+# Set creds for aws s3 to download raw fastq files
+switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
 # download samples
 aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/samples --no-progress --endpoint-url $S3_ENDPOINT
 
 
 # Set creds for js2 to download old QC if they exist
-export AWS_ACCESS_KEY_ID=$JS2_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$JS2_SECRET_ACCESS_KEY
-export AWS_DEFAULT_REGION=$JS2_DEFAULT_REGION
-
+switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
 aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $JS2_ENDPOINT
+# upload raw samples to js2
+aws s3 sync $PROJECTID-$PRIMER/samples s3://$JS2_BUCKET/projects/$PROJECTID/samples --no-progress --endpoint-url $JS2_ENDPOINT
 
 # download Anacapa
 git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
