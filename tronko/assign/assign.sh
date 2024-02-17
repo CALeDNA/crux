@@ -7,6 +7,7 @@ PAIRED=""
 UNPAIRED_F=""
 UNPAIRED_R=""
 LCA=5
+VARS="/vars/crux_vars.sh"
 while getopts "i:p:r:123" opt; do
     case $opt in
         i) PROJECTID="$OPTARG"
@@ -24,7 +25,7 @@ while getopts "i:p:r:123" opt; do
     esac
 done
 
-source /vars/crux_vars.sh # gets $RUNID and $IPADDRESS
+source $VARS # gets $RUNID and $IPADDRESS
 
 # source /vars/crux_vars.sh # get tronko db $RUNID
 mkdir $PROJECTID-$PRIMER $PROJECTID-$PRIMER-rc
@@ -179,6 +180,15 @@ switchAWSCreds() {
     export AWS_SECRET_ACCESS_KEY=$2
     export AWS_DEFAULT_REGION=$3
 }
+
+# Set creds for aws s3
+switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+
+# get js2 credentials
+secret_json=$(aws secretsmanager get-secret-value --secret-id your_secret_id_here --query SecretString --output text)
+echo $secret_json | jq -r 'to_entries|map("export \(.key)=\(.value|tostring)")|.[]' > export_vars.sh
+source export_vars.sh && rm export_vars.sh
+
 
 if [ "${PAIRED}" = "TRUE" ]
 then
@@ -583,12 +593,6 @@ aws s3 cp ednaexplorer-project-$PROJECTID.tar.gz s3://$S3_BUCKET/projects/$PROJE
 switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
 aws s3 cp ednaexplorer-project-$PROJECTID.tar.gz s3://$JS2_BUCKET/projects/$PROJECTID/ednaexplorer-project-$PROJECTID.tar.gz --no-progress --endpoint-url $JS2_ENDPOINT
 
-# call processing_notif.sh
-cd /mnt/jwt
-# download primer list for jwt step.
-aws s3 cp s3://$JS2_BUCKET/projects/$PROJECTID/QC/metabarcode_loci_min_merge_length.txt . --no-progress --endpoint-url $JS2_ENDPOINT
-./processing_notif.sh -i $PROJECTID
-
 # cleanup
 rm -r ${PROJECTID}*
 
@@ -598,3 +602,6 @@ curl -X POST http://$IPADDRESS:8004/initializer \
      -d "{
            \"ProjectID\": \"$PROJECTID\"
          }"
+
+# add notif job
+ben add -s /tmp/ben-notif -c "$HOME/crux/tronko/assign/jwt/processing_notif.sh -i $PROJECTID" $PROJECTID-$PRIMER -o /etc/ben/output
