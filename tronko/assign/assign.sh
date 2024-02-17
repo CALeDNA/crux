@@ -185,7 +185,12 @@ switchAWSCreds() {
 switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
 
 # get js2 credentials
-secret_json=$(aws secretsmanager get-secret-value --secret-id your_secret_id_here --query SecretString --output text)
+if [[ $BRANCH == "master" ]]; then
+    secret_id="prod/trex/qcassign"
+else
+    secret_id="staging/trex/qcassign"
+fi
+secret_json=$(aws secretsmanager get-secret-value --secret-id $secret_id --query SecretString --output text)
 echo $secret_json | jq -r 'to_entries|map("export \(.key)=\(.value|tostring)")|.[]' > export_vars.sh
 source export_vars.sh && rm export_vars.sh
 
