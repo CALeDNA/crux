@@ -609,4 +609,4 @@ curl -X POST http://$IPADDRESS:8004/initializer \
          }"
 
 # add notif job
-ben add -s /tmp/ben-notif -c "$HOME/crux/tronko/assign/jwt/processing_notif.sh -i $PROJECTID" $PROJECTID-$PRIMER -o /etc/ben/output
+ben add -s /tmp/ben-notif -c "/home/ubuntu/crux/tronko/assign/jwt/processing_notif.sh -i $PROJECTID" $PROJECTID-$PRIMER -o /etc/ben/output
