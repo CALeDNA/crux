@@ -4,6 +4,7 @@ export AWS_MAX_ATTEMPTS=3
 
 OUTPUT="/etc/ben/output"
 RUNID="2023-04-07"
+VARS="/vars/crux_vars.sh"
 while getopts "i:p:b:" opt; do
     case $opt in
         i) PROJECTID="$OPTARG"
@@ -17,11 +18,39 @@ while getopts "i:p:b:" opt; do
     esac
 done
 
-source /vars/crux_vars.sh
+switchAWSCreds() {
+    export AWS_ACCESS_KEY_ID=$1
+    export AWS_SECRET_ACCESS_KEY=$2
+    export AWS_DEFAULT_REGION=$3
+}
 
-# download $PROJECTID/QC and samples
-aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $AWS_ENDPOINT
-aws s3 sync s3://$AWS_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/samples --no-progress --endpoint-url $AWS_ENDPOINT
+source $VARS
+
+# Set creds for aws s3
+switchAWSCreds $S3_ACCESS_KEY_ID $S3_SECRET_ACCESS_KEY $S3_DEFAULT_REGION
+
+# get js2 credentials
+if [[ $BRANCH == "master" ]]; then
+    secret_id="prod/trex/qcassign"
+else
+    secret_id="staging/trex/qcassign"
+fi
+secret_json=$(aws secretsmanager get-secret-value --secret-id $secret_id --query SecretString --output text)
+echo $secret_json | jq -r 'to_entries|map("export \(.key)=\(.value|tostring)")|.[]' > export_vars.sh
+source export_vars.sh && rm export_vars.sh
+
+# download samples
+aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/samples --no-progress --endpoint-url $S3_ENDPOINT
+
+
+# download primer info
+aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $S3_ENDPOINT
+
+# Set creds for js2 to download old QC if they exist
+switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
+aws s3 sync s3://$JS2_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $JS2_ENDPOINT
+# upload raw samples to js2
+aws s3 sync $PROJECTID-$PRIMER/samples s3://$JS2_BUCKET/projects/$PROJECTID/samples --no-progress --endpoint-url $JS2_ENDPOINT
 
 # download Anacapa
 git clone -b cruxv2 https://github.com/CALeDNA/Anacapa.git
@@ -48,13 +77,13 @@ mv tmp "$REVERSE"
 
 time $DB/anacapa_QC_dada2.sh -i $DATA -o $OUT -d $DB -f $FORWARD -r $REVERSE -m 50 -q 30
 
-# upload $OUT
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url $AWS_ENDPOINT
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url $AWS_ENDPOINT
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url $AWS_ENDPOINT
+# upload $OUT to JS2
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/paired/filtered s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/paired --no-progress --endpoint-url $JS2_ENDPOINT
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_F/filtered s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_F --no-progress --endpoint-url $JS2_ENDPOINT
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/$PRIMER/${PRIMER}_sort_by_read_type/unpaired_R/filtered s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/unpaired_R --no-progress --endpoint-url $JS2_ENDPOINT
 
 # upload QC logs
-aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://$AWS_BUCKET/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url $AWS_ENDPOINT
+aws s3 sync $PROJECTID-$PRIMER/${PROJECTID}QC/Run_info s3://$JS2_BUCKET/projects/$PROJECTID/QC/$PRIMER/Run_info --no-progress --endpoint-url $JS2_ENDPOINT
 
 
 # add ben tronko-assign jobs
@@ -74,7 +103,7 @@ if [ "$unpaired_R_files" -gt 0 ]; then
 fi
 
 # add tronko assign job on $PRIMER
-ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e AWS_ENDPOINT=$AWS_ENDPOINT -e AWS_BUCKET=$AWS_BUCKET --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
+ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID -e S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY -e S3_DEFAULT_REGION=$S3_DEFAULT_REGION -e S3_BUCKET=$S3_BUCKET -e S3_ENDPOINT=$S3_ENDPOINT --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
 
 # clean up
 rm -r /mnt/$PROJECTID-$PRIMER /mnt/Anacapa
