@@ -8,7 +8,7 @@ while getopts "i:" opt; do
 done
 
 # check there's no other running jobs
-current_jobs=currentJobs=$(( $(ben list -s /tmp/ben-assign -t r | grep -c "$PROJECTID") + $(ben list -s /tmp/ben-assignxl -t r | grep -c "$PROJECTID") )) # should be 1
+currentJobs=$(( $(ben list -s /tmp/ben-assign -t r | grep -c "$PROJECTID") + $(ben list -s /tmp/ben-assignxl -t r | grep -c "$PROJECTID") )) # should be 1
 pendingJobs=$(ben list -s /tmp/ben-assign -t p | grep -c "$PROJECTID") # should be 0
 totalJobs=$((currentJobs + pendingJobs))
 
@@ -31,7 +31,7 @@ if [ "$totalJobs" -eq "1" ]; then
         primersList=""
         for folder in "${countedFolders[@]}"; do
             if [ -n "$primersList" ]; then
-                concatenatedFolders+=","  # Add a comma delimiter if the string is not empty
+                primersList+=","  # Add a comma delimiter if the string is not empty
             fi
             primersList+="$folder"  # Concatenate the folder
         done
