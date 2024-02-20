@@ -40,11 +40,11 @@ echo $secret_json | jq -r 'to_entries|map("export \(.key)=\(.value|tostring)")|.
 source export_vars.sh && rm export_vars.sh
 
 # download samples
-aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/samples --no-progress --endpoint-url $S3_ENDPOINT
+aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/samples $PROJECTID-$PRIMER/samples --no-progress
 
 
 # download primer info
-aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress --endpoint-url $S3_ENDPOINT
+aws s3 sync s3://$S3_BUCKET/projects/$PROJECTID/QC $PROJECTID-$PRIMER/ --exclude "*/*" --no-progress
 
 # Set creds for js2 to download old QC if they exist
 switchAWSCreds $JS2_ACCESS_KEY_ID $JS2_SECRET_ACCESS_KEY $JS2_DEFAULT_REGION
@@ -103,7 +103,7 @@ if [ "$unpaired_R_files" -gt 0 ]; then
 fi
 
 # add tronko assign job on $PRIMER
-ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID -e S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY -e S3_DEFAULT_REGION=$S3_DEFAULT_REGION -e S3_BUCKET=$S3_BUCKET -e S3_ENDPOINT=$S3_ENDPOINT --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
+ben add -s $BENSERVER -c "docker run --rm -t -v ~/crux/tronko/assign:/mnt -v ~/crux/crux/vars:/vars -v /tmp:/tmp -e S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID -e S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY -e S3_DEFAULT_REGION=$S3_DEFAULT_REGION -e S3_BUCKET=$S3_BUCKET --name $PROJECTID-assign-$PRIMER crux /mnt/assign.sh -i $PROJECTID -r $RUNID -p $PRIMER $parameters" $PROJECTID-assign-$PRIMER -o $OUTPUT
 
 # clean up
 rm -r /mnt/$PROJECTID-$PRIMER /mnt/Anacapa
